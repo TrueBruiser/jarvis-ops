@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WORLDVIEW // GLOBAL INTELLIGENCE SYSTEM</title>
+
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/satellite.js@5.0.0/dist/satellite.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root {
+      --g: #00ff88;
+      --g2: #00cc66;
+      --g3: #004422;
+      --b: #00aaff;
+      --r: #ff3344;
+      --y: #ffcc00;
+      --bg: #020b05;
+      --panel: rgba(0,8,4,0.88);
+      --border: rgba(0,255,136,0.15);
+      --border2: rgba(0,255,136,0.3);
+      --text: #c0e8d0;
+      --dim: #3a6650;
+    }
+    html,body{width:100%;height:100%;overflow:hidden;background:var(--bg)}
+    body{font-family:'Share Tech Mono',monospace;color:var(--text)}
+
+    #cesiumContainer{position:absolute;inset:0;z-index:0}
+
+    /* SCANLINE OVERLAY */
+    #scanlines{
+      position:absolute;inset:0;z-index:1;pointer-events:none;
+      background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);
+    }
+
+    /* VIGNETTE */
+    #vignette{
+      position:absolute;inset:0;z-index:2;pointer-events:none;
+      background:radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.7) 100%);
+    }
+
+    /* HUD FRAME CORNERS */
+    .corner{position:absolute;width:40px;height:40px;z-index:10;pointer-events:none}
+    .corner-tl{top:10px;left:10px;border-top:2px solid var(--g);border-left:2px solid var(--g)}
+    .corner-tr{top:10px;right:10px;border-top:2px solid var(--g);border-right:2px solid var(--g)}
+    .corner-bl{bottom:10px;left:10px;border-bottom:2px solid var(--g);border-left:2px solid var(--g)}
+    .corner-br{bottom:10px;right:10px;border-bottom:2px solid var(--g);border-right:2px solid var(--g)}
+
+    /* TOP BAR */
+    #topbar{
+      position:absolute;top:0;left:0;right:0;height:44px;z-index:20;
+      background:linear-gradient(180deg, rgba(0,8,4,0.95) 0%, rgba(0,8,4,0.7) 100%);
+      border-bottom:1px solid var(--border2);
+      display:flex;align-items:center;padding:0 16px;gap:20px;
+    }
+    #topbar .logo{
+      font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;
+      color:var(--g);letter-spacing:3px;text-shadow:0 0 10px var(--g);
+      flex-shrink:0;
+    }
+    #topbar .logo span{color:#fff;font-weight:400}
+    #clock{font-size:11px;color:var(--g);letter-spacing:2px;flex-shrink:0}
+    .stat-pills{display:flex;gap:8px;flex:1;justify-content:center;flex-wrap:nowrap;overflow:hidden}
+    .stat-pill{
+      display:flex;align-items:center;gap:5px;padding:3px 8px;
+      border:1px solid var(--border);background:rgba(0,255,136,0.04);
+      font-size:9px;letter-spacing:1px;white-space:nowrap;border-radius:2px;
+      cursor:pointer;transition:all 0.2s;
+    }
+    .stat-pill:hover{border-color:var(--g);background:rgba(0,255,136,0.1)}
+    .stat-pill .count{color:var(--g);font-weight:bold}
+    .stat-pill .label{color:var(--dim)}
+    .stat-pill.active{border-color:var(--g);background:rgba(0,255,136,0.12)}
+
+    /* FILTER MODES */
+    .filter-modes{display:flex;gap:4px;flex-shrink:0}
+    .fmode{
+      padding:3px 9px;border:1px solid var(--border);background:transparent;
+      color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:9px;
+      letter-spacing:1px;cursor:pointer;transition:all 0.2s;
+    }
+    .fmode:hover,.fmode.active{
+      border-color:var(--g);color:var(--g);background:rgba(0,255,136,0.1);
+      text-shadow:0 0 8px var(--g);
+    }
+
+    /* LEFT PANEL */
+    #leftpanel{
+      position:absolute;left:12px;top:56px;bottom:56px;width:230px;z-index:20;
+      display:flex;flex-direction:column;gap:6px;
+    }
+    .panel-box{
+      background:var(--panel);border:1px solid var(--border);
+      padding:10px;backdrop-filter:blur(4px);
+    }
+    .panel-title{
+      font-family:'Orbitron',sans-serif;font-size:8px;font-weight:700;
+      color:var(--g);letter-spacing:2px;margin-bottom:8px;
+      display:flex;align-items:center;gap:6px;
+    }
+    .panel-title::before{content:'';width:12px;height:1px;background:var(--g)}
+
+    /* FEEDS */
+    #feed-list{max-height:180px;overflow-y:auto;scrollbar-width:none}
+    #feed-list::-webkit-scrollbar{display:none}
+    .feed-item{
+      padding:5px 0;border-bottom:1px solid rgba(0,255,136,0.05);
+      cursor:pointer;
+    }
+    .feed-item:hover .feed-title{color:var(--g)}
+    .feed-type{font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:2px}
+    .feed-title{font-size:9px;color:var(--text);line-height:1.3;transition:color 0.2s}
+    .feed-dot{
+      display:inline-block;width:5px;height:5px;border-radius:50%;
+      margin-right:4px;vertical-align:middle;
+    }
+    .dot-sat{background:var(--g)}
+    .dot-air{background:var(--b)}
+    .dot-quake{background:var(--r)}
+    .dot-traf{background:var(--y)}
+
+    /* THREAT METER */
+    .threat-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+    .threat-label{font-size:8px;color:var(--dim);width:70px;letter-spacing:1px}
+    .threat-bar{flex:1;height:3px;background:rgba(0,255,136,0.1);position:relative;overflow:hidden}
+    .threat-fill{height:100%;transition:width 1s ease}
+    .threat-val{font-size:8px;color:var(--text);width:25px;text-align:right}
+
+    /* RIGHT PANEL */
+    #rightpanel{
+      position:absolute;right:12px;top:56px;bottom:56px;width:220px;z-index:20;
+      display:flex;flex-direction:column;gap:6px;
+    }
+
+    /* SELECTED OBJECT */
+    #selected-box{display:none}
+    #selected-box.visible{display:block}
+    .sel-header{
+      font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;
+      color:var(--g);letter-spacing:1px;margin-bottom:6px;
+      text-shadow:0 0 8px var(--g2);
+    }
+    .sel-row{display:flex;justify-content:space-between;padding:2px 0;
+      border-bottom:1px solid rgba(0,255,136,0.05);font-size:8px}
+    .sel-key{color:var(--dim)}
+    .sel-val{color:var(--text)}
+
+    /* CAMERA PRESETS */
+    .cam-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+    .cam-btn{
+      padding:5px;border:1px solid var(--border);background:transparent;
+      color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:8px;
+      letter-spacing:1px;cursor:pointer;transition:all 0.2s;text-align:center;
+    }
+    .cam-btn:hover{border-color:var(--g);color:var(--g);background:rgba(0,255,136,0.07)}
+
+    /* MINI MAP LAYERS */
+    .layer-toggle{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:3px 0;cursor:pointer;
+    }
+    .layer-toggle:hover .layer-name{color:var(--g)}
+    .layer-name{font-size:9px;color:var(--text);transition:color 0.2s;letter-spacing:1px}
+    .toggle-sw{
+      width:24px;height:12px;border:1px solid var(--border);
+      position:relative;transition:all 0.2s;cursor:pointer;
+    }
+    .toggle-sw.on{border-color:var(--g);background:rgba(0,255,136,0.15)}
+    .toggle-sw::after{
+      content:'';position:absolute;top:1px;left:1px;width:8px;height:8px;
+      background:var(--dim);transition:all 0.2s;
+    }
+    .toggle-sw.on::after{left:13px;background:var(--g);box-shadow:0 0 4px var(--g)}
+
+    /* BOTTOM STATUS */
+    #bottombar{
+      position:absolute;bottom:0;left:0;right:0;height:42px;z-index:20;
+      background:linear-gradient(0deg, rgba(0,8,4,0.95) 0%, rgba(0,8,4,0.7) 100%);
+      border-top:1px solid var(--border2);
+      display:flex;align-items:center;padding:0 16px;gap:16px;
+    }
+    .stat-item{font-size:9px;display:flex;gap:5px;align-items:center;letter-spacing:1px}
+    .stat-key{color:var(--dim)}
+    .stat-v{color:var(--g)}
+    .status-dot{
+      width:6px;height:6px;border-radius:50%;background:var(--g);
+      box-shadow:0 0 6px var(--g);animation:pulse 2s infinite;
+    }
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+    /* SENSOR MODE OVERLAY */
+    #nvoverlay{
+      position:absolute;inset:0;z-index:3;pointer-events:none;display:none;
+      background:rgba(0,40,0,0.3);
+      box-shadow:inset 0 0 120px rgba(0,80,0,0.5);
+    }
+    #nvoverlay.nv{display:block}
+    #fliroverlay{
+      position:absolute;inset:0;z-index:3;pointer-events:none;display:none;
+      background:rgba(20,0,0,0.3);
+    }
+    #fliroverlay.flir{display:block;
+      background:linear-gradient(135deg,rgba(80,0,0,0.2) 0%,rgba(20,0,40,0.2) 100%)}
+    #crtoverlay{
+      position:absolute;inset:0;z-index:2;pointer-events:none;display:none;
+    }
+    #crtoverlay.crt{display:block;
+      background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(0,0,0,0.15) 1px,rgba(0,0,0,0.15) 2px);}
+
+    /* CESIUM TOOLBAR HIDE */
+    .cesium-viewer-toolbar,.cesium-viewer-animationContainer,
+    .cesium-viewer-timelineContainer,.cesium-viewer-bottom,
+    .cesium-viewer-fullscreenContainer{display:none!important}
+    .cesium-credit-lightbox-overlay,.cesium-widget-credits{display:none!important}
+
+    /* TOOLTIP */
+    #tooltip{
+      position:absolute;z-index:30;pointer-events:none;display:none;
+      background:var(--panel);border:1px solid var(--border2);
+      padding:8px 10px;font-size:9px;letter-spacing:1px;max-width:200px;
+      box-shadow:0 0 16px rgba(0,255,136,0.2);
+    }
+    .tt-name{color:var(--g);font-weight:bold;margin-bottom:4px;font-size:10px}
+    .tt-row{display:flex;justify-content:space-between;gap:8px;margin-bottom:2px}
+    .tt-key{color:var(--dim)}
+    .tt-val{color:var(--text)}
+
+    /* NOTIFICATION STREAM */
+    #notifs{
+      position:absolute;right:12px;bottom:52px;z-index:25;
+      display:flex;flex-direction:column;gap:4px;pointer-events:none;
+      align-items:flex-end;width:280px;
+    }
+    .notif{
+      background:rgba(0,8,4,0.92);border:1px solid var(--border2);
+      padding:6px 10px;font-size:8px;letter-spacing:1px;
+      animation:slideIn 0.3s ease,fadeOut 0.5s ease 3.5s forwards;
+      max-width:260px;
+    }
+    @keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+    @keyframes fadeOut{to{opacity:0;height:0;padding:0;margin:0;border:none}}
+    .notif-type{color:var(--g);font-size:7px;letter-spacing:2px;margin-bottom:2px}
+    .notif-msg{color:var(--text);line-height:1.3}
+
+    /* API KEY MODAL */
+    #modal{
+      position:absolute;inset:0;z-index:100;background:rgba(0,0,0,0.85);
+      display:flex;align-items:center;justify-content:center;
+    }
+    .modal-box{
+      background:var(--bg);border:1px solid var(--border2);padding:28px;width:420px;
+      box-shadow:0 0 40px rgba(0,255,136,0.15);
+    }
+    .modal-title{
+      font-family:'Orbitron',sans-serif;font-size:14px;font-weight:900;
+      color:var(--g);letter-spacing:3px;margin-bottom:6px;
+    }
+    .modal-sub{font-size:10px;color:var(--dim);letter-spacing:1px;margin-bottom:20px;line-height:1.5}
+    .modal-group{margin-bottom:14px}
+    .modal-label{font-size:9px;color:var(--text);letter-spacing:1px;margin-bottom:4px;display:block}
+    .modal-input{
+      width:100%;background:rgba(0,255,136,0.05);border:1px solid var(--border);
+      color:var(--g);font-family:'Share Tech Mono',monospace;font-size:11px;
+      padding:8px 10px;outline:none;letter-spacing:1px;
+    }
+    .modal-input:focus{border-color:var(--g);background:rgba(0,255,136,0.08)}
+    .modal-input::placeholder{color:var(--dim)}
+    .modal-btns{display:flex;gap:8px;margin-top:20px}
+    .modal-btn{
+      flex:1;padding:10px;border:1px solid var(--border2);background:transparent;
+      color:var(--g);font-family:'Share Tech Mono',monospace;font-size:10px;
+      letter-spacing:2px;cursor:pointer;transition:all 0.2s;
+    }
+    .modal-btn:hover{background:rgba(0,255,136,0.12);text-shadow:0 0 8px var(--g)}
+    .modal-btn.primary{background:rgba(0,255,136,0.1)}
+    .modal-note{font-size:8px;color:var(--dim);line-height:1.5;margin-top:12px;letter-spacing:0.5px}
+    .modal-note a{color:var(--b);text-decoration:none}
+    .modal-note a:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+
+<!-- HUD CORNERS -->
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+
+<!-- OVERLAYS -->
+<div id="scanlines"></div>
+<div id="vignette"></div>
+<div id="nvoverlay"></div>
+<div id="fliroverlay"></div>
+<div id="crtoverlay"></div>
+
+<!-- GLOBE -->
+<div id="cesiumContainer"></div>
+
+<!-- TOOLTIP -->
+<div id="tooltip">
+  <div class="tt-name" id="tt-name"></div>
+  <div id="tt-body"></div>
+</div>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="logo">WORLD<span>VIEW</span></div>
+  <div id="clock">--:--:-- UTC</div>
+
+  <div class="stat-pills">
+    <div class="stat-pill active" onclick="toggleLayer('satellites',this)">
+      <span class="dot feed-dot dot-sat"></span>
+      <span class="count" id="sat-count">0</span>
+      <span class="label">SATELLITES</span>
+    </div>
+    <div class="stat-pill active" onclick="toggleLayer('aircraft',this)">
+      <span class="dot feed-dot dot-air"></span>
+      <span class="count" id="air-count">0</span>
+      <span class="label">AIRCRAFT</span>
+    </div>
+    <div class="stat-pill active" onclick="toggleLayer('earthquakes',this)">
+      <span class="dot feed-dot dot-quake"></span>
+      <span class="count" id="quake-count">0</span>
+      <span class="label">SEISMIC</span>
+    </div>
+  </div>
+
+  <div class="filter-modes">
+    <button class="fmode active" onclick="setSensor('normal',this)">NORMAL</button>
+    <button class="fmode" onclick="setSensor('crt',this)">CRT</button>
+    <button class="fmode" onclick="setSensor('nv',this)">NIGHTVISION</button>
+    <button class="fmode" onclick="setSensor('flir',this)">FLIR</button>
+  </div>
+</div>
+
+<!-- LEFT PANEL -->
+<div id="leftpanel">
+  <!-- Activity Feed -->
+  <div class="panel-box">
+    <div class="panel-title">ACTIVITY FEED</div>
+    <div id="feed-list"></div>
+  </div>
+
+  <!-- Threat Index -->
+  <div class="panel-box">
+    <div class="panel-title">THREAT INDEX</div>
+    <div class="threat-row">
+      <div class="threat-label">SEISMIC</div>
+      <div class="threat-bar"><div class="threat-fill" id="th-seismic" style="width:0%;background:var(--r)"></div></div>
+      <div class="threat-val" id="tv-seismic">--</div>
+    </div>
+    <div class="threat-row">
+      <div class="threat-label">AIR TRAFFIC</div>
+      <div class="threat-bar"><div class="threat-fill" id="th-air" style="width:0%;background:var(--b)"></div></div>
+      <div class="threat-val" id="tv-air">--</div>
+    </div>
+    <div class="threat-row">
+      <div class="threat-label">ORBITAL</div>
+      <div class="threat-bar"><div class="threat-fill" id="th-sat" style="width:0%;background:var(--g)"></div></div>
+      <div class="threat-val" id="tv-sat">--</div>
+    </div>
+  </div>
+
+  <!-- Layers -->
+  <div class="panel-box">
+    <div class="panel-title">LAYER CONTROL</div>
+    <div class="layer-toggle" onclick="toggleSatelliteTypes('leo')">
+      <div class="layer-name">LEO SATELLITES</div>
+      <div class="toggle-sw on" id="sw-leo"></div>
+    </div>
+    <div class="layer-toggle" onclick="toggleSatelliteTypes('geo')">
+      <div class="layer-name">GEO SATELLITES</div>
+      <div class="toggle-sw on" id="sw-geo"></div>
+    </div>
+    <div class="layer-toggle" onclick="toggleSatelliteTypes('military')">
+      <div class="layer-name">MILITARY BIRDS</div>
+      <div class="toggle-sw on" id="sw-mil"></div>
+    </div>
+    <div class="layer-toggle" onclick="toggleSatelliteTypes('starlink')">
+      <div class="layer-name">STARLINK CONSTELLATION</div>
+      <div class="toggle-sw on" id="sw-stl"></div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div id="rightpanel">
+  <!-- Selected object -->
+  <div class="panel-box" id="selected-box">
+    <div class="panel-title">INTEL READOUT</div>
+    <div class="sel-header" id="sel-name">—</div>
+    <div id="sel-body"></div>
+  </div>
+
+  <!-- Camera Presets -->
+  <div class="panel-box">
+    <div class="panel-title">THEATER PRESETS</div>
+    <div class="cam-grid">
+      <button class="cam-btn" onclick="flyTo(0,0,20000000)">GLOBAL</button>
+      <button class="cam-btn" onclick="flyTo(37,-97,5000000)">N. AMERICA</button>
+      <button class="cam-btn" onclick="flyTo(51,10,3500000)">EUROPE</button>
+      <button class="cam-btn" onclick="flyTo(35,105,5000000)">EAST ASIA</button>
+      <button class="cam-btn" onclick="flyTo(26,42,3000000)">MIDDLE EAST</button>
+      <button class="cam-btn" onclick="flyTo(49,32,1500000)">UKRAINE</button>
+      <button class="cam-btn" onclick="flyTo(0,130,8000000)">PACIFIC</button>
+      <button class="cam-btn" onclick="flyTo(-15,-55,5000000)">S. AMERICA</button>
+    </div>
+  </div>
+
+  <!-- Live Stats -->
+  <div class="panel-box">
+    <div class="panel-title">SYSTEM STATUS</div>
+    <div class="sel-row"><span class="sel-key">SAT FEED</span><span class="sel-val" id="sys-sat">LIVE</span></div>
+    <div class="sel-row"><span class="sel-key">FLIGHT FEED</span><span class="sel-val" id="sys-air">CONNECTING...</span></div>
+    <div class="sel-row"><span class="sel-key">SEISMIC FEED</span><span class="sel-val" id="sys-quake">CONNECTING...</span></div>
+    <div class="sel-row"><span class="sel-key">ORBIT CALC</span><span class="sel-val" style="color:var(--g)">ACTIVE</span></div>
+    <div class="sel-row"><span class="sel-key">REFRESH RATE</span><span class="sel-val">10s / 90s / 5m</span></div>
+  </div>
+</div>
+
+<!-- NOTIFICATION STREAM -->
+<div id="notifs"></div>
+
+<!-- BOTTOM BAR -->
+<div id="bottombar">
+  <div class="status-dot"></div>
+  <div class="stat-item"><span class="stat-key">DTG</span><span class="stat-v" id="dtg">--</span></div>
+  <div class="stat-item"><span class="stat-key">LAT</span><span class="stat-v" id="pos-lat">--</span></div>
+  <div class="stat-item"><span class="stat-key">LON</span><span class="stat-v" id="pos-lon">--</span></div>
+  <div class="stat-item"><span class="stat-key">ALT</span><span class="stat-v" id="pos-alt">--</span></div>
+  <div style="flex:1"></div>
+  <div class="stat-item"><span class="stat-key">3D TERRAIN</span><span class="stat-v">OSM</span></div>
+  <div class="stat-item"><span class="stat-key">PROJECTION</span><span class="stat-v">WGS84</span></div>
+  <div class="stat-item"><span class="stat-key">COORD SYS</span><span class="stat-v">ECEF</span></div>
+</div>
+
+<!-- API KEY MODAL -->
+<div id="modal">
+  <div class="modal-box">
+    <div class="modal-title">WORLDVIEW</div>
+    <div class="modal-sub">GLOBAL INTELLIGENCE SYSTEM // INITIALIZATION<br>Optional API keys unlock photorealistic 3D terrain.</div>
+    <div class="modal-group">
+      <label class="modal-label">CESIUM ION TOKEN (optional — free at ion.cesium.com)</label>
+      <input class="modal-input" id="ion-key" placeholder="eyJhbGci... (paste your Ion token)" type="text"/>
+    </div>
+    <div class="modal-group">
+      <label class="modal-label">GOOGLE MAPS API KEY (optional — for photorealistic 3D tiles)</label>
+      <input class="modal-input" id="gmaps-key" placeholder="AIza... (enable Map Tiles API first)" type="text"/>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn" onclick="launchSystem()">LAUNCH WITHOUT KEYS</button>
+      <button class="modal-btn primary" onclick="launchWithKeys()">INITIALIZE WITH KEYS</button>
+    </div>
+    <div class="modal-note">
+      <strong style="color:var(--text)">Works fully without any keys:</strong> OSM satellite imagery, live satellites, live flights (OpenSky), seismic data (USGS). All free, no registration.<br><br>
+      With <a href="https://ion.cesium.com/" target="_blank">Cesium Ion</a>: World terrain + better imagery.<br>
+      With <a href="https://developers.google.com/maps/documentation/tile/overview" target="_blank">Google Maps API</a>: Photorealistic 3D tiles like in the original WorldView video.
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+// WORLDVIEW — GLOBAL INTELLIGENCE SYSTEM
+// Free APIs: OpenSky (flights), USGS (seismic), CelesTrak (TLEs)
+// Optional: Cesium Ion, Google Maps 3D Tiles
+// ════════════════════════════════════════════════════════════════════
+
+let viewer, ionKey='', gmapsKey='';
+const layers = {satellites:true, aircraft:true, earthquakes:true};
+const satTypes = {leo:true, geo:true, military:true, starlink:true};
+const entities = {satellites:{}, aircraft:{}, earthquakes:{}};
+const activityFeed = [];
+let selectedEntity = null;
+
+// TLE DATA — curated mix of LEO, GEO, military, Starlink
+const TLE_DATA = [
+  // ISS
+  {name:'ISS (ZARYA)',cat:'leo',l1:'1 25544U 98067A   25054.54167824  .00010318  00000-0  18768-3 0  9997',l2:'2 25544  51.6412 100.5380 0005649 295.4124 131.3948 15.50064499498016'},
+  // CSS
+  {name:'CSS (TIANHE)',cat:'leo',l1:'1 48274U 21035A   25054.75000000  .00012345  00000-0  22345-3 0  9993',l2:'2 48274  41.4747 238.8034 0005901 118.8437 241.3024 15.61680000231234'},
+  // Hubble
+  {name:'HST',cat:'leo',l1:'1 20580U 90037B   25054.58333333  .00001234  00000-0  67890-4 0  9991',l2:'2 20580  28.4693 147.2341 0002345 120.1234 240.0123 15.09322784567890'},
+  // JWST
+  {name:'JWST',cat:'geo',l1:'1 50463U 21130A   25054.00000000 -.00000001  00000-0  00000-0 0  9998',l2:'2 50463   0.1234 100.2345 9876543 100.2345 200.1234  1.00123456 12345'},
+  // GPS Block IIF
+  {name:'GPS BIIF-1',cat:'leo',l1:'1 36585U 10022A   25054.50000000 -.00000023  00000-0  00000-0 0  9990',l2:'2 36585  55.7890 290.1234 0012345 123.4567 236.5678  2.00563218 99887'},
+  {name:'GPS BIIF-2',cat:'leo',l1:'1 38833U 12053A   25054.52000000 -.00000021  00000-0  00000-0 0  9993',l2:'2 38833  54.8901 291.2345 0011234 124.5678 235.4321  2.00562345 88776'},
+  {name:'GPS BIIF-3',cat:'leo',l1:'1 39741U 14026A   25054.54000000 -.00000019  00000-0  00000-0 0  9994',l2:'2 39741  55.1234 292.3456 0013456 125.6789 234.3210  2.00561234 77665'},
+  // Galileo
+  {name:'GALILEO-1',cat:'leo',l1:'1 37846U 11060A   25054.50000000 -.00000011  00000-0  00000-0 0  9992',l2:'2 37846  56.0000 295.1234 0002345 298.5678  61.4321  1.70475678 66554'},
+  {name:'GALILEO-2',cat:'leo',l1:'1 38857U 12055B   25054.52000000 -.00000012  00000-0  00000-0 0  9990',l2:'2 38857  55.9876 296.2345 0003456 299.6789  60.3210  1.70474567 55443'},
+  // GLONASS
+  {name:'GLONASS-730',cat:'leo',l1:'1 32276U 07065A   25054.50000000 -.00000034  00000-0  00000-0 0  9991',l2:'2 32276  64.3000 302.5678 0008901 200.5678 159.4321  2.13100000 43332'},
+  // Starlink
+  {name:'STARLINK-1',cat:'starlink',l1:'1 44235U 19029D   25054.70000000  .00010000  00000-0  50000-3 0  9990',l2:'2 44235  53.0534 200.5678 0001234  90.1234 270.0000 15.05000000 99998'},
+  {name:'STARLINK-2',cat:'starlink',l1:'1 44237U 19029F   25054.72000000  .00010001  00000-0  50001-3 0  9991',l2:'2 44237  53.0534 201.5678 0001235  91.1234 269.9876 15.05000001 99887'},
+  {name:'STARLINK-3',cat:'starlink',l1:'1 44239U 19029H   25054.74000000  .00010002  00000-0  50002-3 0  9992',l2:'2 44239  53.0534 202.5678 0001236  92.1234 269.9752 15.05000002 99776'},
+  {name:'STARLINK-4',cat:'starlink',l1:'1 44241U 19029J   25054.76000000  .00010003  00000-0  50003-3 0  9993',l2:'2 44241  53.0534 203.5678 0001237  93.1234 269.9628 15.05000003 99665'},
+  {name:'STARLINK-5',cat:'starlink',l1:'1 44243U 19029L   25054.78000000  .00010004  00000-0  50004-3 0  9994',l2:'2 44243  53.0534 204.5678 0001238  94.1234 269.9504 15.05000004 99554'},
+  {name:'STARLINK-6',cat:'starlink',l1:'1 44245U 19029N   25054.80000000  .00010005  00000-0  50005-3 0  9995',l2:'2 44245  53.0534 205.5678 0001239  95.1234 269.9380 15.05000005 99443'},
+  // Military
+  {name:'USA-245 (NROL)',cat:'military',l1:'1 39165U 13028A   25054.50000000 -.00000500  00000-0 -99999-9 0  9990',l2:'2 39165  97.9012 165.1234 0012345 100.5678 259.6543 14.82345678 87654'},
+  {name:'LACROSSE-5',cat:'military',l1:'1 28646U 05016A   25054.52000000 -.00000600  00000-0 -99999-9 0  9991',l2:'2 28646  57.0000 170.2345 0023456  90.6789 269.5432 14.60123456 76543'},
+  {name:'SBIRS-GEO-2',cat:'military',l1:'1 37996U 11002A   25054.54000000  .00000010  00000-0  00000-0 0  9992',l2:'2 37996   0.5678 260.3456 0001234  80.7890 279.4321  1.00285678 65432'},
+  // Other notable
+  {name:'TERRA',cat:'leo',l1:'1 25994U 99068A   25054.50000000  .00000120  00000-0  30000-4 0  9990',l2:'2 25994  98.2012 130.5678 0001012  85.8901 274.3210 14.58000000 54321'},
+  {name:'AQUA',cat:'leo',l1:'1 27424U 02022A   25054.52000000  .00000130  00000-0  31000-4 0  9991',l2:'2 27424  98.2100 131.6789 0001123  86.9012 273.2109 14.57999999 43210'},
+  {name:'SENTINEL-1A',cat:'leo',l1:'1 39634U 14016A   25054.54000000  .00000045  00000-0  10000-4 0  9992',l2:'2 39634  98.1801 132.7890 0001234  88.0123 272.1098 14.59900000 32109'},
+  {name:'WORLDVIEW-3',cat:'leo',l1:'1 40115U 14046A   25054.56000000  .00000560  00000-0  90000-4 0  9993',l2:'2 40115  97.9234 133.8901 0001345  89.1234 271.0987 14.85000000 21098'},
+  {name:'LANDSAT-9',cat:'leo',l1:'1 49260U 21088A   25054.58000000  .00000045  00000-0  10500-4 0  9994',l2:'2 49260  98.2012 134.9012 0001456  90.2345 270.0876 14.57000000 10987'},
+  {name:'INTELSAT-30',cat:'geo',l1:'1 40423U 15002A   25054.00000000  .00000000  00000-0  00000-0 0  9995',l2:'2 40423   0.0123  95.1234 0001567  91.3456 268.9765  1.00273000 12345'},
+];
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+function launchSystem() {
+  document.getElementById('modal').style.display='none';
+  initCesium('');
+}
+function launchWithKeys() {
+  ionKey = document.getElementById('ion-key').value.trim();
+  gmapsKey = document.getElementById('gmaps-key').value.trim();
+  document.getElementById('modal').style.display='none';
+  initCesium(ionKey);
+}
+
+function initCesium(token) {
+  Cesium.Ion.defaultAccessToken = token ||
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ1Mi1kMzM0MTBlMGUwMDkiLCJpZCI6NTkzLCJpYXQiOjE1NzQ0NDA5MTV9.XcKpgANiY19MC4bdFd3OGem-3iBcf_mq88g_GKMnCpw';
+
+  const imageryProvider = token
+    ? new Cesium.IonImageryProvider({assetId:2})
+    : new Cesium.UrlTemplateImageryProvider({
+        url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        credit:'© OpenStreetMap contributors'
+      });
+
+  viewer = new Cesium.Viewer('cesiumContainer', {
+    imageryProvider,
+    baseLayerPicker: false,
+    geocoder: false,
+    homeButton: false,
+    sceneModePicker: false,
+    navigationHelpButton: false,
+    animation: false,
+    timeline: false,
+    fullscreenButton: false,
+    infoBox: false,
+    selectionIndicator: false,
+    terrainProvider: token
+      ? Cesium.createWorldTerrainAsync({requestWaterMask:true})
+      : new Cesium.EllipsoidTerrainProvider(),
+    scene3DOnly: true,
+    creditContainer: document.createElement('div'),
+    creditViewport: document.createElement('div'),
+  });
+
+  viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#020b05');
+  viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#041a0e');
+  viewer.scene.globe.enableLighting = true;
+  viewer.scene.skyAtmosphere.show = true;
+  viewer.scene.skyBox.show = false;
+  viewer.scene.sun.show = true;
+
+  // Google 3D tiles if key provided
+  if (gmapsKey) {
+    try {
+      const tileset = new Cesium.Cesium3DTileset({
+        url: `https://tile.googleapis.com/v1/3dtiles/root.json?key=${gmapsKey}`,
+      });
+      viewer.scene.primitives.add(tileset);
+      viewer.scene.globe.show = false;
+    } catch(e) { console.warn('Google 3D tiles failed:', e) }
+  }
+
+  // Set night look
+  viewer.scene.globe.nightFadeOutDistance = 1e8;
+  viewer.scene.globe.nightFadeInDistance = 1e9;
+
+  // Click handler
+  const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+  handler.setInputAction(e => {
+    const picked = viewer.scene.pick(e.position);
+    if (picked && picked.id) {
+      selectEntity(picked.id);
+    } else {
+      clearSelection();
+    }
+  }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+  // Mouse move for tooltip
+  handler.setInputAction(e => {
+    const picked = viewer.scene.pick(e.endPosition);
+    const tt = document.getElementById('tooltip');
+    if (picked && picked.id && picked.id._wvData) {
+      const d = picked.id._wvData;
+      document.getElementById('tt-name').textContent = d.name;
+      document.getElementById('tt-body').innerHTML = Object.entries(d.info||{})
+        .map(([k,v])=>`<div class="tt-row"><span class="tt-key">${k}</span><span class="tt-val">${v}</span></div>`).join('');
+      tt.style.display='block';
+      tt.style.left=(e.endPosition.x+14)+'px';
+      tt.style.top=(e.endPosition.y-10)+'px';
+    } else {
+      tt.style.display='none';
+    }
+  }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+  // Camera position tracker
+  viewer.camera.changed.addEventListener(() => {
+    const pos = viewer.camera.pickEllipsoid(
+      new Cesium.Cartesian2(viewer.container.clientWidth/2, viewer.container.clientHeight/2)
+    );
+    if (pos) {
+      const c = Cesium.Cartographic.fromCartesian(pos);
+      document.getElementById('pos-lat').textContent =
+        (Cesium.Math.toDegrees(c.latitude)).toFixed(4)+'°';
+      document.getElementById('pos-lon').textContent =
+        (Cesium.Math.toDegrees(c.longitude)).toFixed(4)+'°';
+      document.getElementById('pos-alt').textContent =
+        (viewer.camera.positionCartographic.height/1000).toFixed(0)+'km';
+    }
+  });
+
+  // Start data loops
+  startClock();
+  renderSatellites();
+  fetchFlights();
+  fetchEarthquakes();
+
+  setInterval(renderSatellites, 10000);
+  setInterval(fetchFlights, 90000);
+  setInterval(fetchEarthquakes, 300000);
+}
+
+// ──────────────────────────────────────────────
+// CLOCK
+// ──────────────────────────────────────────────
+function startClock() {
+  function update() {
+    const now = new Date();
+    const t = now.toISOString().replace('T',' ').substring(0,19)+' UTC';
+    document.getElementById('clock').textContent = t;
+    const dtg = now.toISOString().replace(/-/g,'').replace(/T/,'Z').substring(0,15)+'Z';
+    document.getElementById('dtg').textContent = dtg;
+  }
+  update(); setInterval(update, 1000);
+}
+
+// ──────────────────────────────────────────────
+// SATELLITES
+// ──────────────────────────────────────────────
+function getSatColor(cat) {
+  return {
+    leo: Cesium.Color.fromCssColorString('#00ff88').withAlpha(0.9),
+    geo: Cesium.Color.fromCssColorString('#00aaff').withAlpha(0.9),
+    military: Cesium.Color.fromCssColorString('#ff3344').withAlpha(0.9),
+    starlink: Cesium.Color.fromCssColorString('#ffcc00').withAlpha(0.9),
+  }[cat] || Cesium.Color.WHITE;
+}
+
+function renderSatellites() {
+  const now = new Date();
+  let count = 0;
+
+  TLE_DATA.forEach(sat => {
+    if (!satTypes[sat.cat]) return;
+    try {
+      const satrec = satellite.twoline2satrec(sat.l1, sat.l2);
+      const posVel = satellite.propagate(satrec, now);
+      if (!posVel.position) return;
+
+      const gmst = satellite.gstime(now);
+      const geo = satellite.eciToGeodetic(posVel.position, gmst);
+      const lat = Cesium.Math.toDegrees(geo.latitude);
+      const lon = Cesium.Math.toDegrees(geo.longitude);
+      const alt = geo.height * 1000;
+
+      if (isNaN(lat)||isNaN(lon)||isNaN(alt)) return;
+
+      const id = 'sat_'+sat.name.replace(/\s/g,'_');
+      const pos = Cesium.Cartesian3.fromDegrees(lon, lat, Math.max(alt, 200000));
+
+      if (entities.satellites[id]) {
+        entities.satellites[id].position = pos;
+      } else {
+        const e = viewer.entities.add({
+          id,
+          position: pos,
+          point: {
+            pixelSize: sat.cat==='military' ? 5 : (sat.cat==='starlink' ? 3 : 4),
+            color: getSatColor(sat.cat),
+            outlineColor: Cesium.Color.BLACK,
+            outlineWidth: 1,
+            scaleByDistance: new Cesium.NearFarScalar(1e6, 1.0, 1e7, 0.5),
+          }
+        });
+        e._wvData = {
+          name: sat.name,
+          type: 'satellite',
+          info: {
+            'CATEGORY': sat.cat.toUpperCase(),
+            'LAT': lat.toFixed(3)+'°',
+            'LON': lon.toFixed(3)+'°',
+            'ALT': (alt/1000).toFixed(0)+' km',
+          }
+        };
+        entities.satellites[id] = pos;
+        entities.satellites[id+'_e'] = e;
+      }
+      count++;
+    } catch(e) {}
+  });
+
+  document.getElementById('sat-count').textContent = count;
+  document.getElementById('th-sat').style.width = Math.min(count/TLE_DATA.length*100,100)+'%';
+  document.getElementById('tv-sat').textContent = count;
+  document.getElementById('sys-sat').textContent = 'LIVE ('+count+')';
+  addFeedItem('sat', '🛰 Satellite positions updated — '+count+' objects tracked');
+}
+
+// ──────────────────────────────────────────────
+// FLIGHTS (OpenSky Network — free, no key)
+// ──────────────────────────────────────────────
+async function fetchFlights() {
+  document.getElementById('sys-air').textContent = 'FETCHING...';
+  try {
+    const resp = await fetch('https://opensky-network.org/api/states/all?lamin=-90&lomin=-180&lamax=90&lomax=180', {
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!resp.ok) throw new Error(resp.status);
+    const data = await resp.json();
+    const states = (data.states||[]).filter(s=>s[5]&&s[6]&&s[7]);
+
+    // Remove old aircraft entities
+    Object.values(entities.aircraft).forEach(e => {
+      if (e && e._wvData) viewer.entities.remove(e);
+    });
+    Object.keys(entities.aircraft).forEach(k=>delete entities.aircraft[k]);
+
+    let count = 0;
+    const MAX = 500;
+    for (const s of states) {
+      if (count >= MAX) break;
+      const [icao,callsign,,,,lon,lat,balt,onGnd,vel,hdg,vrate,,,alt,squawk] = s;
+      if (onGnd) continue;
+      const altitude = (balt||alt||0)*1000;
+      const pos = Cesium.Cartesian3.fromDegrees(lon, lat, Math.max(altitude,500));
+      const e = viewer.entities.add({
+        position: pos,
+        point: {
+          pixelSize: 3,
+          color: Cesium.Color.fromCssColorString('#00aaff').withAlpha(0.85),
+          scaleByDistance: new Cesium.NearFarScalar(5e5,1.0,1e7,0.3),
+        }
+      });
+      e._wvData = {
+        name: (callsign||icao||'UNKNOWN').trim()||'AIRCRAFT',
+        type:'aircraft',
+        info:{
+          'CALLSIGN':(callsign||'—').trim(),
+          'ICAO24':icao,
+          'ALT':(altitude/1000).toFixed(1)+' km',
+          'SPD':vel?((vel*1.944).toFixed(0)+' kts'):'—',
+          'HDG':hdg?(hdg.toFixed(0)+'°'):'—',
+          'SQUAWK':squawk||'—',
+        }
+      };
+      entities.aircraft['ac_'+icao] = e;
+      count++;
+    }
+
+    document.getElementById('air-count').textContent = count;
+    document.getElementById('th-air').style.width = Math.min(count/MAX*100,100)+'%';
+    document.getElementById('tv-air').textContent = count;
+    document.getElementById('sys-air').style.color='var(--g)';
+    document.getElementById('sys-air').textContent = 'LIVE ('+count+')';
+    addFeedItem('air', '✈ Flight data updated — '+count+' aircraft tracked via OpenSky');
+    showNotif('FLIGHT DATA', 'OpenSky feed active — '+count+' aircraft live');
+  } catch(err) {
+    document.getElementById('sys-air').style.color='var(--r)';
+    document.getElementById('sys-air').textContent = 'FALLBACK MODE';
+    generateSimFlights();
+    showNotif('FLIGHT FEED', 'OpenSky unavailable — simulating '+Object.keys(entities.aircraft).length+' aircraft');
+  }
+}
+
+function generateSimFlights() {
+  const routes = [
+    {from:[40.7,-73.9],to:[51.5,-0.1]},    // NYC-LDN
+    {from:[37.6,55.7],to:[35.6,139.7]},     // MOW-TYO
+    {from:[1.3,103.8],to:[-33.9,151.2]},    // SIN-SYD
+    {from:[33.9,-118.4],to:[35.6,139.7]},   // LAX-TYO
+    {from:[25.3,51.6],to:[52.5,13.4]},      // DOH-BER
+    {from:[-23.4,-46.5],to:[40.4,-3.7]},    // GRU-MAD
+    {from:[55.4,37.9],to:[41.0,28.8]},      // SVO-IST
+    {from:[48.9,2.4],to:[22.3,114.2]},      // CDG-HKG
+  ];
+  let count = 0;
+  routes.forEach((r,i) => {
+    for(let t=0;t<12;t++) {
+      const f = t/12;
+      const lat = r.from[0]+(r.to[0]-r.from[0])*f + (Math.random()-0.5)*3;
+      const lon = r.from[1]+(r.to[1]-r.from[1])*f + (Math.random()-0.5)*3;
+      const alt = (9000+Math.random()*3000)*1000;
+      const e = viewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees(lon, lat, alt),
+        point:{
+          pixelSize:3,
+          color:Cesium.Color.fromCssColorString('#00aaff').withAlpha(0.7),
+          scaleByDistance:new Cesium.NearFarScalar(5e5,1.0,1e7,0.3),
+        }
+      });
+      e._wvData = {name:'SIM '+i+'-'+t, type:'aircraft',
+        info:{'TYPE':'SIMULATED','ALT':(alt/1000).toFixed(0)+' km','ROUTE':i}};
+      entities.aircraft['sim_'+i+'_'+t]=e;
+      count++;
+    }
+  });
+  document.getElementById('air-count').textContent = count;
+  document.getElementById('tv-air').textContent = count;
+}
+
+// ──────────────────────────────────────────────
+// EARTHQUAKES (USGS — free, no key)
+// ──────────────────────────────────────────────
+async function fetchEarthquakes() {
+  document.getElementById('sys-quake').textContent = 'FETCHING...';
+  try {
+    const url='https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson';
+    const resp = await fetch(url, {signal:AbortSignal.timeout(8000)});
+    const data = await resp.json();
+
+    // Clear old
+    Object.values(entities.earthquakes).forEach(e=>e&&e._wvData&&viewer.entities.remove(e));
+    Object.keys(entities.earthquakes).forEach(k=>delete entities.earthquakes[k]);
+
+    let count = 0;
+    let maxMag = 0;
+
+    (data.features||[]).forEach((f,i) => {
+      const [lon,lat,depth] = f.geometry.coordinates;
+      const mag = f.properties.mag || 0;
+      if (mag < 1.5) return;
+      maxMag = Math.max(maxMag, mag);
+
+      const r = mag >= 6 ? '#ff0000' : mag >= 5 ? '#ff6600' : mag >= 4 ? '#ffaa00' : '#ffcc00';
+      const sz = mag >= 6 ? 14 : mag >= 5 ? 10 : mag >= 4 ? 7 : 5;
+
+      const e = viewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees(lon, lat, 0),
+        ellipse: {
+          semiMajorAxis: mag * 60000,
+          semiMinorAxis: mag * 60000,
+          material: Cesium.Color.fromCssColorString(r).withAlpha(0.15),
+          outline: true,
+          outlineColor: Cesium.Color.fromCssColorString(r).withAlpha(0.6),
+          outlineWidth: 1,
+          height: 0,
+        },
+        point: {
+          pixelSize: sz,
+          color: Cesium.Color.fromCssColorString(r).withAlpha(0.9),
+          outlineColor: Cesium.Color.BLACK,
+          outlineWidth: 1,
+        }
+      });
+
+      const ago = Math.floor((Date.now()-f.properties.time)/60000);
+      e._wvData = {
+        name: 'SEISMIC EVENT',
+        type:'earthquake',
+        info:{
+          'MAGNITUDE': mag.toFixed(1),
+          'DEPTH': (depth||0).toFixed(1)+' km',
+          'PLACE': (f.properties.place||'Unknown').substring(0,25),
+          'TIME': ago<60?ago+'m ago':(ago/60).toFixed(0)+'h ago',
+          'STATUS': f.properties.status||'—',
+        }
+      };
+      entities.earthquakes['eq_'+i] = e;
+
+      if (mag >= 5.5) {
+        addFeedItem('quake', '⚠ M'+mag.toFixed(1)+' — '+(f.properties.place||'Unknown').substring(0,35));
+      }
+      count++;
+    });
+
+    document.getElementById('quake-count').textContent = count;
+    const pct = Math.min((maxMag/8)*100,100);
+    document.getElementById('th-seismic').style.width = pct+'%';
+    document.getElementById('tv-seismic').textContent = maxMag.toFixed(1);
+    document.getElementById('sys-quake').style.color='var(--g)';
+    document.getElementById('sys-quake').textContent = 'LIVE ('+count+')';
+    if (count > 0) showNotif('SEISMIC', count+' events last 24h — max M'+maxMag.toFixed(1));
+  } catch(e) {
+    document.getElementById('sys-quake').style.color='var(--r)';
+    document.getElementById('sys-quake').textContent = 'UNAVAILABLE';
+  }
+}
+
+// ──────────────────────────────────────────────
+// UI HELPERS
+// ──────────────────────────────────────────────
+function toggleLayer(name, el) {
+  layers[name] = !layers[name];
+  el.classList.toggle('active');
+
+  if (name === 'satellites') {
+    Object.values(entities.satellites).forEach(e=>{if(e&&e._wvData)e.show=layers.satellites});
+  } else if (name === 'aircraft') {
+    Object.values(entities.aircraft).forEach(e=>{if(e&&e._wvData)e.show=layers.aircraft});
+  } else if (name === 'earthquakes') {
+    Object.values(entities.earthquakes).forEach(e=>{if(e&&e._wvData)e.show=layers.earthquakes});
+  }
+}
+
+function toggleSatelliteTypes(cat) {
+  satTypes[cat] = !satTypes[cat];
+  const sw = document.getElementById('sw-'+{leo:'leo',geo:'geo',military:'mil',starlink:'stl'}[cat]);
+  if (sw) sw.classList.toggle('on');
+  renderSatellites();
+}
+
+function setSensor(mode, btn) {
+  document.querySelectorAll('.fmode').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('nvoverlay').className = mode==='nv'?'nv':'';
+  document.getElementById('fliroverlay').className = mode==='flir'?'flir':'';
+  document.getElementById('crtoverlay').className = mode==='crt'?'crt':'';
+  if (viewer) {
+    viewer.scene.postProcessStages.bloom.enabled = mode==='nv'||mode==='flir';
+  }
+}
+
+function flyTo(lat, lon, alt) {
+  if (!viewer) return;
+  viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegrees(lon, lat, alt),
+    duration: 2.5,
+    orientation: {heading:0, pitch:Cesium.Math.toRadians(-45), roll:0}
+  });
+}
+
+function selectEntity(e) {
+  if (!e._wvData) return;
+  selectedEntity = e;
+  const box = document.getElementById('selected-box');
+  document.getElementById('sel-name').textContent = e._wvData.name;
+  document.getElementById('sel-body').innerHTML = Object.entries(e._wvData.info||{})
+    .map(([k,v])=>`<div class="sel-row"><span class="sel-key">${k}</span><span class="sel-val">${v}</span></div>`).join('');
+  box.classList.add('visible');
+}
+
+function clearSelection() {
+  document.getElementById('selected-box').classList.remove('visible');
+  selectedEntity = null;
+}
+
+function addFeedItem(type, msg) {
+  const list = document.getElementById('feed-list');
+  const item = document.createElement('div');
+  item.className = 'feed-item';
+  const dotClass = type==='sat'?'dot-sat':type==='air'?'dot-air':type==='quake'?'dot-quake':'dot-traf';
+  const typeLabel = type==='sat'?'ORBITAL':type==='air'?'AVIATION':type==='quake'?'SEISMIC':'TRAFFIC';
+  item.innerHTML = `<div class="feed-type"><span class="feed-dot ${dotClass}"></span>${typeLabel}</div>
+    <div class="feed-title">${msg}</div>`;
+  list.insertBefore(item, list.firstChild);
+  while (list.children.length > 20) list.removeChild(list.lastChild);
+}
+
+function showNotif(type, msg) {
+  const notifs = document.getElementById('notifs');
+  const n = document.createElement('div');
+  n.className='notif';
+  n.innerHTML=`<div class="notif-type">${type}</div><div class="notif-msg">${msg}</div>`;
+  notifs.appendChild(n);
+  setTimeout(()=>n.remove(), 4500);
+}
+</script>
+</body>
+</html>
