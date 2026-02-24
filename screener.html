@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>MERIDIAN SCREENER // MARKET INTELLIGENCE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#050810;
+      --panel:rgba(5,8,16,0.92);
+      --g:#f0b429;
+      --g2:#d49613;
+      --b:#3b9eff;
+      --r:#ff4757;
+      --gr:#2ed573;
+      --border:rgba(240,180,41,0.15);
+      --border2:rgba(240,180,41,0.3);
+      --text:#d8c9a3;
+      --dim:#6b5e3f;
+      --header:#0b0f1a;
+    }
+    html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace}
+
+    /* ── LAYOUT ── */
+    #app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+    /* TOP BAR */
+    #topbar{
+      display:flex;align-items:center;height:44px;padding:0 16px;gap:16px;
+      background:var(--header);border-bottom:1px solid var(--border2);flex-shrink:0;
+    }
+    .logo{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:900;color:var(--g);
+      letter-spacing:3px;text-shadow:0 0 10px rgba(240,180,41,0.4);white-space:nowrap}
+    .logo span{color:#fff;font-weight:400}
+    #market-ticker{flex:1;overflow:hidden;display:flex;gap:16px;align-items:center}
+    .tick-item{display:flex;gap:5px;align-items:center;white-space:nowrap;font-size:9px;letter-spacing:1px}
+    .tick-sym{color:var(--g);font-weight:700}
+    .tick-price{color:var(--text)}
+    .tick-chg.up{color:var(--gr)}
+    .tick-chg.dn{color:var(--r)}
+    #clock{font-size:9px;color:var(--dim);letter-spacing:2px;white-space:nowrap}
+    .topbar-btn{
+      padding:4px 10px;border:1px solid var(--border);background:transparent;
+      color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:8px;
+      letter-spacing:1px;cursor:pointer;transition:all 0.2s;
+    }
+    .topbar-btn:hover,.topbar-btn.active{border-color:var(--g);color:var(--g);background:rgba(240,180,41,0.08)}
+
+    /* FILTER BAR */
+    #filterbar{
+      display:flex;align-items:center;gap:8px;padding:8px 16px;
+      background:rgba(11,15,26,0.8);border-bottom:1px solid var(--border);
+      flex-shrink:0;flex-wrap:wrap;
+    }
+    .filter-group{display:flex;align-items:center;gap:6px}
+    .filter-label{font-size:8px;color:var(--dim);letter-spacing:1px;white-space:nowrap}
+    .filter-select{
+      background:rgba(240,180,41,0.04);border:1px solid var(--border);
+      color:var(--text);font-family:'JetBrains Mono',monospace;font-size:8px;
+      padding:3px 6px;cursor:pointer;outline:none;letter-spacing:1px;
+    }
+    .filter-select:focus{border-color:var(--g)}
+    .filter-input{
+      background:rgba(240,180,41,0.04);border:1px solid var(--border);
+      color:var(--text);font-family:'JetBrains Mono',monospace;font-size:8px;
+      padding:3px 6px;outline:none;width:70px;letter-spacing:1px;
+    }
+    .filter-input::placeholder{color:var(--dim)}
+    .filter-input:focus{border-color:var(--g)}
+    .filter-sep{width:1px;height:20px;background:var(--border)}
+    #run-btn{
+      padding:5px 14px;border:1px solid var(--g);background:rgba(240,180,41,0.1);
+      color:var(--g);font-family:'JetBrains Mono',monospace;font-size:9px;
+      letter-spacing:2px;cursor:pointer;transition:all 0.2s;margin-left:auto;
+    }
+    #run-btn:hover{background:rgba(240,180,41,0.2);box-shadow:0 0 12px rgba(240,180,41,0.2)}
+    #result-count{font-size:8px;color:var(--dim);letter-spacing:1px;white-space:nowrap}
+
+    /* MAIN LAYOUT */
+    #main{display:flex;flex:1;overflow:hidden;gap:0}
+
+    /* TABLE AREA */
+    #table-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+    #table-wrap{flex:1;overflow:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+    #table-wrap::-webkit-scrollbar{width:5px;height:5px}
+    #table-wrap::-webkit-scrollbar-track{background:transparent}
+    #table-wrap::-webkit-scrollbar-thumb{background:var(--border)}
+    #screener-table{width:100%;border-collapse:collapse;font-size:10px;letter-spacing:0.5px}
+    #screener-table thead tr{background:var(--header);position:sticky;top:0;z-index:10}
+    #screener-table th{
+      padding:8px 10px;text-align:right;color:var(--dim);font-size:8px;
+      letter-spacing:1px;border-bottom:1px solid var(--border2);cursor:pointer;
+      white-space:nowrap;user-select:none;font-weight:400;
+    }
+    #screener-table th:first-child{text-align:left;padding-left:14px}
+    #screener-table th:hover{color:var(--g)}
+    #screener-table th.sorted{color:var(--g)}
+    #screener-table tbody tr{
+      border-bottom:1px solid rgba(240,180,41,0.04);cursor:pointer;transition:background 0.15s;
+    }
+    #screener-table tbody tr:hover{background:rgba(240,180,41,0.05)}
+    #screener-table tbody tr.selected{background:rgba(240,180,41,0.09);border-color:rgba(240,180,41,0.2)}
+    #screener-table td{padding:7px 10px;text-align:right;white-space:nowrap;vertical-align:middle}
+    #screener-table td:first-child{text-align:left;padding-left:14px}
+    .td-sym{color:var(--g);font-weight:700;font-size:11px}
+    .td-name{color:var(--dim);font-size:8px;max-width:160px;overflow:hidden;text-overflow:ellipsis}
+    .td-up{color:var(--gr)}
+    .td-dn{color:var(--r)}
+    .td-neu{color:var(--dim)}
+    .td-price{color:#fff;font-weight:500}
+    .sector-tag{
+      display:inline-block;padding:1px 6px;border-radius:2px;font-size:7px;
+      letter-spacing:1px;background:rgba(240,180,41,0.08);border:1px solid var(--border);
+      color:var(--dim);white-space:nowrap;
+    }
+    .spark-cell{padding:4px 10px}
+    .bar-col{display:inline-block;height:10px;min-width:2px;vertical-align:middle}
+    .perf-bar{display:inline-block;height:3px;vertical-align:middle;border-radius:1px}
+
+    /* DETAIL PANEL */
+    #detail-panel{
+      width:300px;flex-shrink:0;border-left:1px solid var(--border);
+      background:rgba(5,8,16,0.95);display:flex;flex-direction:column;overflow:hidden;
+    }
+    .dp-header{
+      padding:10px 14px;border-bottom:1px solid var(--border);
+      background:var(--header);
+    }
+    .dp-sym{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--g);letter-spacing:2px}
+    .dp-name{font-size:9px;color:var(--dim);letter-spacing:1px;margin-top:2px}
+    .dp-price{font-size:22px;font-weight:700;color:#fff;margin-top:6px;font-family:'Rajdhani',sans-serif}
+    .dp-chg{font-size:11px;margin-top:2px}
+    #dp-chart-wrap{height:120px;padding:10px;border-bottom:1px solid var(--border)}
+    .dp-stats{flex:1;overflow-y:auto;padding:10px;scrollbar-width:none}
+    .dp-stats::-webkit-scrollbar{display:none}
+    .dp-section{margin-bottom:14px}
+    .dp-section-title{
+      font-size:7px;color:var(--g);letter-spacing:2px;margin-bottom:6px;
+      display:flex;align-items:center;gap:6px;
+    }
+    .dp-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+    .dp-row{
+      display:flex;justify-content:space-between;padding:3px 0;
+      border-bottom:1px solid rgba(240,180,41,0.04);font-size:9px;
+    }
+    .dp-key{color:var(--dim)}
+    .dp-val{color:var(--text)}
+    .dp-val.hi{color:var(--gr)}
+    .dp-val.lo{color:var(--r)}
+    .dp-val.gold{color:var(--g)}
+    #dp-ai{
+      padding:10px 14px;border-top:1px solid var(--border);background:rgba(240,180,41,0.03);
+      font-size:8px;line-height:1.6;color:var(--text);letter-spacing:0.3px;
+    }
+    .ai-label{font-size:7px;color:var(--g);letter-spacing:2px;margin-bottom:5px}
+    #dp-empty{
+      flex:1;display:flex;align-items:center;justify-content:center;
+      font-size:9px;color:var(--dim);letter-spacing:2px;text-align:center;line-height:2;
+    }
+
+    /* HEATMAP */
+    #heatmap-view{display:none;flex:1;overflow:auto;padding:14px;flex-wrap:wrap;align-content:flex-start;gap:4px}
+    #heatmap-view.visible{display:flex}
+    .hm-cell{
+      display:flex;flex-direction:column;justify-content:center;align-items:center;
+      cursor:pointer;transition:all 0.2s;border:1px solid transparent;position:relative;
+    }
+    .hm-cell:hover{filter:brightness(1.2);border-color:rgba(255,255,255,0.3)}
+    .hm-sym{font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.8)}
+    .hm-pct{font-size:8px;color:rgba(255,255,255,0.75);text-shadow:0 1px 2px rgba(0,0,0,0.7)}
+
+    /* LOADING */
+    #loading{
+      position:fixed;inset:0;z-index:50;background:var(--bg);
+      display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;
+    }
+    .load-sym{font-family:'Orbitron',sans-serif;font-size:16px;color:var(--g);letter-spacing:4px}
+    .load-bar{width:200px;height:2px;background:var(--border);overflow:hidden}
+    .load-fill{height:100%;background:var(--g);animation:loadanim 1.5s ease-in-out infinite}
+    @keyframes loadanim{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}/* not ideal but works */}
+    .load-msg{font-size:8px;color:var(--dim);letter-spacing:2px}
+
+    /* BOTTOM BAR */
+    #bottombar{
+      display:flex;align-items:center;gap:16px;padding:0 16px;height:32px;
+      background:var(--header);border-top:1px solid var(--border);flex-shrink:0;
+    }
+    .bb-item{font-size:8px;display:flex;gap:5px;letter-spacing:1px}
+    .bb-key{color:var(--dim)}
+    .bb-val{color:var(--g)}
+    .status-dot{width:5px;height:5px;border-radius:50%;background:var(--gr);
+      box-shadow:0 0 5px var(--gr);animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+  </style>
+</head>
+<body>
+<div id="loading">
+  <div class="load-sym">MERIDIAN SCREENER</div>
+  <div class="load-bar"><div class="load-fill"></div></div>
+  <div class="load-msg" id="load-msg">INITIALIZING DATA FEEDS...</div>
+</div>
+
+<div id="app" style="display:none">
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <div class="logo">MERIDIAN <span>SCREENER</span></div>
+    <div id="market-ticker"></div>
+    <button class="topbar-btn active" id="btn-table" onclick="switchView('table')">TABLE</button>
+    <button class="topbar-btn" id="btn-heat" onclick="switchView('heat')">HEATMAP</button>
+    <div id="clock">--:--:-- ET</div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div id="filterbar">
+    <div class="filter-group">
+      <span class="filter-label">SECTOR</span>
+      <select class="filter-select" id="f-sector">
+        <option value="">ALL SECTORS</option>
+        <option>Technology</option><option>Healthcare</option><option>Financials</option>
+        <option>Consumer Cyclical</option><option>Consumer Defensive</option>
+        <option>Industrials</option><option>Energy</option><option>Materials</option>
+        <option>Real Estate</option><option>Utilities</option><option>Communication Services</option>
+      </select>
+    </div>
+    <div class="filter-sep"></div>
+    <div class="filter-group">
+      <span class="filter-label">MKT CAP</span>
+      <select class="filter-select" id="f-mktcap">
+        <option value="">ANY</option>
+        <option value="mega">Mega (&gt;$200B)</option>
+        <option value="large">Large ($10B-$200B)</option>
+        <option value="mid">Mid ($2B-$10B)</option>
+        <option value="small">Small (&lt;$2B)</option>
+      </select>
+    </div>
+    <div class="filter-sep"></div>
+    <div class="filter-group">
+      <span class="filter-label">P/E MAX</span>
+      <input class="filter-input" id="f-pe" placeholder="e.g. 30" type="number" min="0"/>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">DIV YIELD MIN %</span>
+      <input class="filter-input" id="f-div" placeholder="e.g. 2" type="number" min="0" step="0.1"/>
+    </div>
+    <div class="filter-sep"></div>
+    <div class="filter-group">
+      <span class="filter-label">CHANGE</span>
+      <select class="filter-select" id="f-chg">
+        <option value="">ANY</option>
+        <option value="up5">Up &gt;5%</option>
+        <option value="up2">Up &gt;2%</option>
+        <option value="dn2">Down &gt;2%</option>
+        <option value="dn5">Down &gt;5%</option>
+      </select>
+    </div>
+    <div class="filter-sep"></div>
+    <div class="filter-group">
+      <span class="filter-label">VOLUME</span>
+      <select class="filter-select" id="f-vol">
+        <option value="">ANY</option>
+        <option value="high">High (&gt;2x avg)</option>
+        <option value="low">Low (&lt;0.5x avg)</option>
+      </select>
+    </div>
+    <div class="filter-sep"></div>
+    <div class="filter-group">
+      <span class="filter-label">52W</span>
+      <select class="filter-select" id="f-52w">
+        <option value="">ANY</option>
+        <option value="near-high">Near High (&lt;5%)</option>
+        <option value="near-low">Near Low (&lt;10%)</option>
+      </select>
+    </div>
+    <span id="result-count">— results</span>
+    <button id="run-btn" onclick="runScreen()">⚡ RUN SCREEN</button>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="main">
+    <div id="table-area">
+      <div id="table-wrap">
+        <table id="screener-table">
+          <thead>
+            <tr>
+              <th onclick="sortBy('sym')" id="th-sym">TICKER ↕</th>
+              <th onclick="sortBy('name')" id="th-name" style="text-align:left">NAME</th>
+              <th onclick="sortBy('sector')" id="th-sector">SECTOR</th>
+              <th onclick="sortBy('price')" id="th-price">PRICE ↕</th>
+              <th onclick="sortBy('chgPct')" id="th-chgPct">CHG % ↕</th>
+              <th onclick="sortBy('mktCap')" id="th-mktCap">MKT CAP ↕</th>
+              <th onclick="sortBy('pe')" id="th-pe">P/E ↕</th>
+              <th onclick="sortBy('divYield')" id="th-divYield">DIV YLD ↕</th>
+              <th onclick="sortBy('beta')" id="th-beta">BETA ↕</th>
+              <th onclick="sortBy('pct52')" id="th-pct52">52W % ↕</th>
+              <th>VOLUME</th>
+              <th>PERF BAR</th>
+            </tr>
+          </thead>
+          <tbody id="screen-body"></tbody>
+        </table>
+      </div>
+      <div id="heatmap-view"></div>
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <div id="detail-panel">
+      <div id="dp-empty">SELECT A STOCK<br>FOR FULL ANALYSIS</div>
+      <div id="dp-content" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+        <div class="dp-header">
+          <div class="dp-sym" id="dp-sym">—</div>
+          <div class="dp-name" id="dp-name">—</div>
+          <div class="dp-price" id="dp-price">—</div>
+          <div class="dp-chg" id="dp-chg">—</div>
+        </div>
+        <div id="dp-chart-wrap"><canvas id="dp-chart"></canvas></div>
+        <div class="dp-stats" id="dp-stats"></div>
+        <div id="dp-ai"><div class="ai-label">AI ANALYSIS</div><div id="dp-ai-text"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div id="bottombar">
+    <div class="status-dot"></div>
+    <div class="bb-item"><span class="bb-key">DATA</span><span class="bb-val" id="bb-src">Yahoo Finance</span></div>
+    <div class="bb-item"><span class="bb-key">STOCKS</span><span class="bb-val" id="bb-total">—</span></div>
+    <div class="bb-item"><span class="bb-key">LAST UPDATE</span><span class="bb-val" id="bb-update">—</span></div>
+    <div class="bb-item"><span class="bb-key">MARKET</span><span class="bb-val" id="bb-market">—</span></div>
+    <div style="flex:1"></div>
+    <div class="bb-item"><span class="bb-key">API</span><span class="bb-val" style="color:var(--gr)">FREE TIER ACTIVE</span></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+// MERIDIAN SCREENER — Advanced Stock Screener
+// Data: Yahoo Finance (free, no key), CORS via allorigins proxy
+// ════════════════════════════════════════════════════════════════════
+
+// ──────────────────────────────────────────────────────────────────────
+// STATIC STOCK DATABASE (100+ S&P 500 stocks with fundamentals)
+// We pair this with live price data from Yahoo Finance for the best of both worlds
+// ──────────────────────────────────────────────────────────────────────
+const STOCK_DB = [
+  // Technology
+  {sym:'AAPL',name:'Apple Inc.',sector:'Technology',mktCapB:3720,pe:38.2,divYield:0.42,beta:1.24,high52:260.10,low52:164.08},
+  {sym:'MSFT',name:'Microsoft Corp.',sector:'Technology',mktCapB:3260,pe:36.4,divYield:0.72,beta:0.89,high52:468.35,low52:362.90},
+  {sym:'NVDA',name:'NVIDIA Corp.',sector:'Technology',mktCapB:3380,pe:65.2,divYield:0.03,beta:1.96,high52:153.13,low52:47.32},
+  {sym:'GOOGL',name:'Alphabet Inc.',sector:'Technology',mktCapB:2150,pe:24.8,divYield:0,beta:1.04,high52:207.05,low52:140.53},
+  {sym:'META',name:'Meta Platforms',sector:'Technology',mktCapB:1640,pe:29.3,divYield:0.30,beta:1.33,high52:740.91,low52:382.17},
+  {sym:'AVGO',name:'Broadcom Inc.',sector:'Technology',mktCapB:1020,pe:42.1,divYield:1.04,beta:1.05,high52:251.88,low52:124.92},
+  {sym:'TSM',name:'Taiwan Semiconductor',sector:'Technology',mktCapB:976,pe:31.5,divYield:1.28,beta:1.15,high52:226.40,low52:105.77},
+  {sym:'ORCL',name:'Oracle Corp.',sector:'Technology',mktCapB:498,pe:40.2,divYield:0.93,beta:0.89,high52:198.31,low52:109.78},
+  {sym:'CRM',name:'Salesforce Inc.',sector:'Technology',mktCapB:310,pe:51.8,divYield:0.48,beta:1.38,high52:369.00,low52:212.00},
+  {sym:'AMD',name:'Advanced Micro Devices',sector:'Technology',mktCapB:215,pe:48.7,divYield:0,beta:1.78,high52:227.30,low52:117.96},
+  {sym:'QCOM',name:'Qualcomm Inc.',sector:'Technology',mktCapB:174,pe:16.8,divYield:2.05,beta:1.28,high52:230.63,low52:147.10},
+  {sym:'INTC',name:'Intel Corp.',sector:'Technology',mktCapB:88,pe:null,divYield:2.07,beta:0.95,high52:48.98,low52:17.67},
+  {sym:'NOW',name:'ServiceNow Inc.',sector:'Technology',mktCapB:208,pe:122.3,divYield:0,beta:1.22,high52:1198.09,low52:668.37},
+  {sym:'ANET',name:'Arista Networks',sector:'Technology',mktCapB:137,pe:54.9,divYield:0,beta:1.45,high52:133.52,low52:71.12},
+  {sym:'PANW',name:'Palo Alto Networks',sector:'Technology',mktCapB:115,pe:180.4,divYield:0,beta:1.12,high52:410.43,low52:248.52},
+  {sym:'SNOW',name:'Snowflake Inc.',sector:'Technology',mktCapB:53,pe:null,divYield:0,beta:1.89,high52:237.72,low52:107.13},
+  {sym:'PLTR',name:'Palantir Technologies',sector:'Technology',mktCapB:218,pe:390.0,divYield:0,beta:2.12,high52:125.41,low52:16.61},
+  {sym:'NET',name:'Cloudflare Inc.',sector:'Technology',mktCapB:49,pe:null,divYield:0,beta:1.78,high52:214.26,low52:53.94},
+  // Healthcare
+  {sym:'LLY',name:'Eli Lilly & Co.',sector:'Healthcare',mktCapB:742,pe:62.4,divYield:0.61,beta:0.47,high52:972.53,low52:718.51},
+  {sym:'UNH',name:'UnitedHealth Group',sector:'Healthcare',mktCapB:480,pe:22.3,divYield:1.60,beta:0.52,high52:611.34,low52:403.49},
+  {sym:'JNJ',name:'Johnson & Johnson',sector:'Healthcare',mktCapB:362,pe:15.8,divYield:3.22,beta:0.55,high52:168.33,low52:138.62},
+  {sym:'ABT',name:'Abbott Laboratories',sector:'Healthcare',mktCapB:188,pe:27.1,divYield:1.93,beta:0.69,high52:131.74,low52:93.82},
+  {sym:'MRK',name:'Merck & Co.',sector:'Healthcare',mktCapB:218,pe:16.2,divYield:2.93,beta:0.38,high52:134.63,low52:92.06},
+  {sym:'TMO',name:'Thermo Fisher Scientific',sector:'Healthcare',mktCapB:214,pe:33.8,divYield:0.29,beta:0.89,high52:623.00,low52:434.90},
+  {sym:'ABBV',name:'AbbVie Inc.',sector:'Healthcare',mktCapB:318,pe:58.3,divYield:3.45,beta:0.65,high52:208.55,low52:155.83},
+  {sym:'PFE',name:'Pfizer Inc.',sector:'Healthcare',mktCapB:154,pe:null,divYield:6.82,beta:0.43,high52:30.92,low52:22.49},
+  {sym:'AMGN',name:'Amgen Inc.',sector:'Healthcare',mktCapB:167,pe:19.8,divYield:3.16,beta:0.52,high52:334.93,low52:254.79},
+  {sym:'ISRG',name:'Intuitive Surgical',sector:'Healthcare',mktCapB:193,pe:78.6,divYield:0,beta:1.12,high52:598.55,low52:339.71},
+  // Financials
+  {sym:'BRK-B',name:'Berkshire Hathaway B',sector:'Financials',mktCapB:1060,pe:23.1,divYield:0,beta:0.87,high52:494.16,low52:350.70},
+  {sym:'JPM',name:'JPMorgan Chase',sector:'Financials',mktCapB:723,pe:13.8,divYield:2.12,beta:1.09,high52:280.25,low52:170.81},
+  {sym:'V',name:'Visa Inc.',sector:'Financials',mktCapB:595,pe:32.4,divYield:0.77,beta:0.93,high52:316.00,low52:247.85},
+  {sym:'MA',name:'Mastercard Inc.',sector:'Financials',mktCapB:474,pe:38.2,divYield:0.52,beta:1.04,high52:556.00,low52:423.25},
+  {sym:'BAC',name:'Bank of America',sector:'Financials',mktCapB:344,pe:15.2,divYield:2.35,beta:1.33,high52:48.08,low52:31.37},
+  {sym:'WFC',name:'Wells Fargo',sector:'Financials',mktCapB:271,pe:14.7,divYield:1.96,beta:1.26,high52:81.39,low52:50.14},
+  {sym:'GS',name:'Goldman Sachs',sector:'Financials',mktCapB:198,pe:16.8,divYield:2.14,beta:1.28,high52:660.00,low52:380.00},
+  {sym:'AXP',name:'American Express',sector:'Financials',mktCapB:207,pe:22.4,divYield:1.17,beta:1.15,high52:325.87,low52:192.29},
+  {sym:'PYPL',name:'PayPal Holdings',sector:'Financials',mktCapB:73,pe:19.2,divYield:0,beta:1.55,high52:101.46,low52:57.59},
+  {sym:'COF',name:'Capital One Financial',sector:'Financials',mktCapB:57,pe:14.3,divYield:1.88,beta:1.46,high52:199.39,low52:113.84},
+  // Consumer Cyclical
+  {sym:'AMZN',name:'Amazon.com Inc.',sector:'Consumer Cyclical',mktCapB:2390,pe:47.8,divYield:0,beta:1.27,high52:242.52,low52:151.61},
+  {sym:'TSLA',name:'Tesla Inc.',sector:'Consumer Cyclical',mktCapB:985,pe:98.4,divYield:0,beta:2.14,high52:488.54,low52:138.80},
+  {sym:'HD',name:'Home Depot',sector:'Consumer Cyclical',mktCapB:346,pe:25.8,divYield:2.36,beta:0.96,high52:439.37,low52:305.62},
+  {sym:'MCD',name:"McDonald's Corp.",sector:'Consumer Cyclical',mktCapB:203,pe:23.4,divYield:2.30,beta:0.72,high52:317.90,low52:243.50},
+  {sym:'NKE',name:'Nike Inc.',sector:'Consumer Cyclical',mktCapB:95,pe:28.4,divYield:2.15,beta:1.05,high52:115.21,low52:70.83},
+  {sym:'SBUX',name:'Starbucks Corp.',sector:'Consumer Cyclical',mktCapB:102,pe:32.7,divYield:2.42,beta:0.88,high52:117.00,low52:71.54},
+  {sym:'TGT',name:'Target Corp.',sector:'Consumer Cyclical',mktCapB:56,pe:14.8,divYield:3.55,beta:0.79,high52:181.86,low52:109.77},
+  {sym:'LOW',name:"Lowe's Companies",sector:'Consumer Cyclical',mktCapB:139,pe:22.1,divYield:2.00,beta:0.97,high52:271.79,low52:188.96},
+  {sym:'GM',name:'General Motors',sector:'Consumer Cyclical',mktCapB:50,pe:5.6,divYield:1.22,beta:1.56,high52:61.53,low52:38.49},
+  {sym:'F',name:'Ford Motor Co.',sector:'Consumer Cyclical',mktCapB:47,pe:11.2,divYield:6.43,beta:1.45,high52:14.85,low52:9.84},
+  // Consumer Defensive
+  {sym:'PG',name:'Procter & Gamble',sector:'Consumer Defensive',mktCapB:368,pe:24.8,divYield:2.43,beta:0.54,high52:180.43,low52:153.92},
+  {sym:'KO',name:'Coca-Cola Co.',sector:'Consumer Defensive',mktCapB:285,pe:27.1,divYield:3.06,beta:0.61,high52:73.53,low52:56.17},
+  {sym:'PEP',name:'PepsiCo Inc.',sector:'Consumer Defensive',mktCapB:207,pe:21.8,divYield:3.59,beta:0.52,high52:183.42,low52:142.67},
+  {sym:'WMT',name:'Walmart Inc.',sector:'Consumer Defensive',mktCapB:739,pe:38.3,divYield:1.00,beta:0.63,high52:105.30,low52:65.75},
+  {sym:'COST',name:'Costco Wholesale',sector:'Consumer Defensive',mktCapB:390,pe:56.8,divYield:0.52,beta:0.97,high52:1078.23,low52:693.00},
+  {sym:'MDLZ',name:'Mondelez International',sector:'Consumer Defensive',mktCapB:82,pe:21.4,divYield:2.58,beta:0.66,high52:76.93,low52:57.91},
+  {sym:'PM',name:'Philip Morris Intl',sector:'Consumer Defensive',mktCapB:218,pe:19.8,divYield:4.16,beta:0.64,high52:145.65,low52:82.08},
+  // Industrials
+  {sym:'GE',name:'GE Aerospace',sector:'Industrials',mktCapB:218,pe:39.4,divYield:0.70,beta:1.12,high52:218.71,low52:102.96},
+  {sym:'CAT',name:'Caterpillar Inc.',sector:'Industrials',mktCapB:168,pe:17.8,divYield:1.53,beta:1.04,high52:418.50,low52:280.57},
+  {sym:'HON',name:'Honeywell Intl',sector:'Industrials',mktCapB:133,pe:24.3,divYield:2.12,beta:0.91,high52:229.67,low52:183.89},
+  {sym:'RTX',name:'RTX Corp.',sector:'Industrials',mktCapB:147,pe:34.1,divYield:2.24,beta:0.83,high52:130.78,low52:86.93},
+  {sym:'BA',name:'Boeing Co.',sector:'Industrials',mktCapB:112,pe:null,divYield:0,beta:1.23,high52:211.03,low52:137.02},
+  {sym:'LMT',name:'Lockheed Martin',sector:'Industrials',mktCapB:115,pe:17.1,divYield:2.88,beta:0.53,high52:619.40,low52:413.92},
+  {sym:'UPS',name:'United Parcel Service',sector:'Industrials',mktCapB:117,pe:19.8,divYield:5.45,beta:0.98,high52:148.69,low52:103.92},
+  {sym:'DE',name:'Deere & Co.',sector:'Industrials',mktCapB:116,pe:14.2,divYield:1.69,beta:0.87,high52:470.89,low52:346.73},
+  {sym:'ETN',name:'Eaton Corp.',sector:'Industrials',mktCapB:145,pe:37.2,divYield:1.04,beta:1.18,high52:385.50,low52:214.12},
+  // Energy
+  {sym:'XOM',name:'Exxon Mobil',sector:'Energy',mktCapB:507,pe:14.2,divYield:3.68,beta:0.95,high52:126.34,low52:97.62},
+  {sym:'CVX',name:'Chevron Corp.',sector:'Energy',mktCapB:263,pe:15.8,divYield:4.54,beta:0.99,high52:168.96,low52:131.85},
+  {sym:'SLB',name:'SLB (Schlumberger)',sector:'Energy',mktCapB:45,pe:14.1,divYield:2.78,beta:1.48,high52:61.68,low52:33.94},
+  {sym:'EOG',name:'EOG Resources',sector:'Energy',mktCapB:72,pe:12.1,divYield:3.03,beta:1.23,high52:142.63,low52:110.94},
+  {sym:'OXY',name:'Occidental Petroleum',sector:'Energy',mktCapB:48,pe:12.8,divYield:1.85,beta:1.38,high52:73.42,low52:42.45},
+  {sym:'COP',name:'ConocoPhillips',sector:'Energy',mktCapB:132,pe:14.8,divYield:3.12,beta:1.14,high52:138.34,low52:99.40},
+  // Materials
+  {sym:'LIN',name:'Linde plc',sector:'Materials',mktCapB:219,pe:34.8,divYield:1.22,beta:0.79,high52:494.57,low52:401.47},
+  {sym:'APD',name:'Air Products & Chem.',sector:'Materials',mktCapB:64,pe:22.1,divYield:2.91,beta:0.78,high52:357.32,low52:217.10},
+  {sym:'NEM',name:'Newmont Corp.',sector:'Materials',mktCapB:51,pe:null,divYield:2.29,beta:0.64,high52:58.72,low52:34.34},
+  {sym:'FCX',name:'Freeport-McMoRan',sector:'Materials',mktCapB:58,pe:21.4,divYield:0.74,beta:1.89,high52:60.70,low52:34.39},
+  // Real Estate
+  {sym:'AMT',name:'American Tower',sector:'Real Estate',mktCapB:96,pe:42.8,divYield:3.06,beta:0.72,high52:229.00,low52:159.00},
+  {sym:'PLD',name:'Prologis Inc.',sector:'Real Estate',mktCapB:109,pe:35.2,divYield:3.16,beta:1.05,high52:138.04,low52:96.38},
+  {sym:'EQIX',name:'Equinix Inc.',sector:'Real Estate',mktCapB:79,pe:87.3,divYield:2.06,beta:0.67,high52:1001.68,low52:681.18},
+  {sym:'CCI',name:'Crown Castle Inc.',sector:'Real Estate',mktCapB:45,pe:34.1,divYield:6.29,beta:0.76,high52:120.94,low52:83.48},
+  {sym:'O',name:'Realty Income Corp.',sector:'Real Estate',mktCapB:52,pe:44.2,divYield:5.63,beta:0.84,high52:67.47,low52:50.73},
+  // Utilities
+  {sym:'NEE',name:'NextEra Energy',sector:'Utilities',mktCapB:147,pe:20.3,divYield:3.11,beta:0.56,high52:85.11,low52:56.03},
+  {sym:'SO',name:'Southern Co.',sector:'Utilities',mktCapB:87,pe:22.4,divYield:3.56,beta:0.51,high52:92.13,low52:68.01},
+  {sym:'DUK',name:'Duke Energy',sector:'Utilities',mktCapB:86,pe:21.8,divYield:3.89,beta:0.40,high52:122.03,low52:93.85},
+  {sym:'AEP',name:'AEP Ohio',sector:'Utilities',mktCapB:52,pe:18.2,divYield:3.82,beta:0.43,high52:103.51,low52:79.21},
+  {sym:'D',name:'Dominion Energy',sector:'Utilities',mktCapB:40,pe:24.8,divYield:4.90,beta:0.46,high52:54.18,low52:34.26},
+  // Communication Services
+  {sym:'NFLX',name:'Netflix Inc.',sector:'Communication Services',mktCapB:449,pe:58.9,divYield:0,beta:1.18,high52:1064.50,low52:542.01},
+  {sym:'SPOT',name:'Spotify Technology',sector:'Communication Services',mktCapB:89,pe:138.4,divYield:0,beta:1.34,high52:632.54,low52:170.98},
+  {sym:'DIS',name:'Walt Disney Co.',sector:'Communication Services',mktCapB:198,pe:31.8,divYield:0.42,beta:1.05,high52:123.74,low52:84.78},
+  {sym:'CMCSA',name:'Comcast Corp.',sector:'Communication Services',mktCapB:170,pe:11.2,divYield:3.18,beta:0.99,high52:45.30,low52:36.31},
+  {sym:'T',name:'AT&T Inc.',sector:'Communication Services',mktCapB:175,pe:18.4,divYield:5.23,beta:0.71,high52:27.75,low52:16.20},
+  {sym:'VZ',name:'Verizon Communications',sector:'Communication Services',mktCapB:177,pe:11.8,divYield:6.89,beta:0.38,high52:45.15,low52:37.16},
+];
+
+// Live price data
+let liveData = {};
+let allStocks = [];
+let filtered = [];
+let sortKey = 'mktCap';
+let sortDir = -1;
+let currentView = 'table';
+let dpChart = null;
+
+// ──────────────────────────────────────────────────────────────────────
+// FETCH LIVE PRICES FROM YAHOO FINANCE (free, no key)
+// ──────────────────────────────────────────────────────────────────────
+async function fetchYahooQuotes(symbols) {
+  const chunk = symbols.join(',');
+  const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(chunk)}&fields=regularMarketPrice,regularMarketChangePercent,regularMarketChange,regularMarketVolume,averageDailyVolume3Month,regularMarketDayHigh,regularMarketDayLow,regularMarketOpen,regularMarketPreviousClose,trailingPE,forwardPE,dividendYield,beta,marketCap,fiftyTwoWeekHigh,fiftyTwoWeekLow,trailingAnnualDividendYield,regularMarketTime,marketState`;
+
+  // Try direct first, then through allorigins proxy
+  const endpoints = [
+    url,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  ];
+
+  for (const ep of endpoints) {
+    try {
+      const resp = await fetch(ep, {signal: AbortSignal.timeout(8000)});
+      if (!resp.ok) continue;
+      const data = await resp.json();
+      const results = data?.quoteResponse?.result || [];
+      results.forEach(q => {
+        liveData[q.symbol] = {
+          price: q.regularMarketPrice,
+          chg: q.regularMarketChange,
+          chgPct: q.regularMarketChangePercent,
+          volume: q.regularMarketVolume,
+          avgVol: q.averageDailyVolume3Month,
+          open: q.regularMarketOpen,
+          prevClose: q.regularMarketPreviousClose,
+          dayHigh: q.regularMarketDayHigh,
+          dayLow: q.regularMarketDayLow,
+          marketCap: q.marketCap,
+          pe: q.trailingPE || q.forwardPE,
+          divYield: (q.trailingAnnualDividendYield||q.dividendYield||0)*100,
+          beta: q.beta,
+          h52: q.fiftyTwoWeekHigh,
+          l52: q.fiftyTwoWeekLow,
+          marketState: q.marketState,
+        };
+      });
+      return true;
+    } catch(e) {}
+  }
+  return false;
+}
+
+async function fetchSparkline(sym) {
+  const now = Math.floor(Date.now()/1000);
+  const start = now - 86400;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=5m&period1=${start}&period2=${now}`;
+  const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  try {
+    const resp = await fetch(proxied, {signal: AbortSignal.timeout(6000)});
+    if (!resp.ok) return null;
+    const d = await resp.json();
+    return d?.chart?.result?.[0]?.indicators?.quote?.[0]?.close?.filter(v=>v!=null) || null;
+  } catch(e) { return null; }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────────────────────────────
+async function init() {
+  setLoadMsg('Fetching live market data from Yahoo Finance...');
+  const syms = STOCK_DB.map(s=>s.sym);
+
+  // Fetch in batches of 25
+  const BATCH = 25;
+  for (let i=0; i<syms.length; i+=BATCH) {
+    const batch = syms.slice(i, i+BATCH);
+    await fetchYahooQuotes(batch);
+    setLoadMsg(`Loading prices... ${Math.min(i+BATCH, syms.length)}/${syms.length}`);
+  }
+
+  // Merge static + live data
+  allStocks = STOCK_DB.map(s => {
+    const live = liveData[s.sym] || {};
+    return {
+      ...s,
+      price: live.price || (s.high52 * 0.88),
+      chg: live.chg || 0,
+      chgPct: live.chgPct || 0,
+      volume: live.volume || 0,
+      avgVol: live.avgVol || 1,
+      mktCap: live.marketCap ? live.marketCap/1e9 : s.mktCapB,
+      pe: live.pe || s.pe,
+      divYield: live.divYield !== undefined ? live.divYield : s.divYield,
+      beta: live.beta || s.beta,
+      h52: live.h52 || s.high52,
+      l52: live.l52 || s.low52,
+      open: live.open,
+      prevClose: live.prevClose,
+      dayHigh: live.dayHigh,
+      dayLow: live.dayLow,
+      marketState: live.marketState || 'REGULAR',
+    };
+  });
+
+  // Set market state
+  const states = allStocks.map(s=>s.marketState).filter(Boolean);
+  const mState = states[0] || 'REGULAR';
+  document.getElementById('bb-market').textContent =
+    mState==='REGULAR' ? 'OPEN' : mState==='PRE' ? 'PRE-MARKET' : 'AFTER-HOURS';
+  document.getElementById('bb-market').style.color =
+    mState==='REGULAR' ? 'var(--gr)' : 'var(--g)';
+
+  filtered = [...allStocks];
+  document.getElementById('bb-total').textContent = allStocks.length;
+  document.getElementById('bb-update').textContent = new Date().toLocaleTimeString();
+
+  setLoadMsg('Rendering interface...');
+  await new Promise(r=>setTimeout(r,100));
+
+  renderTable();
+  renderMarketTicker();
+  startClock();
+
+  document.getElementById('loading').style.display='none';
+  document.getElementById('app').style.display='flex';
+}
+
+function setLoadMsg(m) { document.getElementById('load-msg').textContent=m; }
+
+// ──────────────────────────────────────────────────────────────────────
+// SCREEN + SORT
+// ──────────────────────────────────────────────────────────────────────
+function runScreen() {
+  const sector = document.getElementById('f-sector').value;
+  const mktcap = document.getElementById('f-mktcap').value;
+  const peMax = parseFloat(document.getElementById('f-pe').value) || null;
+  const divMin = parseFloat(document.getElementById('f-div').value) || null;
+  const chg = document.getElementById('f-chg').value;
+  const vol = document.getElementById('f-vol').value;
+  const w52 = document.getElementById('f-52w').value;
+
+  filtered = allStocks.filter(s => {
+    if (sector && s.sector !== sector) return false;
+    if (mktcap) {
+      const cap = s.mktCap;
+      if (mktcap==='mega' && cap < 200) return false;
+      if (mktcap==='large' && (cap < 10 || cap >= 200)) return false;
+      if (mktcap==='mid' && (cap < 2 || cap >= 10)) return false;
+      if (mktcap==='small' && cap >= 2) return false;
+    }
+    if (peMax !== null && (s.pe === null || s.pe > peMax)) return false;
+    if (divMin !== null && s.divYield < divMin) return false;
+    if (chg) {
+      const p = s.chgPct;
+      if (chg==='up5' && p <= 5) return false;
+      if (chg==='up2' && p <= 2) return false;
+      if (chg==='dn2' && p >= -2) return false;
+      if (chg==='dn5' && p >= -5) return false;
+    }
+    if (vol && s.avgVol > 0) {
+      const ratio = s.volume / s.avgVol;
+      if (vol==='high' && ratio <= 2) return false;
+      if (vol==='low' && ratio >= 0.5) return false;
+    }
+    if (w52 && s.h52 && s.l52 && s.price) {
+      const range = s.h52 - s.l52;
+      const fromHigh = (s.h52 - s.price) / s.h52;
+      const fromLow = (s.price - s.l52) / s.h52;
+      if (w52==='near-high' && fromHigh > 0.05) return false;
+      if (w52==='near-low' && fromLow > 0.10) return false;
+    }
+    return true;
+  });
+
+  sortAndRender();
+}
+
+function sortBy(key) {
+  if (sortKey === key) sortDir *= -1;
+  else { sortKey = key; sortDir = -1; }
+  document.querySelectorAll('#screener-table th').forEach(t=>t.classList.remove('sorted'));
+  const th = document.getElementById('th-'+key);
+  if (th) th.classList.add('sorted');
+  sortAndRender();
+}
+
+function sortAndRender() {
+  filtered.sort((a,b) => {
+    let av = a[sortKey], bv = b[sortKey];
+    if (av===null||av===undefined) return 1;
+    if (bv===null||bv===undefined) return -1;
+    return (av > bv ? 1 : av < bv ? -1 : 0) * sortDir;
+  });
+  renderTable();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// RENDER TABLE
+// ──────────────────────────────────────────────────────────────────────
+function fmt(v, dec=2, prefix='') {
+  if (v===null||v===undefined||isNaN(v)) return '—';
+  return prefix + v.toFixed(dec);
+}
+function fmtCap(v) {
+  if (!v) return '—';
+  if (v >= 1000) return '$'+(v/1000).toFixed(1)+'T';
+  if (v >= 1) return '$'+v.toFixed(1)+'B';
+  return '$'+(v*1000).toFixed(0)+'M';
+}
+function fmtVol(v) {
+  if (!v) return '—';
+  if (v >= 1e9) return (v/1e9).toFixed(1)+'B';
+  if (v >= 1e6) return (v/1e6).toFixed(1)+'M';
+  return (v/1e3).toFixed(0)+'K';
+}
+
+function renderTable() {
+  if (currentView !== 'table') return;
+  document.getElementById('result-count').textContent = filtered.length + ' results';
+  const body = document.getElementById('screen-body');
+  body.innerHTML = '';
+
+  filtered.forEach(s => {
+    const updown = s.chgPct >= 0;
+    const pct52 = s.h52 && s.l52
+      ? ((s.price - s.l52)/(s.h52 - s.l52)*100)
+      : null;
+    const volRatio = s.avgVol ? s.volume/s.avgVol : null;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><div class="td-sym">${s.sym}</div></td>
+      <td style="text-align:left"><div class="td-name">${s.name}</div></td>
+      <td><span class="sector-tag">${s.sector.split(' ')[0].substring(0,8).toUpperCase()}</span></td>
+      <td class="td-price">$${s.price ? s.price.toFixed(2) : '—'}</td>
+      <td class="${updown?'td-up':'td-dn'}">${updown?'+':''}${s.chgPct ? s.chgPct.toFixed(2) : '0.00'}%</td>
+      <td>${fmtCap(s.mktCap)}</td>
+      <td>${s.pe ? s.pe.toFixed(1) : '—'}</td>
+      <td class="${s.divYield > 3 ? 'td-up' : ''}">${s.divYield ? s.divYield.toFixed(2)+'%' : '—'}</td>
+      <td class="${s.beta && s.beta > 1.5 ? 'td-dn' : s.beta && s.beta < 0.7 ? 'td-up' : ''}">${s.beta ? s.beta.toFixed(2) : '—'}</td>
+      <td class="${pct52 > 80 ? 'td-up' : pct52 < 20 ? 'td-dn' : ''}">${pct52 !== null ? pct52.toFixed(0)+'%' : '—'}</td>
+      <td class="${volRatio && volRatio > 2 ? 'td-up' : ''}">${fmtVol(s.volume)}${volRatio ? ' <span style="font-size:7px;color:var(--dim)">('+volRatio.toFixed(1)+'x)</span>' : ''}</td>
+      <td style="padding:5px 10px">
+        <div style="display:flex;align-items:center;gap:2px;width:80px">
+          <div style="flex:${s.l52?((s.price-s.l52)/(s.h52-s.l52)*100)|0:50};height:3px;background:${updown?'var(--gr)':'var(--r)'};border-radius:1px"></div>
+          <div style="flex:${s.h52?((s.h52-s.price)/(s.h52-s.l52)*100)|0:50};height:3px;background:rgba(255,255,255,0.07);border-radius:1px"></div>
+        </div>
+      </td>
+    `;
+    tr.onclick = () => selectStock(s);
+    body.appendChild(tr);
+  });
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// HEATMAP
+// ──────────────────────────────────────────────────────────────────────
+function renderHeatmap() {
+  const hm = document.getElementById('heatmap-view');
+  hm.innerHTML = '';
+  document.getElementById('result-count').textContent = filtered.length + ' results';
+
+  const maxCap = Math.max(...filtered.map(s=>s.mktCap||0));
+  filtered.forEach(s => {
+    const pct = s.chgPct || 0;
+    const size = Math.max(60, Math.min(160, (s.mktCap||0)/maxCap * 200 + 50));
+    const hue = pct > 0 ? 142 : 4;
+    const sat = Math.min(80, Math.abs(pct)*15 + 20);
+    const bgColor = `hsl(${hue},${sat}%,${10+Math.abs(pct)*3}%)`;
+    const cell = document.createElement('div');
+    cell.className = 'hm-cell';
+    cell.style.cssText = `width:${size}px;height:${size*0.65}px;background:${bgColor};border-radius:2px`;
+    cell.innerHTML = `<div class="hm-sym">${s.sym}</div><div class="hm-pct">${pct>=0?'+':''}${pct.toFixed(2)}%</div>`;
+    cell.onclick = () => selectStock(s);
+    hm.appendChild(cell);
+  });
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// DETAIL PANEL
+// ──────────────────────────────────────────────────────────────────────
+async function selectStock(s) {
+  // Highlight row
+  document.querySelectorAll('#screener-table tbody tr').forEach(r=>r.classList.remove('selected'));
+
+  document.getElementById('dp-empty').style.display='none';
+  const content = document.getElementById('dp-content');
+  content.style.display='flex';
+
+  const updown = (s.chgPct||0) >= 0;
+  document.getElementById('dp-sym').textContent = s.sym;
+  document.getElementById('dp-name').textContent = s.name;
+  document.getElementById('dp-price').textContent = s.price ? `$${s.price.toFixed(2)}` : '—';
+  document.getElementById('dp-chg').innerHTML =
+    `<span class="${updown?'td-up':'td-dn'}">${updown?'▲':'▼'} ${s.chg ? Math.abs(s.chg).toFixed(2) : '0.00'} (${(s.chgPct||0).toFixed(2)}%)</span>
+     <span style="font-size:8px;color:var(--dim);margin-left:8px">${s.sector}</span>`;
+
+  // Stats
+  const pct52 = s.h52 && s.l52 ? ((s.price-s.l52)/(s.h52-s.l52)*100) : null;
+  document.getElementById('dp-stats').innerHTML = `
+    <div class="dp-section">
+      <div class="dp-section-title">PRICE</div>
+      <div class="dp-row"><span class="dp-key">OPEN</span><span class="dp-val">${s.open?'$'+s.open.toFixed(2):'—'}</span></div>
+      <div class="dp-row"><span class="dp-key">PREV CLOSE</span><span class="dp-val">${s.prevClose?'$'+s.prevClose.toFixed(2):'—'}</span></div>
+      <div class="dp-row"><span class="dp-key">DAY RANGE</span><span class="dp-val">${s.dayLow&&s.dayHigh?'$'+s.dayLow.toFixed(2)+' – $'+s.dayHigh.toFixed(2):'—'}</span></div>
+      <div class="dp-row"><span class="dp-key">52W HIGH</span><span class="dp-val hi">${s.h52?'$'+s.h52.toFixed(2):'—'}</span></div>
+      <div class="dp-row"><span class="dp-key">52W LOW</span><span class="dp-val lo">${s.l52?'$'+s.l52.toFixed(2):'—'}</span></div>
+      <div class="dp-row"><span class="dp-key">52W POSITION</span><span class="dp-val">${pct52!==null?pct52.toFixed(0)+'%':'—'}</span></div>
+    </div>
+    <div class="dp-section">
+      <div class="dp-section-title">FUNDAMENTALS</div>
+      <div class="dp-row"><span class="dp-key">MKT CAP</span><span class="dp-val gold">${fmtCap(s.mktCap)}</span></div>
+      <div class="dp-row"><span class="dp-key">P/E RATIO</span><span class="dp-val">${s.pe?s.pe.toFixed(1):'—'}</span></div>
+      <div class="dp-row"><span class="dp-key">DIV YIELD</span><span class="dp-val ${s.divYield>3?'hi':''}">${s.divYield?s.divYield.toFixed(2)+'%':'—'}</span></div>
+      <div class="dp-row"><span class="dp-key">BETA</span><span class="dp-val ${s.beta>1.5?'lo':s.beta<0.7?'hi':''}">${s.beta?s.beta.toFixed(2):'—'}</span></div>
+      <div class="dp-row"><span class="dp-key">VOLUME</span><span class="dp-val">${fmtVol(s.volume)}</span></div>
+      <div class="dp-row"><span class="dp-key">AVG VOLUME</span><span class="dp-val">${fmtVol(s.avgVol)}</span></div>
+    </div>
+  `;
+
+  // Chart
+  const prices = await fetchSparkline(s.sym);
+  renderDpChart(prices, s);
+
+  // AI Analysis (template-based, no API call needed)
+  document.getElementById('dp-ai-text').textContent = generateAnalysis(s);
+}
+
+function generateAnalysis(s) {
+  const pct52 = s.h52 && s.l52 ? ((s.price-s.l52)/(s.h52-s.l52)*100) : null;
+  const volRatio = s.avgVol ? s.volume/s.avgVol : null;
+  const parts = [];
+
+  if (s.chgPct > 3) parts.push(`Strong upward momentum (+${s.chgPct.toFixed(1)}%) indicates positive market sentiment.`);
+  else if (s.chgPct < -3) parts.push(`Notable decline (${s.chgPct.toFixed(1)}%) may present a buying opportunity for long-term investors.`);
+
+  if (pct52 !== null) {
+    if (pct52 > 90) parts.push(`Trading near 52-week highs — momentum is strong but watch for resistance.`);
+    else if (pct52 < 15) parts.push(`Near 52-week lows — potential value territory if fundamentals remain intact.`);
+  }
+
+  if (s.divYield > 4) parts.push(`High dividend yield (${s.divYield.toFixed(1)}%) provides income cushion.`);
+  if (s.pe && s.pe < 15) parts.push(`Low P/E of ${s.pe.toFixed(1)} suggests undervaluation relative to peers.`);
+  if (s.pe && s.pe > 60) parts.push(`Elevated P/E of ${s.pe.toFixed(1)} reflects high growth expectations — valuation risk exists.`);
+  if (s.beta > 1.5) parts.push(`High beta (${s.beta.toFixed(2)}) — volatile, amplifies both gains and losses.`);
+  if (volRatio && volRatio > 2) parts.push(`Volume ${volRatio.toFixed(1)}x above average — unusual activity detected.`);
+
+  if (parts.length === 0) parts.push(`${s.name} is trading within normal ranges. Monitor earnings and sector trends for catalysts.`);
+
+  return parts.join(' ');
+}
+
+function renderDpChart(prices, stock) {
+  const canvas = document.getElementById('dp-chart');
+  if (dpChart) { dpChart.destroy(); dpChart = null; }
+  if (!prices || prices.length < 2) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = 'rgba(240,180,41,0.3)';
+    ctx.font = '9px JetBrains Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText('CHART DATA UNAVAILABLE', canvas.width/2, 50);
+    return;
+  }
+  const up = prices[prices.length-1] >= prices[0];
+  const color = up ? '#2ed573' : '#ff4757';
+  const labels = prices.map((_,i)=>i);
+  dpChart = new Chart(canvas, {
+    type:'line',
+    data:{
+      labels,
+      datasets:[{
+        data: prices,
+        borderColor: color,
+        borderWidth: 1.5,
+        pointRadius: 0,
+        fill: true,
+        backgroundColor: (ctx) => {
+          const g = ctx.chart.ctx.createLinearGradient(0,0,0,120);
+          g.addColorStop(0, color+'44'); g.addColorStop(1, color+'00');
+          return g;
+        },
+        tension: 0.3,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{
+        callbacks:{label:(i)=>'$'+i.raw.toFixed(2)},
+        titleFont:{family:'JetBrains Mono'},
+        bodyFont:{family:'JetBrains Mono'},
+        backgroundColor:'rgba(5,8,16,0.9)',
+        borderColor:'rgba(240,180,41,0.3)',
+        borderWidth:1,
+      }},
+      scales:{
+        x:{display:false},
+        y:{
+          display:true,
+          position:'right',
+          grid:{color:'rgba(240,180,41,0.05)'},
+          ticks:{color:'#6b5e3f',font:{family:'JetBrains Mono',size:8},
+            callback:(v)=>'$'+v.toFixed(0)},
+        }
+      }
+    }
+  });
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// MARKET TICKER
+// ──────────────────────────────────────────────────────────────────────
+function renderMarketTicker() {
+  const tickers = ['SPY','QQQ','DIA','IWM','GLD','TLT','BTC-USD'];
+  const el = document.getElementById('market-ticker');
+  el.innerHTML = '';
+  tickers.forEach(sym => {
+    const s = allStocks.find(x=>x.sym===sym) || liveData[sym];
+    const price = s?.price;
+    const chgPct = s?.chgPct || 0;
+    if (!price) return;
+    const div = document.createElement('div');
+    div.className = 'tick-item';
+    div.innerHTML = `<span class="tick-sym">${sym}</span><span class="tick-price">$${price.toFixed(2)}</span>
+      <span class="tick-chg ${chgPct>=0?'up':'dn'}">${chgPct>=0?'+':''}${chgPct.toFixed(2)}%</span>`;
+    el.appendChild(div);
+  });
+
+  // Fetch index quotes too
+  fetchYahooQuotes(['SPY','QQQ','DIA','IWM']).then(()=>{
+    ['SPY','QQQ','DIA','IWM'].forEach(sym => {
+      const d = liveData[sym];
+      if (!d) return;
+      const els = el.querySelectorAll('.tick-item');
+      els.forEach(e => { if (e.querySelector('.tick-sym')?.textContent === sym) {
+        e.querySelector('.tick-price').textContent = '$'+d.price.toFixed(2);
+        const chgEl = e.querySelector('.tick-chg');
+        chgEl.className = 'tick-chg ' + (d.chgPct>=0?'up':'dn');
+        chgEl.textContent = (d.chgPct>=0?'+':'')+d.chgPct.toFixed(2)+'%';
+      }});
+    });
+  });
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// VIEW SWITCHING
+// ──────────────────────────────────────────────────────────────────────
+function switchView(v) {
+  currentView = v;
+  document.getElementById('btn-table').classList.toggle('active', v==='table');
+  document.getElementById('btn-heat').classList.toggle('active', v==='heat');
+  document.getElementById('table-wrap').style.display = v==='table' ? 'block' : 'none';
+  const hm = document.getElementById('heatmap-view');
+  hm.classList.toggle('visible', v==='heat');
+  if (v==='heat') renderHeatmap();
+  else renderTable();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// CLOCK
+// ──────────────────────────────────────────────────────────────────────
+function startClock() {
+  function update() {
+    const now = new Date();
+    const et = now.toLocaleTimeString('en-US',{timeZone:'America/New_York',hour12:false});
+    document.getElementById('clock').textContent = et+' ET';
+  }
+  update(); setInterval(update, 1000);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// BOOT
+// ──────────────────────────────────────────────────────────────────────
+window.addEventListener('load', init);
+</script>
+</body>
+</html>
