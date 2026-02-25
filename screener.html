@@ -4,9 +4,40 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>MERIDIAN SCREENER // MARKET INTELLIGENCE</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECURITY HARDENING
+       - CSP: restricts script/style/connect origins, blocks inline eval,
+         prevents framing (clickjacking), disables dangerous APIs
+       - Referrer: never leak URL to external origins
+       - Permissions: disable all browser sensor APIs
+  ═══════════════════════════════════════════════════════════════ -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'none';
+    script-src 'self' https://cdn.jsdelivr.net 'nonce-MRD2025';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src https://fonts.gstatic.com;
+    connect-src https://query1.finance.yahoo.com https://query2.finance.yahoo.com https://api.unusualwhales.com https://api.allorigins.win https://corsproxy.io;
+    img-src 'self' data:;
+    frame-ancestors 'none';
+    base-uri 'none';
+    form-action 'none';
+    object-src 'none';
+    worker-src 'none';
+  ">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Permissions-Policy" content="geolocation=(), camera=(), microphone=(), payment=(), usb=(), bluetooth=()">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+
+  <!-- Fonts: crossorigin prevents credential leakage -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" crossorigin>
+
+  <!-- Chart.js with SRI: any tampered CDN file will be rejected by browser -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"
+          integrity="sha384-e6cc9LaIG7xZ3XD5B+jtr1NhTWPQGQdRCh6xiZ+ZFUtWCpg4ycv3Sh+SkZoopvUY"
+          crossorigin="anonymous"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -552,9 +583,43 @@ function pillarsHTML(s) {
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// SECURITY UTILITIES
+// ──────────────────────────────────────────────────────────────────────
+
+/**
+ * sanitize() — strips all HTML tags from external API data before
+ * inserting into the DOM via innerHTML. Prevents XSS if an API response
+ * ever contains injected script/event-handler payloads.
+ */
+function sanitize(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#x27;')
+    .replace(/\//g,'&#x2F;');
+}
+
+/** Safe number formatter — never passes raw API strings into DOM */
+function safeFmt(val, decimals = 2) {
+  const n = parseFloat(val);
+  return isNaN(n) ? '—' : n.toFixed(decimals);
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // UNUSUAL WHALES INTEGRATION
 // ──────────────────────────────────────────────────────────────────────
-let uwToken = localStorage.getItem('uw_token') || '';
+
+/**
+ * Token stored in sessionStorage (NOT localStorage):
+ * - Cleared automatically when tab/browser closes
+ * - Not accessible to other tabs/origins
+ * - Not persisted to disk in most browsers
+ * - Never sent via proxy — all UW calls go direct to api.unusualwhales.com
+ */
+let uwToken = sessionStorage.getItem('uw_token') || '';
 let uwConnected = false;
 
 async function uwFetch(endpoint, params = {}) {
@@ -565,28 +630,25 @@ async function uwFetch(endpoint, params = {}) {
     'Authorization': `Bearer ${uwToken}`,
     'UW-CLIENT-API-ID': '100001',
   };
-  const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url.toString())}`;
   try {
-    const r = await fetch(proxied, { signal: AbortSignal.timeout(8000), headers: {} });
+    // SECURITY: UW token NEVER goes through a third-party proxy.
+    // Direct call only. referrerPolicy prevents URL leakage.
+    const r = await fetch(url.toString(), {
+      headers,
+      signal: AbortSignal.timeout(8000),
+      referrerPolicy: 'no-referrer',
+      credentials: 'omit'
+    });
     if (!r.ok) return null;
-    const d = await r.json();
-    // allorigins returns data as-is if it's the raw response
-    return d;
-  } catch(e) {
-    // Try direct
-    try {
-      const r2 = await fetch(url.toString(), { headers, signal: AbortSignal.timeout(8000) });
-      if (!r2.ok) return null;
-      return await r2.json();
-    } catch(e2) { return null; }
-  }
+    return await r.json();
+  } catch(e) { return null; }
 }
 
 function saveUWToken() {
   const val = document.getElementById('uw-token-input')?.value?.trim();
   if (val) {
     uwToken = val;
-    localStorage.setItem('uw_token', val);
+    sessionStorage.setItem('uw_token', val);
     uwConnected = true;
     document.getElementById('bb-uw').textContent = 'CONNECTED';
     document.getElementById('bb-uw').style.color = 'var(--uw)';
@@ -639,7 +701,7 @@ async function renderUWPanel(ticker = null) {
     el.innerHTML = `
       <div class="uw-header"><span class="uw-logo">🐳 UNUSUAL WHALES</span></div>
       ${renderUWKeySection()}
-      <div class="uw-status">Could not connect. Check token or try refreshing.<br><a onclick="uwToken='';localStorage.removeItem('uw_token');renderUWPanel()">Clear token</a></div>`;
+      <div class="uw-status">Could not connect. Check token or try refreshing.<br><a onclick="uwToken='';sessionStorage.removeItem('uw_token');renderUWPanel()">Clear token</a></div>`;
     return;
   }
 
@@ -654,18 +716,23 @@ async function renderUWPanel(ticker = null) {
   if (flows.length > 0) {
     html += `<div class="dp-section-title" style="color:var(--uw)">RECENT OPTIONS FLOW</div>`;
     flows.forEach(f => {
-      const prem = f.total_premium ? `$${(f.total_premium/1000).toFixed(0)}K` : '—';
+      const prem = f.total_premium ? `$${(parseFloat(f.total_premium)/1000).toFixed(0)}K` : '—';
       const isCall = f.type === 'CALL' || f.call_or_put === 'C';
+      const fSym = sanitize(f.ticker || sym);
+      const fExpiry = sanitize(f.expiry || f.expiration || '');
+      const fStrike = sanitize(String(f.strike || '—'));
+      const fSize = sanitize(String(f.total_size || f.size || '—'));
+      const fSentiment = sanitize(f.sentiment || (isCall ? 'BULLISH' : 'BEARISH'));
       html += `
         <div class="uw-flow-item">
           <div class="uw-flow-top">
-            <span class="uw-flow-sym">${f.ticker || sym}</span>
+            <span class="uw-flow-sym">${fSym}</span>
             <span class="uw-flow-type ${isCall ? 'uw-call' : 'uw-put'}">${isCall ? 'CALL' : 'PUT'}</span>
-            <span style="font-size:8px;color:var(--dim)">${f.expiry || f.expiration || ''}</span>
+            <span style="font-size:8px;color:var(--dim)">${fExpiry}</span>
             <span class="uw-flow-premium">${prem}</span>
           </div>
           <div class="uw-flow-detail">
-            Strike $${f.strike || '—'} · Size ${f.total_size || f.size || '—'} · ${f.sentiment || (isCall ? 'BULLISH' : 'BEARISH')}
+            Strike $${fStrike} · Size ${fSize} · ${fSentiment}
           </div>
         </div>`;
     });
@@ -675,16 +742,20 @@ async function renderUWPanel(ticker = null) {
   if (dps.length > 0) {
     html += `<div class="dp-section-title" style="color:var(--uw);margin-top:12px">DARK POOL PRINTS</div>`;
     dps.forEach(d => {
-      const val = d.size && d.price ? `$${(d.size * d.price / 1e6).toFixed(2)}M` : '—';
+      const val = d.size && d.price ? `$${(parseFloat(d.size) * parseFloat(d.price) / 1e6).toFixed(2)}M` : '—';
+      const dSym = sanitize(d.ticker || sym);
+      const dPrice = sanitize(String(d.price != null ? parseFloat(d.price).toFixed(2) : '—'));
+      const dSize = sanitize(String(d.size != null ? parseInt(d.size).toLocaleString() : '—'));
+      const dTime = d.executed_at || d.time ? new Date(d.executed_at || d.time).toLocaleTimeString() : '—';
       html += `
         <div class="uw-flow-item">
           <div class="uw-flow-top">
-            <span class="uw-flow-sym">${d.ticker || sym}</span>
+            <span class="uw-flow-sym">${dSym}</span>
             <span style="font-size:8px;color:var(--dim)">DARK POOL</span>
             <span class="uw-flow-premium">${val}</span>
           </div>
           <div class="uw-flow-detail">
-            Price $${d.price?.toFixed(2) || '—'} · Size ${d.size?.toLocaleString() || '—'} · ${new Date(d.executed_at || d.time).toLocaleTimeString()}
+            Price $${dPrice} · Size ${dSize} · ${dTime}
           </div>
         </div>`;
     });
@@ -785,7 +856,7 @@ async function renderUWMarketPanel() {
   }
 
   if (!tideItems.length && !flows.length && !dps.length) {
-    html = `<div class="uw-status">No data returned. Token may be invalid or rate limited.<br><a style="color:var(--uw);cursor:pointer" onclick="uwToken='';localStorage.removeItem('uw_token');renderUWMarketPanel()">Clear token</a></div>`;
+    html = `<div class="uw-status">No data returned. Token may be invalid or rate limited.<br><a style="color:var(--uw);cursor:pointer" onclick="uwToken='';sessionStorage.removeItem('uw_token');renderUWMarketPanel()">Clear token</a></div>`;
   } else {
     html += `<div style="margin-top:12px;font-size:7px;color:var(--dim);text-align:right">Via Unusual Whales API · ${new Date().toLocaleTimeString()}</div>`;
   }
@@ -1164,7 +1235,11 @@ async function fetchYahooQuotes(symbols) {
   ];
   for (const ep of endpoints) {
     try {
-      const resp = await fetch(ep, {signal: AbortSignal.timeout(8000)});
+      const resp = await fetch(ep, {
+        signal: AbortSignal.timeout(8000),
+        referrerPolicy: 'no-referrer',
+        credentials: 'omit'
+      });
       if (!resp.ok) continue;
       const data = await resp.json();
       const results = data?.quoteResponse?.result || [];
@@ -1200,7 +1275,11 @@ async function fetchSparkline(sym) {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=5m&period1=${start}&period2=${now}`;
   const proxied = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
   try {
-    const resp = await fetch(proxied, {signal: AbortSignal.timeout(6000)});
+    const resp = await fetch(proxied, {
+      signal: AbortSignal.timeout(6000),
+      referrerPolicy: 'no-referrer',
+      credentials: 'omit'
+    });
     if (!resp.ok) return null;
     const d = await resp.json();
     return d?.chart?.result?.[0]?.indicators?.quote?.[0]?.close?.filter(v=>v!=null) || null;
