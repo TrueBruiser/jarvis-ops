@@ -3,381 +3,1091 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>J.A.R.V.I.S. OPS // Operations Hub</title>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECURITY HARDENING
+     All connect-src entries are live-verified CORS-safe endpoints.
+     No credentials, no cookies, no eval, no external scripts except
+     Google Fonts (style-src only, no execution surface).
+     ═══════════════════════════════════════════════════════════════ -->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'none';
+  script-src 'self' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src https://fonts.gstatic.com;
+  img-src 'self' data:;
+  connect-src
+    https://earthquake.usgs.gov
+    https://opensky-network.org
+    https://api.alternative.me
+    https://api.coingecko.com
+    https://api.wheretheiss.at
+    https://wttr.in
+    https://api.allorigins.win;
+  frame-src 'none';
+  object-src 'none';
+  base-uri 'self';
+  form-action 'none';
+">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta http-equiv="Referrer-Policy" content="no-referrer">
+<meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=(), usb=(), bluetooth=()">
+
+<title>J.A.R.V.I.S. // OPS HUB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+/* ═══════════════════════════════════════════
+   RESET + TOKENS
+   ═══════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#00ff88; --g2:#00cc66; --g3:rgba(0,255,136,0.07);
+  --b:#3af;    --b2:#0088cc;
+  --r:#ff3344; --r2:#cc1122;
+  --y:#ffcc00; --y2:#cc9900;
+  --p:#c84fff; --p2:#9922dd;
+  --o:#ff8844; --o2:#cc5522;
+  --bg:#020b05;
+  --bg2:#030e06;
+  --card:#040f07;
+  --card-h:#06140a;
+  --border:rgba(0,255,136,0.10);
+  --border2:rgba(0,255,136,0.22);
+  --border3:rgba(0,255,136,0.40);
+  --text:#c4e8d2;
+  --dim:#3a6650;
+  --dim2:#2a4a3a;
+  --mono:'Share Tech Mono',monospace;
+  --raj:'Rajdhani',sans-serif;
+  --orb:'Orbitron',sans-serif;
+}
 
-  :root {
-    --green: #00ff88;
-    --gold: #f0b429;
-    --bg: #020b05;
-    --dim: rgba(0,255,136,0.08);
-    --border: rgba(0,255,136,0.2);
-  }
+html,body{
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--mono);
+  overflow-x:hidden;
+  scroll-behavior:smooth;
+}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* ATMOSPHERIC LAYERS */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:998;
+  background:repeating-linear-gradient(
+    0deg,transparent,transparent 2px,
+    rgba(0,0,0,0.055) 2px,rgba(0,0,0,0.055) 4px
+  );
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:997;
+  background:
+    radial-gradient(ellipse 120% 60% at 50% 0%,rgba(0,255,136,0.04) 0%,transparent 60%),
+    radial-gradient(ellipse 80% 40% at 0% 100%,rgba(0,100,60,0.03) 0%,transparent 50%),
+    radial-gradient(ellipse 80% 40% at 100% 100%,rgba(0,60,100,0.03) 0%,transparent 50%);
+}
 
-  body {
-    background: var(--bg);
-    color: var(--green);
-    font-family: 'Share Tech Mono', monospace;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+/* ═══════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════ */
+header{
+  position:sticky;top:0;z-index:200;
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:20px;
+  padding:10px 28px;
+  background:rgba(1,6,3,0.97);
+  border-bottom:1px solid var(--border2);
+  backdrop-filter:blur(12px);
+}
+.logo-block{display:flex;flex-direction:column;gap:1px}
+.logo{
+  font-family:var(--orb);font-size:13px;font-weight:900;
+  color:var(--g);letter-spacing:5px;line-height:1;
+  text-shadow:0 0 20px rgba(0,255,136,0.5),0 0 40px rgba(0,255,136,0.2);
+}
+.logo-sub{font-size:7.5px;color:var(--dim);letter-spacing:5px}
 
-  /* Scanline overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.08) 2px,
-      rgba(0,0,0,0.08) 4px
-    );
-    pointer-events: none;
-    z-index: 100;
-  }
+/* top sysbar scroll */
+.sysbar-scroll{
+  overflow:hidden;position:relative;
+  mask:linear-gradient(90deg,transparent,black 40px,black calc(100% - 40px),transparent);
+}
+.sysbar-inner{
+  display:flex;gap:32px;white-space:nowrap;
+  animation:scrollbar 30s linear infinite;
+  width:max-content;
+}
+@keyframes scrollbar{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.sysbar-item{font-size:8.5px;color:var(--dim);letter-spacing:1.5px;display:flex;gap:8px}
+.sysbar-item .lbl{color:var(--dim2)}
+.sysbar-item .val{color:var(--text)}
+.sysbar-item .val.up{color:var(--g)}
+.sysbar-item .val.dn{color:var(--r)}
+.sysbar-item .val.warn{color:var(--y)}
+.sysbar-item .val.crit{color:var(--r);animation:blink 1.5s infinite}
 
-  /* Animated grid background */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    animation: gridPulse 8s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 0;
-  }
+.header-right{
+  display:flex;flex-direction:column;align-items:flex-end;gap:4px;
+  flex-shrink:0;
+}
+#clock{
+  font-family:var(--orb);font-size:10px;color:var(--g);
+  letter-spacing:2px;text-shadow:0 0 10px rgba(0,255,136,0.3);
+}
+.threat-pill{
+  font-size:7px;letter-spacing:2.5px;padding:2px 8px;
+  border:1px solid var(--y);color:var(--y);
+  background:rgba(255,204,0,0.06);transition:all 1s;
+  font-family:var(--orb);
+}
+.threat-pill.high{border-color:var(--o);color:var(--o);background:rgba(255,136,68,0.06)}
+.threat-pill.critical{border-color:var(--r);color:var(--r);background:rgba(255,51,68,0.06);animation:blink 2s infinite}
 
-  @keyframes gridPulse {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 1; }
-  }
+/* ═══════════════════════════════════════════
+   NEWS TICKER
+   ═══════════════════════════════════════════ */
+.ticker-bar{
+  background:rgba(0,255,136,0.025);
+  border-bottom:1px solid var(--border);
+  padding:7px 0;overflow:hidden;display:flex;align-items:center;
+  position:relative;z-index:100;
+}
+.ticker-label{
+  flex-shrink:0;padding:0 16px 0 20px;
+  font-size:7.5px;color:var(--g);letter-spacing:3px;
+  border-right:1px solid var(--border2);margin-right:16px;
+}
+.ticker-wrap{flex:1;overflow:hidden}
+.ticker-inner{
+  display:flex;gap:48px;animation:ticker 60s linear infinite;
+  width:max-content;
+}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.t-item{font-size:8.5px;color:var(--text);white-space:nowrap;opacity:0.75;display:flex;gap:8px}
+.t-src{
+  color:var(--g);font-size:7.5px;opacity:1;
+  padding:1px 5px;border:1px solid rgba(0,255,136,0.2);
+  background:rgba(0,255,136,0.05);
+}
 
-  header {
-    position: relative;
-    z-index: 10;
-    text-align: center;
-    padding: 80px 20px 60px;
-    border-bottom: 1px solid var(--border);
-  }
+/* ═══════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════ */
+.hero{
+  padding:52px 32px 40px;text-align:center;position:relative;
+  background:radial-gradient(ellipse 100% 100% at 50% 0%,rgba(0,255,136,0.05) 0%,transparent 65%);
+}
+.hero-eyebrow{
+  font-size:8px;letter-spacing:8px;color:var(--dim);margin-bottom:14px;
+}
+.hero-title{
+  font-family:var(--orb);font-weight:900;
+  font-size:clamp(36px,7vw,72px);line-height:0.9;
+  color:var(--g);letter-spacing:12px;
+  text-shadow:
+    0 0 60px rgba(0,255,136,0.4),
+    0 0 120px rgba(0,255,136,0.15),
+    0 0 200px rgba(0,255,136,0.06);
+  margin-bottom:8px;
+}
+.hero-sub{
+  font-size:9px;color:var(--dim);letter-spacing:7px;
+  margin-bottom:36px;
+}
 
-  .system-id {
-    font-size: 11px;
-    letter-spacing: 6px;
-    color: rgba(0,255,136,0.4);
-    margin-bottom: 20px;
-    animation: blink 3s step-end infinite;
-  }
+/* LIVE STAT GRID */
+.stat-grid{
+  display:flex;justify-content:center;flex-wrap:wrap;gap:2px;
+  max-width:900px;margin:0 auto;
+}
+.stat-block{
+  flex:1;min-width:110px;max-width:180px;
+  padding:14px 16px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-top:2px solid transparent;
+  transition:border-color 0.3s,background 0.3s;
+  cursor:default;
+  position:relative;overflow:hidden;
+}
+.stat-block:hover{background:var(--card-h);border-color:var(--border2)}
+.stat-block::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--stat-c,var(--g)),transparent);
+  opacity:0.4;
+}
+.stat-val{
+  font-family:var(--orb);font-size:22px;font-weight:700;
+  color:var(--stat-c,var(--g));line-height:1;margin-bottom:4px;
+  text-shadow:0 0 16px var(--stat-c,rgba(0,255,136,0.4));
+}
+.stat-val.loading{
+  color:var(--dim);font-size:16px;
+  animation:blink 1.2s ease infinite;
+}
+.stat-lbl{font-size:7px;letter-spacing:3px;color:var(--dim)}
+.stat-sub{font-size:7.5px;color:var(--dim2);margin-top:2px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.25}}
 
-  @keyframes blink {
-    0%, 90%, 100% { opacity: 1; }
-    95% { opacity: 0; }
-  }
+/* ═══════════════════════════════════════════
+   SECTION HEADERS
+   ═══════════════════════════════════════════ */
+.section{margin-top:2px}
+.sec-head{
+  display:flex;align-items:center;gap:12px;
+  padding:20px 28px 10px;
+  font-size:7.5px;letter-spacing:5px;color:var(--dim);
+}
+.sec-head::before{content:'//';color:var(--g);opacity:0.5;font-size:10px}
+.sec-line{flex:1;height:1px;background:var(--border)}
 
-  h1 {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(32px, 6vw, 72px);
-    font-weight: 900;
-    letter-spacing: 8px;
-    line-height: 1;
-    margin-bottom: 8px;
-    text-shadow: 0 0 40px rgba(0,255,136,0.5), 0 0 80px rgba(0,255,136,0.2);
-  }
+/* ═══════════════════════════════════════════
+   CARD GRID
+   ═══════════════════════════════════════════ */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(310px,1fr));
+  gap:2px;
+  background:var(--border);
+  margin:0 0 2px;
+}
+.grid-wide{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}
 
-  .subtitle {
-    font-size: 13px;
-    letter-spacing: 4px;
-    color: rgba(0,255,136,0.5);
-    margin-bottom: 40px;
-  }
+/* ── CARD ── */
+.card{
+  background:var(--card);
+  padding:24px;
+  text-decoration:none;
+  color:inherit;
+  display:flex;flex-direction:column;gap:12px;
+  position:relative;overflow:hidden;
+  transition:background 0.2s;
+  cursor:pointer;
+}
+.card:hover{background:var(--card-h)}
+.card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 0%,var(--cc,var(--g)) 50%,transparent 100%);
+  opacity:0;transition:opacity 0.3s;
+}
+.card:hover::before{opacity:0.6}
 
-  .status-bar {
-    display: inline-flex;
-    gap: 30px;
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: rgba(0,255,136,0.4);
-  }
+/* corner bracket */
+.card::after{
+  content:'';position:absolute;bottom:16px;right:16px;
+  width:16px;height:16px;
+  border-bottom:1px solid var(--cc,var(--g));
+  border-right:1px solid var(--cc,var(--g));
+  opacity:0.2;transition:opacity 0.3s;
+}
+.card:hover::after{opacity:0.6}
 
-  .status-bar span { display: flex; align-items: center; gap: 6px; }
-  .dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    animation: pulse 2s ease-in-out infinite;
-    box-shadow: 0 0 6px var(--green);
-  }
-  .dot.gold { background: var(--gold); box-shadow: 0 0 6px var(--gold); animation-delay: 0.5s; }
+/* badge */
+.badge{
+  position:absolute;top:0;right:0;
+  font-size:7px;letter-spacing:2px;
+  padding:3px 10px;
+  border-bottom:1px solid var(--cc,var(--g));
+  border-left:1px solid var(--cc,var(--g));
+  color:var(--cc,var(--g));
+  background:rgba(0,0,0,0.5);
+  font-family:var(--orb);
+}
 
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
+.card-head{display:flex;align-items:flex-start;gap:12px}
+.card-icon{font-size:24px;flex-shrink:0;line-height:1;margin-top:2px}
+.card-meta{flex:1}
+.card-title{
+  font-family:var(--orb);font-size:10px;font-weight:700;
+  letter-spacing:3px;color:var(--cc,var(--text));
+  margin-bottom:4px;transition:color 0.2s;
+  line-height:1.2;
+}
+.card:hover .card-title{
+  color:var(--cc,var(--g));
+  text-shadow:0 0 12px var(--cc,rgba(0,255,136,0.3));
+}
+.card-desc{
+  font-size:8.5px;color:var(--dim);line-height:1.85;
+  font-family:var(--raj);font-weight:400;letter-spacing:0.3px;
+}
 
-  main {
-    position: relative;
-    z-index: 10;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 80px 30px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-  }
+/* tags */
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.tag{
+  font-size:6.5px;letter-spacing:1.5px;
+  padding:2px 6px;
+  border:1px solid rgba(255,255,255,0.07);
+  color:var(--dim);
+  transition:border-color 0.2s,color 0.2s;
+}
+.card:hover .tag{border-color:rgba(255,255,255,0.12);color:var(--dim)}
 
-  @media (max-width: 700px) { main { grid-template-columns: 1fr; } }
+/* ── LIVE DATA BLOCK inside card ── */
+.live-block{
+  padding-top:10px;border-top:1px solid var(--border);
+  display:flex;flex-direction:column;gap:6px;
+}
+.live-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.live-lbl{font-size:7.5px;letter-spacing:2px;color:var(--dim)}
+.live-val{
+  font-family:var(--orb);font-size:11px;color:var(--g);
+  text-shadow:0 0 8px rgba(0,255,136,0.3);
+}
+.live-val.up{color:var(--g)}
+.live-val.dn{color:var(--r);text-shadow:0 0 8px rgba(255,51,68,0.3)}
+.live-val.warn{color:var(--y);text-shadow:0 0 8px rgba(255,204,0,0.3)}
+.live-val.loading{color:var(--dim);animation:blink 1.2s infinite;font-size:9px}
 
-  .module {
-    background: var(--dim);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 40px;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    text-decoration: none;
-    display: block;
-    color: inherit;
-  }
+/* quake feed */
+.quake-list{display:flex;flex-direction:column;gap:4px}
+.q-row{
+  display:flex;gap:8px;align-items:center;
+  padding:4px 8px;background:rgba(0,0,0,0.3);
+  border-left:2px solid var(--border2);
+  transition:border-color 0.2s;
+}
+.q-row:hover{border-left-color:var(--g)}
+.q-mag{font-family:var(--orb);font-size:9px;font-weight:700;min-width:30px}
+.q-mag.m3{color:var(--g)}.q-mag.m4{color:var(--y)}.q-mag.m5{color:var(--o)}.q-mag.m6{color:var(--r)}
+.q-loc{font-size:7.5px;color:var(--dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.q-time{font-size:7px;color:var(--dim2);flex-shrink:0}
 
-  .module::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(0,255,136,0.05) 0%, transparent 60%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
+/* progress bar */
+.prog-bar{
+  height:4px;background:rgba(255,255,255,0.06);
+  border-radius:2px;overflow:hidden;margin-top:2px;
+}
+.prog-fill{
+  height:100%;border-radius:2px;
+  transition:width 1.5s cubic-bezier(0.25,0.46,0.45,0.94);
+}
 
-  .module:hover {
-    border-color: var(--green);
-    box-shadow: 0 0 30px rgba(0,255,136,0.15), inset 0 0 30px rgba(0,255,136,0.03);
-    transform: translateY(-2px);
-  }
+/* ISS track */
+.iss-track{
+  display:flex;gap:16px;align-items:center;padding:8px;
+  background:rgba(0,0,0,0.3);border:1px solid var(--border);
+}
+.iss-coord{font-family:var(--orb);font-size:9px;color:var(--b);flex:1}
+.iss-coord span{display:block;font-size:7px;color:var(--dim);font-family:var(--mono)}
 
-  .module:hover::before { opacity: 1; }
+/* weather block */
+.wx-row{display:flex;gap:16px;align-items:center}
+.wx-temp{font-family:var(--orb);font-size:28px;font-weight:700;color:var(--b);line-height:1}
+.wx-details{display:flex;flex-direction:column;gap:2px;font-size:8px;color:var(--dim)}
 
-  .module.gold-theme {
-    border-color: rgba(240,180,41,0.2);
-  }
+/* ring gauge */
+.ring-wrap{display:flex;align-items:center;gap:16px}
+.ring-svg{flex-shrink:0}
+.ring-bg-c{fill:none;stroke:rgba(0,255,136,0.08);stroke-width:6}
+.ring-fg-c{fill:none;stroke:var(--g);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 2s cubic-bezier(0.25,0.46,0.45,0.94)}
+.ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-num{font-family:var(--orb);font-size:16px;font-weight:700;color:var(--g);line-height:1}
+.ring-sub{font-size:6.5px;letter-spacing:1.5px;color:var(--dim)}
 
-  .module.gold-theme:hover {
-    border-color: var(--gold);
-    box-shadow: 0 0 30px rgba(240,180,41,0.15), inset 0 0 30px rgba(240,180,41,0.03);
-  }
+/* ═══════════════════════════════════════════
+   MODAL
+   ═══════════════════════════════════════════ */
+#modal{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,0.88);backdrop-filter:blur(6px);
+  align-items:center;justify-content:center;
+}
+#modal.open{display:flex}
+.modal-box{
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-top:2px solid var(--r);
+  max-width:480px;width:90%;padding:28px;
+  position:relative;
+  animation:fadeUp 0.2s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.modal-close{
+  position:absolute;top:12px;right:14px;
+  font-size:8px;color:var(--dim);letter-spacing:2px;cursor:pointer;
+  padding:4px 8px;border:1px solid var(--border);
+  transition:all 0.2s;
+}
+.modal-close:hover{color:var(--r);border-color:var(--r)}
+.modal-title{
+  font-family:var(--orb);font-size:10px;letter-spacing:3px;
+  color:var(--r);margin-bottom:16px;
+}
+.modal-body{font-size:9px;color:var(--text);line-height:2;font-family:var(--raj)}
+.modal-body .hi{color:var(--g)}
+.modal-body .warn{color:var(--r)}
 
-  .module.gold-theme::before {
-    background: linear-gradient(135deg, rgba(240,180,41,0.05) 0%, transparent 60%);
-  }
+/* ═══════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════ */
+footer{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+  padding:16px 28px;
+  background:rgba(1,4,2,0.9);
+  border-top:1px solid var(--border);
+  font-size:7.5px;color:var(--dim);letter-spacing:2px;
+}
+.footer-right{display:flex;gap:20px;align-items:center}
+.dot-live{
+  display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--g);box-shadow:0 0 8px var(--g);
+  animation:pulse 2s infinite;margin-right:6px;
+}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 8px var(--g)}50%{opacity:0.3;box-shadow:none}}
 
-  .module-tag {
-    font-size: 10px;
-    letter-spacing: 4px;
-    color: rgba(0,255,136,0.4);
-    margin-bottom: 16px;
-  }
-
-  .module.gold-theme .module-tag { color: rgba(240,180,41,0.4); }
-
-  .module-title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    margin-bottom: 6px;
-  }
-
-  .module.gold-theme .module-title { color: var(--gold); text-shadow: 0 0 20px rgba(240,180,41,0.3); }
-
-  .module-codename {
-    font-size: 11px;
-    letter-spacing: 3px;
-    color: rgba(0,255,136,0.3);
-    margin-bottom: 24px;
-  }
-
-  .module.gold-theme .module-codename { color: rgba(240,180,41,0.3); }
-
-  .module-desc {
-    font-size: 13px;
-    line-height: 1.8;
-    color: rgba(0,255,136,0.6);
-    margin-bottom: 30px;
-  }
-
-  .module.gold-theme .module-desc { color: rgba(240,180,41,0.6); }
-
-  .feature-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 36px;
-  }
-
-  .feature-list li {
-    font-size: 11px;
-    letter-spacing: 1px;
-    color: rgba(0,255,136,0.4);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .module.gold-theme .feature-list li { color: rgba(240,180,41,0.4); }
-
-  .feature-list li::before {
-    content: '▸';
-    color: var(--green);
-    font-size: 10px;
-  }
-
-  .module.gold-theme .feature-list li::before { color: var(--gold); }
-
-  .launch-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 3px;
-    color: var(--bg);
-    background: var(--green);
-    border: none;
-    padding: 12px 24px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-transform: uppercase;
-    text-decoration: none;
-  }
-
-  .module.gold-theme .launch-btn {
-    background: var(--gold);
-  }
-
-  .launch-btn:hover {
-    filter: brightness(1.2);
-    box-shadow: 0 0 20px rgba(0,255,136,0.4);
-  }
-
-  .module.gold-theme .launch-btn:hover {
-    box-shadow: 0 0 20px rgba(240,180,41,0.4);
-  }
-
-  /* Corner accents */
-  .module::after {
-    content: '';
-    position: absolute;
-    top: 0; right: 0;
-    width: 0; height: 0;
-    border-top: 20px solid rgba(0,255,136,0.15);
-    border-left: 20px solid transparent;
-  }
-
-  .module.gold-theme::after {
-    border-top-color: rgba(240,180,41,0.15);
-  }
-
-  footer {
-    position: relative;
-    z-index: 10;
-    text-align: center;
-    padding: 40px;
-    border-top: 1px solid var(--border);
-    font-size: 10px;
-    letter-spacing: 3px;
-    color: rgba(0,255,136,0.2);
-  }
-
-  /* Typing cursor effect on h1 */
-  .cursor {
-    display: inline-block;
-    width: 3px;
-    height: 0.8em;
-    background: var(--green);
-    margin-left: 4px;
-    vertical-align: middle;
-    animation: blink 1s step-end infinite;
-  }
+/* ═══════════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════════ */
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
 </style>
 </head>
 <body>
 
+<!-- ══════════════ HEADER ══════════════ -->
 <header>
-  <div class="system-id">SYSTEM ID: JARVIS-OPS // AUTHORIZATION LEVEL: UNRESTRICTED</div>
-  <h1>J.A.R.V.I.S.<span class="cursor"></span></h1>
-  <div class="subtitle">JUST A RATHER VERY INTELLIGENT SYSTEM // OPERATIONS HUB v2.0</div>
-  <div class="status-bar">
-    <span><span class="dot"></span> SYSTEMS ONLINE</span>
-    <span><span class="dot gold"></span> LIVE DATA FEEDS ACTIVE</span>
-    <span><span class="dot"></span> ALL MODULES READY</span>
+  <div class="logo-block">
+    <div class="logo">J.A.R.V.I.S.</div>
+    <div class="logo-sub">SOAL INDUSTRIES // OPS HUB</div>
+  </div>
+
+  <div class="sysbar-scroll" aria-hidden="true">
+    <div class="sysbar-inner" id="sysbar">
+      <div class="sysbar-item"><span class="lbl">FLIGHTS</span><span class="val" id="sb-fl">…</span></div>
+      <div class="sysbar-item"><span class="lbl">QUAKES 24H</span><span class="val" id="sb-eq">…</span></div>
+      <div class="sysbar-item"><span class="lbl">MAX MAG</span><span class="val" id="sb-mag">…</span></div>
+      <div class="sysbar-item"><span class="lbl">FEAR/GREED</span><span class="val warn" id="sb-fg">…</span></div>
+      <div class="sysbar-item"><span class="lbl">BTC</span><span class="val" id="sb-btc">…</span></div>
+      <div class="sysbar-item"><span class="lbl">ETH</span><span class="val" id="sb-eth">…</span></div>
+      <div class="sysbar-item"><span class="lbl">SPY</span><span class="val" id="sb-spy">…</span></div>
+      <div class="sysbar-item"><span class="lbl">QQQ</span><span class="val" id="sb-qqq">…</span></div>
+      <div class="sysbar-item"><span class="lbl">VIX</span><span class="val" id="sb-vix">…</span></div>
+      <div class="sysbar-item"><span class="lbl">ISS</span><span class="val up" id="sb-iss">…</span></div>
+      <div class="sysbar-item"><span class="lbl">CHARLOTTE</span><span class="val" id="sb-wx">…</span></div>
+      <div class="sysbar-item"><span class="lbl">OPERATOR</span><span class="val">JACK SPENCER // CHARLOTTE NC</span></div>
+      <!-- duplicate for seamless loop -->
+      <div class="sysbar-item"><span class="lbl">FLIGHTS</span><span class="val" id="sb-fl2">…</span></div>
+      <div class="sysbar-item"><span class="lbl">QUAKES 24H</span><span class="val" id="sb-eq2">…</span></div>
+      <div class="sysbar-item"><span class="lbl">FEAR/GREED</span><span class="val warn" id="sb-fg2">…</span></div>
+      <div class="sysbar-item"><span class="lbl">BTC</span><span class="val" id="sb-btc2">…</span></div>
+      <div class="sysbar-item"><span class="lbl">SPY</span><span class="val" id="sb-spy2">…</span></div>
+      <div class="sysbar-item"><span class="lbl">VIX</span><span class="val" id="sb-vix2">…</span></div>
+      <div class="sysbar-item"><span class="lbl">ISS</span><span class="val up" id="sb-iss2">…</span></div>
+      <div class="sysbar-item"><span class="lbl">OPERATOR</span><span class="val">JACK SPENCER // CHARLOTTE NC</span></div>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div id="clock">--:--:-- UTC</div>
+    <div class="threat-pill" id="threat">THREAT: MODERATE</div>
   </div>
 </header>
 
-<main>
-
-  <!-- WorldView -->
-  <a class="module" href="worldview.html">
-    <div class="module-tag">MODULE 01 // GEOSPATIAL INTELLIGENCE</div>
-    <div class="module-title">WORLDVIEW</div>
-    <div class="module-codename">CODENAME: PALANTIR-ECHO</div>
-    <div class="module-desc">
-      Real-time 3D globe intelligence platform. Track live aircraft, seismic events, and orbital assets — all from a single operational view.
+<!-- ══════════════ NEWS TICKER ══════════════ -->
+<div class="ticker-bar">
+  <div class="ticker-label">INTEL</div>
+  <div class="ticker-wrap">
+    <div class="ticker-inner" id="ticker">
+      <span class="t-item"><span class="t-src">SYS</span>Loading live intelligence feeds…</span>
     </div>
-    <ul class="feature-list">
-      <li>75+ tracked satellites — ISS, JWST, GPS, Starlink, military</li>
-      <li>Live flight data via OpenSky Network</li>
-      <li>USGS real-time earthquake feed</li>
-      <li>Sensor modes: NORMAL / CRT / NIGHT VISION / FLIR</li>
-      <li>Military HUD with threat index & activity feed</li>
-    </ul>
-    <span class="launch-btn">▶ LAUNCH MODULE</span>
-  </a>
+  </div>
+</div>
 
-  <!-- MERIDIAN Screener -->
-  <a class="module gold-theme" href="screener.html">
-    <div class="module-tag">MODULE 02 // FINANCIAL INTELLIGENCE</div>
-    <div class="module-title">MERIDIAN</div>
-    <div class="module-codename">CODENAME: BLOOMBERG-ECHO</div>
-    <div class="module-desc">
-      Bloomberg-grade stock screener with live market data. Filter, rank, and analyze 100+ S&P 500 equities in real time.
+<!-- ══════════════ HERO ══════════════ -->
+<section class="hero">
+  <div class="hero-eyebrow">// UNIFIED COMMAND INTERFACE //</div>
+  <div class="hero-title">OPS HUB</div>
+  <div class="hero-sub">INTELLIGENCE · SURVEILLANCE · RECONNAISSANCE · FINANCIAL</div>
+
+  <div class="stat-grid">
+    <div class="stat-block" style="--stat-c:var(--g)">
+      <div class="stat-val loading" id="h-fl">—</div>
+      <div class="stat-lbl">AIRBORNE</div>
+      <div class="stat-sub" id="h-fl-sub">N. AMERICA</div>
     </div>
-    <ul class="feature-list">
-      <li>Live price data via Yahoo Finance API</li>
-      <li>Multi-factor screening — P/E, dividend, beta, momentum</li>
-      <li>Sector heatmap with market-cap weighting</li>
-      <li>AI-powered per-stock analysis</li>
-      <li>Market pulse: SPY / QQQ / DIA / IWM</li>
-    </ul>
-    <span class="launch-btn">▶ LAUNCH MODULE</span>
-  </a>
+    <div class="stat-block" style="--stat-c:var(--o)">
+      <div class="stat-val loading" id="h-eq">—</div>
+      <div class="stat-lbl">QUAKES 24H</div>
+      <div class="stat-sub" id="h-eq-sub">M2.5+</div>
+    </div>
+    <div class="stat-block" style="--stat-c:var(--r)">
+      <div class="stat-val loading" id="h-fg">—</div>
+      <div class="stat-lbl">FEAR INDEX</div>
+      <div class="stat-sub" id="h-fg-sub">CRYPTO</div>
+    </div>
+    <div class="stat-block" style="--stat-c:var(--y)">
+      <div class="stat-val loading" id="h-btc">—</div>
+      <div class="stat-lbl">BTC / USD</div>
+      <div class="stat-sub" id="h-btc-sub">24H CHANGE</div>
+    </div>
+    <div class="stat-block" style="--stat-c:var(--b)">
+      <div class="stat-val loading" id="h-spy">—</div>
+      <div class="stat-lbl">SPY</div>
+      <div class="stat-sub" id="h-spy-sub">S&amp;P 500 ETF</div>
+    </div>
+    <div class="stat-block" style="--stat-c:var(--p)">
+      <div class="stat-val loading" id="h-iss">—</div>
+      <div class="stat-lbl">ISS ALT</div>
+      <div class="stat-sub" id="h-iss-sub">KILOMETERS</div>
+    </div>
+  </div>
+</section>
 
-</main>
+<!-- ══════════════ INTELLIGENCE ══════════════ -->
+<section class="section">
+  <div class="sec-head">INTELLIGENCE &amp; SURVEILLANCE<div class="sec-line"></div></div>
+  <div class="grid grid-wide">
 
+    <!-- WORLDVIEW -->
+    <a class="card" href="worldview.html" style="--cc:var(--g)">
+      <div class="badge">LIVE</div>
+      <div class="card-head">
+        <div class="card-icon">🌍</div>
+        <div class="card-meta">
+          <div class="card-title">WORLDVIEW GLOBE</div>
+          <div class="card-desc">Palantir-style 3D geospatial intelligence. Live ADS-B flight tracking over N. America, USGS seismic feeds, real-time satellite orbital propagation — ISS, Starlink, GPS constellation, military satellites. CRT / Night Vision / FLIR sensor modes.</div>
+        </div>
+      </div>
+      <div class="live-block">
+        <div class="live-row">
+          <span class="live-lbl">FLIGHTS AIRBORNE</span>
+          <span class="live-val loading" id="c-fl">…</span>
+        </div>
+        <div class="prog-bar"><div class="prog-fill" id="c-fl-bar" style="width:0%;background:var(--g)"></div></div>
+        <div class="live-row" style="margin-top:6px">
+          <span class="live-lbl">ISS POSITION</span>
+          <span class="live-val up" id="c-iss">…</span>
+        </div>
+        <div class="live-row">
+          <span class="live-lbl">ISS VELOCITY</span>
+          <span class="live-val up" id="c-iss-vel">…</span>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag">ADS-B LIVE</span><span class="tag">SEISMIC</span>
+        <span class="tag">SAT TRACK</span><span class="tag">CESIUMJS</span>
+      </div>
+    </a>
+
+    <!-- WORLDVIEW ENGINE -->
+    <a class="card" href="http://localhost:5055" style="--cc:var(--b)">
+      <div class="badge" style="border-color:var(--b);color:var(--b)">LOCAL :5055</div>
+      <div class="card-head">
+        <div class="card-icon">📡</div>
+        <div class="card-meta">
+          <div class="card-title">WORLDVIEW ENGINE</div>
+          <div class="card-desc">Flask OSINT collection server. ADS-B every 90s · USGS every 5min · GDELT news every 15min · Celestrak TLE every 12h. Threshold alerting. PDF SITREP generation on demand. Daily auto-report at 06:00Z.</div>
+        </div>
+      </div>
+      <div class="live-block">
+        <div class="quake-list" id="quake-list">
+          <div class="q-row"><span class="q-mag m3">M—</span><span class="q-loc">Loading seismic feed…</span></div>
+        </div>
+        <div class="live-row" style="margin-top:8px">
+          <span class="live-lbl">QUAKES 24H</span>
+          <span class="live-val loading" id="c-eq">…</span>
+        </div>
+        <div class="live-row">
+          <span class="live-lbl">MAX MAGNITUDE</span>
+          <span class="live-val loading" id="c-maxmag">…</span>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag">FLASK</span><span class="tag">GDELT</span>
+        <span class="tag">PDF SITREP</span><span class="tag">SCHEDULED</span>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ══════════════ FINANCIAL ══════════════ -->
+<section class="section">
+  <div class="sec-head">FINANCIAL INTELLIGENCE<div class="sec-line"></div></div>
+  <div class="grid">
+
+    <!-- MERIDIAN SCREENER -->
+    <a class="card" href="screener.html" style="--cc:var(--y)">
+      <div class="badge" style="border-color:var(--y);color:var(--y)">LIVE DATA</div>
+      <div class="card-head">
+        <div class="card-icon">📊</div>
+        <div class="card-meta">
+          <div class="card-title">MERIDIAN SCREENER</div>
+          <div class="card-desc">Bloomberg-style market intelligence terminal. Russell 3000 live quotes, sector heatmap, P/E · dividend · beta · momentum filters. Buffett Oracle BUY/HOLD/CAUTION signals. Unusual Whales dark pool integration.</div>
+        </div>
+      </div>
+      <div class="live-block">
+        <div class="live-row"><span class="live-lbl">SPY</span><span class="live-val loading" id="c-spy">…</span></div>
+        <div class="live-row"><span class="live-lbl">QQQ</span><span class="live-val loading" id="c-qqq">…</span></div>
+        <div class="live-row"><span class="live-lbl">VIX</span><span class="live-val loading" id="c-vix">…</span></div>
+        <div class="live-row"><span class="live-lbl">IWM</span><span class="live-val loading" id="c-iwm">…</span></div>
+        <div style="margin-top:8px">
+          <div style="font-size:7px;letter-spacing:2px;color:var(--dim);margin-bottom:4px">FEAR &amp; GREED INDEX</div>
+          <div class="prog-bar"><div class="prog-fill" id="fg-bar" style="width:0%;background:linear-gradient(90deg,var(--g),var(--y),var(--r))"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:6.5px;color:var(--dim2);margin-top:3px">
+            <span>EXTREME FEAR</span><span id="fg-label" style="color:var(--text)">—</span><span>EXTREME GREED</span>
+          </div>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag">RUSSELL 3000</span><span class="tag">BUFFETT ORACLE</span>
+        <span class="tag">DARK POOL</span><span class="tag">SECTOR HEATMAP</span>
+      </div>
+    </a>
+
+    <!-- CRYPTO -->
+    <div class="card" style="--cc:var(--o);cursor:default">
+      <div class="badge" style="border-color:var(--o);color:var(--o)">LIVE</div>
+      <div class="card-head">
+        <div class="card-icon">₿</div>
+        <div class="card-meta">
+          <div class="card-title">CRYPTO INTEL</div>
+          <div class="card-desc">Live cryptocurrency market data via CoinGecko. BTC, ETH, SOL with 24h change, market caps, and trend indicators. Zero API key required. Auto-refreshes every 90 seconds.</div>
+        </div>
+      </div>
+      <div class="live-block">
+        <div class="live-row"><span class="live-lbl">BITCOIN</span><span class="live-val loading" id="c-btc">…</span></div>
+        <div class="live-row"><span class="live-lbl">ETHEREUM</span><span class="live-val loading" id="c-eth">…</span></div>
+        <div class="live-row"><span class="live-lbl">SOLANA</span><span class="live-val loading" id="c-sol">…</span></div>
+        <div class="live-row"><span class="live-lbl">24H TREND</span><span class="live-val loading" id="c-trend">…</span></div>
+      </div>
+      <div class="tags">
+        <span class="tag">COINGECKO</span><span class="tag">NO KEY</span>
+        <span class="tag">90s REFRESH</span><span class="tag">CORS FREE</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════ SECURITY ══════════════ -->
+<section class="section">
+  <div class="sec-head">SECURITY OPERATIONS<div class="sec-line"></div></div>
+  <div class="grid">
+
+    <a class="card" href="#" onclick="openModal('sentinel');return false" style="--cc:var(--r)">
+      <div class="badge" style="border-color:var(--r);color:var(--r)">AUTH ONLY</div>
+      <div class="card-head">
+        <div class="card-icon">🛡️</div>
+        <div class="card-meta">
+          <div class="card-title">SENTINEL</div>
+          <div class="card-desc">Autonomous penetration testing platform. Network · Web (OWASP Top 10) · Active Directory · Wireless · Physical. Real-time findings dashboard. Auto-generated professional PDF pentest reports. Bash Bunny · WiFi Pineapple · HackRF One · Flipper Zero.</div>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag">WRITTEN AUTH REQUIRED</span><span class="tag">BASH BUNNY</span>
+        <span class="tag">HACKRF ONE</span><span class="tag">FLIPPER ZERO</span>
+      </div>
+    </a>
+
+    <a class="card" href="#" onclick="openModal('pinecon');return false" style="--cc:var(--o)">
+      <div class="badge" style="border-color:var(--o);color:var(--o)">DEVICE</div>
+      <div class="card-head">
+        <div class="card-icon">📶</div>
+        <div class="card-meta">
+          <div class="card-title">PINECON</div>
+          <div class="card-desc">WiFi Pineapple honeypot &amp; OSINT capture tool. Passive recon, evil twin AP deployment, client tracking, credential capture for authorized social engineering engagements. Runs on-device.</div>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag">WIFI PINEAPPLE</span><span class="tag">EVIL TWIN</span>
+        <span class="tag">CLIENT TRACK</span><span class="tag">OSINT</span>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ══════════════ AI / AUTOMATION ══════════════ -->
+<section class="section">
+  <div class="sec-head">AI &amp; AUTOMATION<div class="sec-line"></div></div>
+  <div class="grid">
+
+    <a class="card" href="http://localhost:3000" style="--cc:var(--p)">
+      <div class="badge" style="border-color:var(--p);color:var(--p)">LOCAL :3000</div>
+      <div class="card-head">
+        <div class="card-icon">🤖</div>
+        <div class="card-meta">
+          <div class="card-title">J.A.R.V.I.S. CORE</div>
+          <div class="card-desc">Iron Man AI assistant. Docker/FastAPI backend · Home Assistant integration · Chatterbox TTS voice cloning · iOS SwiftUI HUD with Action Button · MCP servers · Philips Hue · Google Nest · Tailscale remote access.</div>
+        </div>
+      </div>
+      <div class="live-block">
+        <div class="live-row">
+          <span class="live-lbl">CHARLOTTE WEATHER NOW</span>
+        </div>
+        <div class="wx-row" id="wx-block">
+          <div class="wx-temp loading" id="wx-temp">—°F</div>
+          <div class="wx-details">
+            <span id="wx-desc">Loading…</span>
+            <span id="wx-feels">Feels like —°F</span>
+            <span id="wx-hum">Humidity —%</span>
+          </div>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag">DOCKER</span><span class="tag">CLAUDE API</span>
+        <span class="tag">HOME ASSISTANT</span><span class="tag">iOS APP</span>
+      </div>
+    </a>
+
+    <div class="card" style="--cc:var(--b);cursor:default">
+      <div class="badge" style="border-color:var(--b);color:var(--b)">SCHEDULED</div>
+      <div class="card-head">
+        <div class="card-icon">📋</div>
+        <div class="card-meta">
+          <div class="card-title">DAILY INTEL BRIEF</div>
+          <div class="card-desc">Military SITREP-format PDF briefing. Aggregates news, weather, markets, prediction markets via Claude API narrative generation. SORD page · HERMES operational companion · market screener. Twilio SMS/MMS delivery on completion.</div>
+        </div>
+      </div>
+      <div class="live-block">
+        <div class="live-row"><span class="live-lbl">RUNNER</span><span class="live-val" style="color:var(--b);font-size:8px">A:\...\Daily Briefing\run_briefing.py</span></div>
+        <div class="live-row"><span class="live-lbl">SITREP PATH</span><span class="live-val" style="color:var(--b);font-size:8px">A:\...\Executive Brief\run_briefing.py</span></div>
+        <div class="live-row"><span class="live-lbl">DELIVERY</span><span class="live-val" style="color:var(--g)">PDF + SMS/MMS</span></div>
+      </div>
+      <div class="tags">
+        <span class="tag">PDF OUTPUT</span><span class="tag">CLAUDE API</span>
+        <span class="tag">TWILIO SMS</span><span class="tag">SITREP FORMAT</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════ FOOTER ══════════════ -->
 <footer>
-  J.A.R.V.I.S. OPERATIONS HUB // BUILT BY JACK SPENCER // CHARLOTTE, NC
-  &nbsp;|&nbsp; ALL DATA FEEDS PUBLIC &amp; FREE
+  <span>J.A.R.V.I.S. OPS HUB // SOAL INDUSTRIES // JACK SPENCER // CHARLOTTE NC</span>
+  <div class="footer-right">
+    <span><span class="dot-live"></span>ALL FEEDS LIVE · 90s REFRESH</span>
+    <span id="last-update">LAST SYNC: —</span>
+    <span>SECURITY TOOLS: AUTHORIZED ENGAGEMENTS ONLY</span>
+  </div>
 </footer>
 
-<script>
-  // Live clock in system-id
-  const sysId = document.querySelector('.system-id');
-  function tick() {
-    const now = new Date();
-    const ts = now.toISOString().replace('T', ' ').split('.')[0] + 'Z';
-    sysId.textContent = `SYSTEM ID: JARVIS-OPS // ${ts} // AUTHORIZATION: UNRESTRICTED`;
-  }
-  tick();
-  setInterval(tick, 1000);
-</script>
+<!-- ══════════════ MODAL ══════════════ -->
+<div id="modal" role="dialog" aria-modal="true" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-close" onclick="closeModal()" tabindex="0">✕ CLOSE</div>
+    <div id="modal-content"></div>
+  </div>
+</div>
 
+<script>
+'use strict';
+
+// ── SECURITY: Lock prototype against pollution ──────────────
+Object.freeze(Object.prototype);
+
+// ── MODAL CONTENT ────────────────────────────────────────────
+const MODAL_DATA = {
+  sentinel:{
+    title:'⚠ AUTHORIZATION GATE — SENTINEL',
+    body:`<strong class="warn">WRITTEN AUTHORIZATION IS REQUIRED</strong> before running any engagement module.<br><br>
+Unauthorized access to computer systems is a federal crime under the CFAA.<br><br>
+<strong class="hi">Launch dashboard:</strong> Open <span class="hi">SENTINEL/ui/dashboard.html</span> in your browser<br>
+<strong class="hi">Run engine:</strong> <span class="hi">python sentinel.py --config engagement.yaml</span><br><br>
+All engagement targets must have explicit written sign-off on file before execution.`
+  },
+  pinecon:{
+    title:'PINECON // WIFI PINEAPPLE HONEYPOT',
+    body:`Deploy directly from your WiFi Pineapple device via its web interface.<br><br>
+<strong class="hi">Capabilities:</strong> Passive recon, evil twin AP, client probe capture, credential harvest<br><br>
+<strong class="warn">For authorized social engineering engagements only.</strong><br>
+Operator must hold written authorization from target organization.`
+  }
+};
+
+function openModal(id){
+  const d=MODAL_DATA[id];
+  if(!d)return;
+  document.getElementById('modal-content').innerHTML=
+    `<div class="modal-title">${escHTML(d.title)}</div><div class="modal-body">${d.body}</div>`;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+function escHTML(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── CLOCK ──────────────────────────────────────────────────
+function tick(){
+  const n=new Date();
+  document.getElementById('clock').textContent=
+    n.toISOString().replace('T',' ').split('.')[0]+' UTC';
+}
+tick();setInterval(tick,1000);
+
+// ── SAFE FETCH (timeout + no credentials) ─────────────────
+async function sf(url,opts={}){
+  const ac=new AbortController();
+  const t=setTimeout(()=>ac.abort(),10000);
+  try{
+    const r=await fetch(url,{
+      ...opts,signal:ac.signal,
+      credentials:'omit',mode:'cors',
+      referrerPolicy:'no-referrer'
+    });
+    clearTimeout(t);
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    return r;
+  }catch(e){clearTimeout(t);throw e;}
+}
+
+// ── HELPER: update multiple elements ──────────────────────
+function upd(ids,val,cls=''){
+  (Array.isArray(ids)?ids:[ids]).forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.textContent=val;
+    el.classList.remove('loading','up','dn','warn','crit');
+    if(cls)el.classList.add(cls);
+  });
+}
+function fmtChg(c){return(c>=0?'+':'')+c.toFixed(2)+'%'}
+function chgClass(c){return c>=0?'up':'dn'}
+
+// ── 1. USGS EARTHQUAKES ───────────────────────────────────
+async function loadQuakes(){
+  const r=await sf('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson');
+  const d=await r.json();
+  const features=d.features||[];
+  const count=features.length;
+  const sorted=[...features].sort((a,b)=>(b.properties.mag||0)-(a.properties.mag||0));
+  const maxMag=(sorted[0]?.properties?.mag||0).toFixed(1);
+
+  upd(['h-eq','sb-eq','sb-eq2','c-eq'],String(count), parseFloat(maxMag)>=6?'warn':'');
+  upd(['sb-mag'],'M'+maxMag);
+  upd(['c-maxmag'],'M'+maxMag, parseFloat(maxMag)>=5?'warn':parseFloat(maxMag)>=6?'crit':'up');
+  document.getElementById('h-eq-sub').textContent=`MAX M${maxMag}`;
+
+  // quake list
+  const list=document.getElementById('quake-list');
+  if(sorted.length&&list){
+    const now=Date.now();
+    list.innerHTML=sorted.slice(0,5).map(f=>{
+      const mag=(f.properties.mag||0).toFixed(1);
+      const loc=escHTML((f.properties.place||'Unknown location').substring(0,55));
+      const ageMs=now-(f.properties.time||now);
+      const ageH=Math.round(ageMs/3600000);
+      const cls=mag>=6?'m6':mag>=5?'m5':mag>=4?'m4':'m3';
+      return `<div class="q-row">
+        <span class="q-mag ${cls}">M${mag}</span>
+        <span class="q-loc">${loc}</span>
+        <span class="q-time">${ageH}h ago</span>
+      </div>`;
+    }).join('');
+  }
+
+  // threat level logic
+  if(parseFloat(maxMag)>=7||count>30){
+    const el=document.getElementById('threat');
+    el.textContent='THREAT: ELEVATED';el.className='threat-pill high';
+  }
+}
+
+// ── 2. OPENSKY FLIGHTS ────────────────────────────────────
+async function loadFlights(){
+  const r=await sf('https://opensky-network.org/api/states/all?lamin=24&lomin=-125&lamax=50&lomax=-66');
+  const d=await r.json();
+  const count=(d.states||[]).length;
+  const disp=count>999?(count/1000).toFixed(1)+'K':String(count);
+  const full=count.toLocaleString();
+
+  upd(['h-fl','c-fl'],disp,'up');
+  upd(['sb-fl','sb-fl2'],full+' FLIGHTS');
+  document.getElementById('h-fl-sub').textContent=full+' OVER N. AMERICA';
+
+  // ring bar — typical range 2000-8000
+  const pct=Math.min(count/7500,1)*100;
+  const bar=document.getElementById('c-fl-bar');
+  if(bar)bar.style.width=pct+'%';
+}
+
+// ── 3. FEAR & GREED ───────────────────────────────────────
+async function loadFear(){
+  const r=await sf('https://api.alternative.me/fng/?limit=1&format=json');
+  const d=await r.json();
+  const val=parseInt(d.data?.[0]?.value||50);
+  const label=(d.data?.[0]?.value_classification||'').toUpperCase();
+
+  upd(['h-fg','sb-fg','sb-fg2'],String(val), val<=25?'crit':val<=40?'warn':val>=60?'up':'');
+  upd(['fg-label'],label);
+  document.getElementById('h-fg-sub').textContent=label;
+
+  const bar=document.getElementById('fg-bar');
+  if(bar)bar.style.width=val+'%';
+
+  if(val<=25){
+    const el=document.getElementById('threat');
+    if(el.className!=='threat-pill critical'){
+      el.textContent='THREAT: CRITICAL';el.className='threat-pill critical';
+    }
+  }
+}
+
+// ── 4. COINGECKO CRYPTO ───────────────────────────────────
+async function loadCrypto(){
+  const r=await sf('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true');
+  const d=await r.json();
+
+  const btc=d.bitcoin?.usd||0;
+  const btcC=d.bitcoin?.usd_24h_change||0;
+  const eth=d.ethereum?.usd||0;
+  const ethC=d.ethereum?.usd_24h_change||0;
+  const sol=d.solana?.usd||0;
+  const solC=d.solana?.usd_24h_change||0;
+
+  const fmtBtc='$'+(btc>999?(btc/1000).toFixed(1)+'K':btc.toFixed(0));
+  const fmtEth='$'+(eth/1000).toFixed(2)+'K';
+  const fmtSol='$'+sol.toFixed(2);
+
+  upd(['h-btc','sb-btc','sb-btc2'],fmtBtc+' '+fmtChg(btcC),chgClass(btcC));
+  document.getElementById('h-btc-sub').textContent=fmtChg(btcC)+' 24H';
+  upd(['c-btc'],fmtBtc+' '+fmtChg(btcC),chgClass(btcC));
+  upd(['c-eth'],fmtEth+' '+fmtChg(ethC),chgClass(ethC));
+  upd(['sb-eth'],fmtEth+' '+fmtChg(ethC),chgClass(ethC));
+  upd(['c-sol'],fmtSol+' '+fmtChg(solC),chgClass(solC));
+
+  const avgC=(btcC+ethC+solC)/3;
+  upd(['c-trend'],fmtChg(avgC)+' AVG',chgClass(avgC));
+}
+
+// ── 5. YAHOO FINANCE via allorigins ──────────────────────
+async function loadYahoo(sym,ids){
+  const encoded=encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`);
+  const r=await sf(`https://api.allorigins.win/get?url=${encoded}`);
+  const outer=await r.json();
+  const inner=JSON.parse(outer.contents);
+  const meta=inner.chart.result[0].meta;
+  const price=meta.regularMarketPrice;
+  const prev=meta.previousClose||price;
+  const chgPct=((price-prev)/prev)*100;
+  const fmt='$'+price.toFixed(2)+' '+fmtChg(chgPct);
+  ids.forEach(id=>upd([id],fmt,chgClass(chgPct)));
+  return{price,chgPct};
+}
+
+async function loadMarkets(){
+  const [spy,qqq,iwm,vix]=await Promise.allSettled([
+    loadYahoo('SPY',['c-spy','sb-spy','sb-spy2']),
+    loadYahoo('QQQ',['c-qqq','sb-qqq']),
+    loadYahoo('IWM',['c-iwm']),
+    loadYahoo('%5EVIX',['c-vix','sb-vix','sb-vix2'])
+  ]);
+
+  if(spy.status==='fulfilled'){
+    upd(['h-spy'],'$'+spy.value.price.toFixed(2),chgClass(spy.value.chgPct));
+    document.getElementById('h-spy-sub').textContent=fmtChg(spy.value.chgPct)+' TODAY';
+  }
+  if(vix.status==='fulfilled'){
+    const v=vix.value.price;
+    if(v>30)upd(['c-vix'],'$'+v.toFixed(2)+' !!','crit');
+  }
+}
+
+// ── 6. ISS POSITION ───────────────────────────────────────
+async function loadISS(){
+  const r=await sf('https://api.wheretheiss.at/v1/satellites/25544');
+  const d=await r.json();
+  const lat=parseFloat(d.latitude).toFixed(1);
+  const lon=parseFloat(d.longitude).toFixed(1);
+  const alt=Math.round(d.altitude);
+  const vel=Math.round(d.velocity);
+
+  const pos=`${lat}°${lat>=0?'N':'S'} ${Math.abs(lon).toFixed(1)}°${lon>=0?'E':'W'}`;
+  upd(['h-iss'],alt+'km','up');
+  upd(['sb-iss','sb-iss2'],pos);
+  upd(['c-iss'],pos,'up');
+  upd(['c-iss-vel'],vel.toLocaleString()+' km/h','up');
+  document.getElementById('h-iss-sub').textContent=vel.toLocaleString()+' KM/H';
+}
+
+// ── 7. WEATHER ────────────────────────────────────────────
+async function loadWeather(){
+  const r=await sf('https://wttr.in/Charlotte,NC?format=j1');
+  const d=await r.json();
+  const c=d.current_condition[0];
+  const temp=c.temp_F;
+  const feels=c.FeelsLikeF;
+  const desc=c.weatherDesc[0].value;
+  const hum=c.humidity;
+
+  document.getElementById('wx-temp').textContent=temp+'°F';
+  document.getElementById('wx-temp').classList.remove('loading');
+  document.getElementById('wx-desc').textContent=desc;
+  document.getElementById('wx-feels').textContent=`Feels like ${feels}°F`;
+  document.getElementById('wx-hum').textContent=`Humidity ${hum}%`;
+  upd(['sb-wx'],temp+'°F · '+desc.substring(0,12));
+}
+
+// ── 8. NEWS TICKER via allorigins ─────────────────────────
+async function loadTicker(){
+  const rssURL=encodeURIComponent('https://feeds.bbci.co.uk/news/world/rss.xml');
+  const r=await sf(`https://api.allorigins.win/get?url=${rssURL}`);
+  const outer=await r.json();
+  const parser=new DOMParser();
+  const xml=parser.parseFromString(outer.contents,'text/xml');
+  const items=Array.from(xml.querySelectorAll('item')).slice(0,10);
+
+  if(!items.length)return;
+
+  const make=(items)=>items.map(item=>{
+    const rawTitle=item.querySelector('title')?.textContent?.trim()||'';
+    // strip CDATA wrappers safely
+    const title=escHTML(rawTitle.replace(/^<!\[CDATA\[|\]\]>$/g,'').trim().substring(0,110));
+    return `<span class="t-item"><span class="t-src">BBC</span>${title}</span>`;
+  }).join('');
+
+  // double for seamless loop
+  document.getElementById('ticker').innerHTML=make(items)+make(items);
+}
+
+// ── BOOT + REFRESH LOOP ───────────────────────────────────
+async function boot(){
+  const jobs=[
+    ['quakes',  loadQuakes ],
+    ['flights', loadFlights],
+    ['fear',    loadFear   ],
+    ['crypto',  loadCrypto ],
+    ['markets', loadMarkets],
+    ['iss',     loadISS    ],
+    ['weather', loadWeather],
+    ['ticker',  loadTicker ],
+  ];
+
+  // fire all simultaneously, isolate failures
+  const results=await Promise.allSettled(jobs.map(([,fn])=>fn()));
+  results.forEach((r,i)=>{
+    if(r.status==='rejected')
+      console.warn(`[OpsHub] ${jobs[i][0]} failed:`,r.reason?.message||r.reason);
+  });
+
+  // timestamp
+  const now=new Date();
+  document.getElementById('last-update').textContent=
+    'LAST SYNC: '+now.toISOString().replace('T',' ').split('.')[0]+'Z';
+}
+
+// ISS refreshes every 10s (it moves fast)
+async function issLoop(){
+  while(true){
+    await new Promise(r=>setTimeout(r,10000));
+    try{await loadISS();}catch(e){/* silent */}
+  }
+}
+
+boot();
+issLoop();
+// Everything else refreshes every 90s
+setInterval(()=>{
+  Promise.allSettled([loadQuakes(),loadFlights(),loadFear(),loadCrypto(),loadMarkets(),loadWeather()]);
+},90000);
+</script>
 </body>
 </html>
