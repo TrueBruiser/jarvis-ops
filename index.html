@@ -688,7 +688,7 @@ html, body {
     </a>
 
     <!-- WORLDVIEW ENGINE -->
-    <a class="card" href="http://localhost:5055" style="--cc:var(--b)">
+    <a class="card" href="http://localhost:5055" onclick="return localLink(event, 'http://localhost:5055', 'WORLDVIEW ENGINE', 'Flask OSINT server · run: python worldview.py')" style="--cc:var(--b)">
       <div class="badge" style="border-color:var(--b);color:var(--b)">LOCAL :5055</div>
       <div class="card-head">
         <div class="card-icon">📡</div>
@@ -821,7 +821,7 @@ html, body {
   <div class="sec-head">AI &amp; AUTOMATION<div class="sec-line"></div></div>
   <div class="grid">
 
-    <a class="card" href="http://localhost:3000" style="--cc:var(--p)">
+    <a class="card" href="http://localhost:3000" onclick="return localLink(event, 'http://localhost:3000', 'J.A.R.V.I.S. CORE', 'Docker backend · run: docker compose up in C:\\\\Users\\\\jackg\\\\jarvis')" style="--cc:var(--p)">
       <div class="badge" style="border-color:var(--p);color:var(--p)">LOCAL :3000</div>
       <div class="card-head">
         <div class="card-icon">🤖</div>
@@ -1202,6 +1202,28 @@ issLoop();
 setInterval(()=>{
   Promise.allSettled([loadQuakes(),loadFlights(),loadFear(),loadCrypto(),loadMarkets(),loadWeather()]);
 },90000);
+
+// ── LOCAL LINK HANDLER ──────────────────────────────────────
+// Detects if we're on localhost. If yes, navigates normally.
+// If remote (GitHub Pages / mobile), shows an informative modal
+// instead of a dead link.
+function localLink(e, url, title, hint) {
+  const isLocal = ['localhost','127.0.0.1','0.0.0.0'].includes(window.location.hostname);
+  if (isLocal) return true; // navigate normally
+  e.preventDefault();
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-title">🖥 LOCAL SERVICE — ${escHTML(title)}</div>
+    <div class="modal-body">
+      This tool runs on your <strong class="hi">local machine</strong> and is not accessible remotely.<br><br>
+      <strong class="hi">URL:</strong> <span style="color:var(--b)">${escHTML(url)}</span><br>
+      <strong class="hi">How to access:</strong> Open this URL directly in a browser on your home machine.<br><br>
+      <span style="color:var(--dim)">${escHTML(hint)}</span><br><br>
+      <span class="warn">For remote access, connect via Tailscale then navigate to this URL.</span>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+  return false;
+}
+
 </script>
 </body>
 </html>
