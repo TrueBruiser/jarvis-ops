@@ -501,10 +501,10 @@ footer {
 
 <!-- ══ NAV ══════════════════════════════════════════════ -->
 <nav id="nav">
-  <a class="nav-tab active" href="#sec-intel"><span class="nav-dot"></span>INTELLIGENCE</a>
-  <a class="nav-tab" href="#sec-financial"><span class="nav-dot"></span>FINANCIAL</a>
-  <a class="nav-tab" href="#sec-security"><span class="nav-dot"></span>SECURITY</a>
-  <a class="nav-tab" href="#sec-ai"><span class="nav-dot"></span>AI / AUTOMATION</a>
+  <div class="nav-tab active" role="button" tabindex="0" onclick="navTo('sec-intel',this)" onkeydown="if(event.key==='Enter')navTo('sec-intel',this)"><span class="nav-dot"></span>INTELLIGENCE</div>
+  <div class="nav-tab" role="button" tabindex="0" onclick="navTo('sec-financial',this)" onkeydown="if(event.key==='Enter')navTo('sec-financial',this)"><span class="nav-dot"></span>FINANCIAL</div>
+  <div class="nav-tab" role="button" tabindex="0" onclick="navTo('sec-security',this)" onkeydown="if(event.key==='Enter')navTo('sec-security',this)"><span class="nav-dot"></span>SECURITY</div>
+  <div class="nav-tab" role="button" tabindex="0" onclick="navTo('sec-ai',this)" onkeydown="if(event.key==='Enter')navTo('sec-ai',this)"><span class="nav-dot"></span>AI / AUTOMATION</div>
 </nav>
 
 <!-- ══ MAIN ══════════════════════════════════════════════ -->
@@ -577,7 +577,7 @@ footer {
     </a>
 
     <!-- WORLDVIEW ENGINE -->
-    <a class="card" href="http://localhost:5055" onclick="return localLink(event,'http://localhost:5055','WORLDVIEW ENGINE','Flask server · run: python worldview.py')" style="--cc:var(--b)">
+    <div class="card" role="button" tabindex="0" onclick="localLink(event,'http://localhost:5055','WORLDVIEW ENGINE','Flask server · run: python worldview.py')" onkeydown="if(event.key==='Enter')localLink(event,'http://localhost:5055','WORLDVIEW ENGINE','Flask server · run: python worldview.py')" style="--cc:var(--b)">
       <div class="badge" style="--cc:var(--b)">LOCAL :5055</div>
       <div class="card-hd">
         <div class="card-icon">📡</div>
@@ -595,7 +595,7 @@ footer {
       <div class="tags">
         <span class="tag">FLASK</span><span class="tag">GDELT</span><span class="tag">PDF SITREP</span><span class="tag">SCHEDULED</span>
       </div>
-    </a>
+    </div>
 
     <!-- ISS LIVE -->
     <div class="card" style="--cc:var(--p);cursor:default">
@@ -768,7 +768,7 @@ footer {
   <div class="grid">
 
     <!-- JARVIS CORE -->
-    <a class="card" href="http://localhost:3000" onclick="return localLink(event,'http://localhost:3000','J.A.R.V.I.S. CORE','Docker backend · run: docker compose up in C:\\Users\\jackg\\jarvis')" style="--cc:var(--p)">
+    <div class="card" role="button" tabindex="0" onclick="localLink(event,'http://localhost:3000','J.A.R.V.I.S. CORE','Docker backend · run: docker compose up in C:\\Users\\jackg\\jarvis')" onkeydown="if(event.key==='Enter')localLink(event,'http://localhost:3000','J.A.R.V.I.S. CORE','Docker backend · run: docker compose up in C:\\Users\\jackg\\jarvis')" style="--cc:var(--p)">
       <div class="badge" style="--cc:var(--p)">LOCAL :3000</div>
       <div class="card-hd">
         <div class="card-icon">🤖</div>
@@ -790,7 +790,7 @@ footer {
       <div class="tags">
         <span class="tag">DOCKER</span><span class="tag">CLAUDE API</span><span class="tag">HOME ASSISTANT</span><span class="tag">iOS APP</span>
       </div>
-    </a>
+    </div>
 
     <!-- SOAL INDUSTRIES -->
     <div class="card" style="--cc:var(--g);cursor:default">
@@ -887,13 +887,16 @@ function localLink(e, url, title, hint){
 function tick(){ document.getElementById('clock').textContent = new Date().toISOString().replace('T',' ').split('.')[0]+' UTC'; }
 tick(); setInterval(tick,1000);
 
-/* ── NAV ACTIVE ─────────────────────────────── */
-document.querySelectorAll('.nav-tab').forEach(tab=>{
-  tab.addEventListener('click',()=>{
-    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-    tab.classList.add('active');
-  });
-});
+
+/* ── NAV SCROLL ─────────────────────────────── */
+function navTo(id, el) {
+  const target = document.getElementById(id);
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+/* nav active handled by navTo() */
 
 /* ── SAFE FETCH ─────────────────────────────── */
 async function sf(url){
