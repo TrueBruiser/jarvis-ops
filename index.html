@@ -703,7 +703,7 @@ footer {
   <div class="sec-hd">SECURITY OPERATIONS<div class="sec-line"></div></div>
   <div class="grid">
 
-    <a class="card" href="#" onclick="openModal('sentinel');return false" style="--cc:var(--r)">
+    <div class="card" role="button" tabindex="0" onclick="openModal('sentinel')" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('sentinel')" style="--cc:var(--r)">
       <div class="badge" style="--cc:var(--r)">AUTH ONLY</div>
       <div class="card-hd">
         <div class="card-icon">🛡️</div>
@@ -715,9 +715,9 @@ footer {
       <div class="tags">
         <span class="tag">WRITTEN AUTH REQUIRED</span><span class="tag">BASH BUNNY</span><span class="tag">HACKRF ONE</span><span class="tag">FLIPPER ZERO</span>
       </div>
-    </a>
+    </div>
 
-    <a class="card" href="#" onclick="openModal('pinecon');return false" style="--cc:var(--o)">
+    <div class="card" role="button" tabindex="0" onclick="openModal('pinecon')" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('pinecon')" style="--cc:var(--o)">
       <div class="badge" style="--cc:var(--o)">DEVICE</div>
       <div class="card-hd">
         <div class="card-icon">📶</div>
