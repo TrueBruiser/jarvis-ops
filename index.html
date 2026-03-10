@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://earthquake.usgs.gov https://opensky-network.org https://api.alternative.me https://api.coingecko.com https://api.wheretheiss.at https://wttr.in https://api.allorigins.win; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://earthquake.usgs.gov https://opensky-network.org https://api.alternative.me https://api.coingecko.com https://api.wheretheiss.at https://wttr.in https://api.allorigins.win https://api.weather.gov https://services.swpc.noaa.gov https://eonet.gsfc.nasa.gov https://hacker-news.firebaseio.com https://en.wikipedia.org https://www.reddit.com; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="no-referrer">
 <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=()">
@@ -505,6 +505,9 @@ footer {
   <div class="nav-tab" role="button" tabindex="0" onclick="navTo('sec-financial',this)" onkeydown="if(event.key==='Enter')navTo('sec-financial',this)"><span class="nav-dot"></span>FINANCIAL</div>
   <div class="nav-tab" role="button" tabindex="0" onclick="navTo('sec-security',this)" onkeydown="if(event.key==='Enter')navTo('sec-security',this)"><span class="nav-dot"></span>SECURITY</div>
   <div class="nav-tab" role="button" tabindex="0" onclick="navTo('sec-ai',this)" onkeydown="if(event.key==='Enter')navTo('sec-ai',this)"><span class="nav-dot"></span>AI / AUTOMATION</div>
+  <div class="nav-tab" role="button" tabindex="0" onclick="navTo('sec-worldview',this)" onkeydown="if(event.key==='Enter')navTo('sec-worldview',this)" style="color:var(--g);font-weight:bold"><span class="nav-dot" style="background:var(--g);box-shadow:0 0 6px var(--g)"></span>WORLDVIEW</div>
+  <div class="nav-tab" role="button" tabindex="0" onclick="navTo('sec-livepulse',this)" onkeydown="if(event.key==='Enter')navTo('sec-livepulse',this)"><span class="nav-dot" style="background:var(--r);animation:blink 1.4s infinite"></span>LIVE PULSE</div>
+  <div class="nav-tab" role="button" tabindex="0" onclick="navTo('sec-signal',this)" onkeydown="if(event.key==='Enter')navTo('sec-signal',this)"><span class="nav-dot" style="background:var(--r);box-shadow:0 0 8px var(--r);animation:blink 0.6s infinite"></span>⚡ SIGNAL</div>
 </nav>
 
 <!-- ══ MAIN ══════════════════════════════════════════════ -->
@@ -817,6 +820,266 @@ footer {
 
 </main>
 
+<!-- ══ WORLDVIEW EMBED ══════════════════════════════════ -->
+<section class="section" id="sec-worldview" style="height:calc(100vh - var(--header-h) - var(--ticker-h) - var(--nav-h));display:flex;flex-direction:column;background:#020b05">
+  <div class="sec-hd" style="flex-shrink:0">
+    WORLDVIEW // GLOBAL INTELLIGENCE GLOBE
+    <div class="sec-line"></div>
+    <a href="worldview-live.html" target="_blank" style="color:var(--g);font-size:7px;letter-spacing:2px;text-decoration:none;margin-left:8px;border:1px solid rgba(0,255,136,0.3);padding:2px 8px;white-space:nowrap">⤢ OPEN FULL</a>
+    <a href="worldview.html" target="_blank" style="color:var(--dim);font-size:7px;letter-spacing:2px;text-decoration:none;margin-left:4px;border:1px solid var(--border);padding:2px 8px;white-space:nowrap">v3</a>
+  </div>
+  <div style="flex:1;overflow:hidden;border:1px solid rgba(0,255,136,0.12);margin:0 2px 2px;position:relative">
+    <iframe
+      src="worldview-live.html"
+      style="width:100%;height:100%;border:none;display:block"
+      loading="lazy"
+      title="WORLDVIEW Global Intelligence Globe"
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+    ></iframe>
+  </div>
+</section>
+
+<!-- ══ LIVE PULSE ════════════════════════════════════════ -->
+<section class="section" id="sec-livepulse">
+  <div class="sec-hd">LIVE PULSE — EVENTS HAPPENING NOW<div class="sec-line"></div></div>
+  <div class="grid grid-3">
+
+    <div class="card" style="--cc:var(--r);cursor:default">
+      <div class="badge" style="--cc:var(--r);animation:blink 1.5s infinite">LIVE</div>
+      <div class="card-hd">
+        <div class="card-icon">⚠️</div>
+        <div class="card-meta">
+          <div class="card-title">NWS ACTIVE ALERTS</div>
+          <div class="card-desc">NOAA National Weather Service — extreme and severe active warnings across the US. Tornado, hurricane, flash flood. Real-time, no key.</div>
+        </div>
+      </div>
+      <div class="live">
+        <div class="lr"><span class="ll">EXTREME</span><span class="lv loading" id="nws-extreme">—</span></div>
+        <div class="lr"><span class="ll">SEVERE</span><span class="lv loading" id="nws-severe">—</span></div>
+        <div class="lr"><span class="ll">TOTAL ACTIVE</span><span class="lv loading" id="nws-total">—</span></div>
+        <div id="nws-events" style="margin-top:6px;max-height:80px;overflow-y:auto;scrollbar-width:none;font-size:7.5px;line-height:1.7"></div>
+      </div>
+      <div class="tags"><span class="tag">NOAA</span><span class="tag">NO KEY</span><span class="tag">TORNADO · FLOOD · HURRICANE</span></div>
+    </div>
+
+    <div class="card" style="--cc:var(--o);cursor:default">
+      <div class="badge" style="--cc:var(--o)">OPEN EVENTS</div>
+      <div class="card-hd">
+        <div class="card-icon">🌋</div>
+        <div class="card-meta">
+          <div class="card-title">NASA EONET</div>
+          <div class="card-desc">Earth Observatory Natural Event Tracker — active wildfires, tropical storms, volcanic eruptions, floods. NASA-curated. Zero auth.</div>
+        </div>
+      </div>
+      <div class="live">
+        <div class="lr"><span class="ll">WILDFIRES</span><span class="lv loading" id="eonet-fire">—</span></div>
+        <div class="lr"><span class="ll">STORMS</span><span class="lv loading" id="eonet-storm">—</span></div>
+        <div class="lr"><span class="ll">VOLCANOES</span><span class="lv loading" id="eonet-volc">—</span></div>
+        <div class="lr"><span class="ll">TOTAL OPEN</span><span class="lv loading" id="eonet-total">—</span></div>
+        <div id="eonet-list" style="margin-top:6px;max-height:80px;overflow-y:auto;scrollbar-width:none;font-size:7.5px;color:var(--dim);line-height:1.7"></div>
+      </div>
+      <div class="tags"><span class="tag">NASA</span><span class="tag">NO KEY</span><span class="tag">FIRES · STORMS · VOLCANOES</span></div>
+    </div>
+
+    <div class="card" style="--cc:var(--p);cursor:default">
+      <div class="badge" style="--cc:var(--p)">REAL-TIME</div>
+      <div class="card-hd">
+        <div class="card-icon">☀️</div>
+        <div class="card-meta">
+          <div class="card-title">SPACE WEATHER</div>
+          <div class="card-desc">NOAA SWPC — live solar wind speed, Bz magnetic field, Kp geomagnetic index. Affects GPS accuracy, HF radio, power grids. Propagated L1 data.</div>
+        </div>
+      </div>
+      <div class="live">
+        <div class="lr"><span class="ll">Kp INDEX</span><span class="lv loading" id="sw-kp">—</span></div>
+        <div class="lr"><span class="ll">SOLAR WIND</span><span class="lv loading" id="sw-wind">—</span></div>
+        <div class="lr"><span class="ll">Bz (MAG FIELD)</span><span class="lv loading" id="sw-bz">—</span></div>
+        <div class="lr"><span class="ll">GEO STORM</span><span class="lv loading" id="sw-storm">—</span></div>
+        <div class="lr"><span class="ll">PROTON DENSITY</span><span class="lv loading" id="sw-density">—</span></div>
+      </div>
+      <div class="tags"><span class="tag">NOAA SWPC</span><span class="tag">NO KEY</span><span class="tag">SOLAR WIND · Kp · GEOMAG</span></div>
+    </div>
+
+    <div class="card" style="--cc:var(--g);cursor:default">
+      <div class="badge" style="--cc:var(--g);animation:blink 1s infinite">TRACKING</div>
+      <div class="card-hd">
+        <div class="card-icon">🛰</div>
+        <div class="card-meta">
+          <div class="card-title">ISS LIVE TRACK</div>
+          <div class="card-desc">International Space Station exact orbital position, updated every 5 seconds. Lat, lon, altitude, velocity. Currently over:</div>
+        </div>
+      </div>
+      <div class="live">
+        <div class="lr"><span class="ll">LATITUDE</span><span class="lv loading" id="iss2-lat">—</span></div>
+        <div class="lr"><span class="ll">LONGITUDE</span><span class="lv loading" id="iss2-lon">—</span></div>
+        <div class="lr"><span class="ll">ALTITUDE</span><span class="lv loading" id="iss2-alt">—</span></div>
+        <div class="lr"><span class="ll">VELOCITY</span><span class="lv loading" id="iss2-vel">—</span></div>
+        <div class="lr"><span class="ll">VISIBILITY</span><span class="lv loading" id="iss2-vis">—</span></div>
+      </div>
+      <div class="tags"><span class="tag">WHERETHEISS.AT</span><span class="tag">5s REFRESH</span><span class="tag">ORBITAL TRACK</span></div>
+    </div>
+
+    <div class="card" style="--cc:var(--y);cursor:default">
+      <div class="badge" style="--cc:var(--y)">LAST HOUR</div>
+      <div class="card-hd">
+        <div class="card-icon">🌐</div>
+        <div class="card-meta">
+          <div class="card-title">SEISMIC PULSE</div>
+          <div class="card-desc">USGS M2.5+ events in the last 24 hours, sorted by magnitude. Top 5 most significant events with location and time offset.</div>
+        </div>
+      </div>
+      <div class="live">
+        <div class="lr"><span class="ll">EVENTS 24H</span><span class="lv loading" id="sq-count">—</span></div>
+        <div class="lr"><span class="ll">MAX MAGNITUDE</span><span class="lv loading" id="sq-max">—</span></div>
+        <div id="sq-list" style="margin-top:6px;max-height:90px;overflow-y:auto;scrollbar-width:none"></div>
+      </div>
+      <div class="tags"><span class="tag">USGS</span><span class="tag">NO KEY</span><span class="tag">M2.5+</span></div>
+    </div>
+
+    <div class="card" style="--cc:var(--b);cursor:default">
+      <div class="badge" style="--cc:var(--b)">NOW TRENDING</div>
+      <div class="card-hd">
+        <div class="card-icon">📡</div>
+        <div class="card-meta">
+          <div class="card-title">HACKER NEWS SIGNAL</div>
+          <div class="card-desc">Top stories on HN right now — tech pulse, security research, AI, world events filtered by technical operators. Free Firebase API, no key.</div>
+        </div>
+      </div>
+      <div class="live">
+        <div id="hn-list" style="max-height:130px;overflow-y:auto;scrollbar-width:none"></div>
+      </div>
+      <div class="tags"><span class="tag">HACKER NEWS</span><span class="tag">NO KEY</span><span class="tag">REAL-TIME SIGNAL</span></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ LIVE SIGNAL ════════════════════════════════════════ -->
+<section class="section" id="sec-signal">
+  <div class="sec-hd">⚡ LIVE SIGNAL — WHAT'S HAPPENING RIGHT NOW<div class="sec-line"></div>
+    <span style="font-size:7px;color:var(--dim);letter-spacing:1px;margin-left:8px">AUTO-REFRESH 60s · ALL SOURCES FREE · NO KEY</span>
+  </div>
+  <div class="grid grid-3" style="padding:0 16px 16px">
+
+    <!-- UNIFIED SIGNAL FEED -->
+    <div class="card" style="--cc:var(--r);cursor:default;grid-row:span 1">
+      <div class="badge" style="--cc:var(--r);animation:blink 0.6s infinite">LIVE FEED</div>
+      <div class="card-hd">
+        <div class="card-icon">📡</div>
+        <div class="card-meta">
+          <div class="card-title">UNIFIED SIGNAL</div>
+          <div class="card-desc">Aggregated real-time event stream: seismic activity, weather alerts, NASA events, space weather anomalies — chronologically merged.</div>
+        </div>
+      </div>
+      <div id="signal-feed" style="max-height:240px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent">
+        <div style="color:var(--dim);font-size:7.5px;padding:4px 0">Loading signal...</div>
+      </div>
+      <div class="tags"><span class="tag">USGS</span><span class="tag">NOAA</span><span class="tag">NASA</span><span class="tag">LAST HOUR</span></div>
+    </div>
+
+    <!-- WIKIPEDIA NOW -->
+    <div class="card" style="--cc:var(--b);cursor:default">
+      <div class="badge" style="--cc:var(--b);animation:blink 1s infinite">LIVE EDITS</div>
+      <div class="card-hd">
+        <div class="card-icon">📖</div>
+        <div class="card-meta">
+          <div class="card-title">WIKIPEDIA NOW</div>
+          <div class="card-desc">Articles being actively edited right now. When events happen, editors update Wikipedia within minutes — fastest proxy for breaking news.</div>
+        </div>
+      </div>
+      <div class="live">
+        <div class="lr"><span class="ll">EDITS / MIN</span><span class="lv loading" id="wiki-rate">—</span></div>
+        <div class="lr"><span class="ll">BOTS FILTERED</span><span class="lv loading" id="wiki-human">—</span></div>
+      </div>
+      <div id="wiki-list" style="margin-top:6px;max-height:160px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent">
+        <div style="color:var(--dim);font-size:7.5px">Loading...</div>
+      </div>
+      <div class="tags"><span class="tag">WIKIPEDIA API</span><span class="tag">NO KEY</span><span class="tag">30s REFRESH</span></div>
+    </div>
+
+    <!-- REDDIT WORLD NEWS -->
+    <div class="card" style="--cc:var(--o);cursor:default">
+      <div class="badge" style="--cc:var(--o)">TRENDING</div>
+      <div class="card-hd">
+        <div class="card-icon">🌐</div>
+        <div class="card-meta">
+          <div class="card-title">r/WORLDNEWS NOW</div>
+          <div class="card-desc">Top rising stories on r/worldnews. Crowd-sourced global event detection — stories surface minutes after events break.</div>
+        </div>
+      </div>
+      <div id="reddit-list" style="margin-top:6px;max-height:240px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent">
+        <div style="color:var(--dim);font-size:7.5px">Loading...</div>
+      </div>
+      <div class="tags"><span class="tag">REDDIT JSON</span><span class="tag">NO KEY</span><span class="tag">5m REFRESH</span></div>
+    </div>
+
+    <!-- LAST HOUR QUAKES -->
+    <div class="card" style="--cc:var(--y);cursor:default">
+      <div class="badge" style="--cc:var(--y);animation:blink 1.2s infinite">LAST HOUR</div>
+      <div class="card-hd">
+        <div class="card-icon">🌐</div>
+        <div class="card-meta">
+          <div class="card-title">SEISMIC — LAST HOUR</div>
+          <div class="card-desc">USGS M1.0+ earthquakes in the past 60 minutes only. Real-time granularity. Updated every 5 minutes.</div>
+        </div>
+      </div>
+      <div class="live">
+        <div class="lr"><span class="ll">EVENTS 1H</span><span class="lv loading" id="sq1h-count">—</span></div>
+        <div class="lr"><span class="ll">MAX MAG</span><span class="lv loading" id="sq1h-max">—</span></div>
+        <div class="lr"><span class="ll">M4+ THIS HOUR</span><span class="lv loading" id="sq1h-sig">—</span></div>
+      </div>
+      <div id="sq1h-list" style="margin-top:6px;max-height:120px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent"></div>
+      <div class="tags"><span class="tag">USGS</span><span class="tag">M1.0+</span><span class="tag">REAL-TIME</span></div>
+    </div>
+
+    <!-- GLOBAL SKIES -->
+    <div class="card" style="--cc:var(--g);cursor:default">
+      <div class="badge" style="--cc:var(--g)">LIVE COUNT</div>
+      <div class="card-hd">
+        <div class="card-icon">✈️</div>
+        <div class="card-meta">
+          <div class="card-title">GLOBAL SKIES</div>
+          <div class="card-desc">Live ADS-B transponder count worldwide via OpenSky Network. Total aircraft with active transponders right now.</div>
+        </div>
+      </div>
+      <div class="live">
+        <div class="lr"><span class="ll">GLOBAL A/C</span><span class="lv loading" id="sky-global">—</span></div>
+        <div class="lr"><span class="ll">N. AMERICA</span><span class="lv loading" id="sky-na">—</span></div>
+        <div class="lr"><span class="ll">ON GROUND</span><span class="lv loading" id="sky-ground">—</span></div>
+        <div class="lr"><span class="ll">AIRBORNE</span><span class="lv loading" id="sky-air">—</span></div>
+      </div>
+      <div id="sky-bar" style="margin-top:8px;height:3px;background:rgba(0,255,136,0.1);border-radius:2px">
+        <div id="sky-bar-fill" style="height:100%;background:var(--g);width:0%;transition:width 1s;border-radius:2px"></div>
+      </div>
+      <div class="tags"><span class="tag">OPENSKY</span><span class="tag">NO KEY</span><span class="tag">ADS-B</span></div>
+    </div>
+
+    <!-- NWS ACTIVE ALERTS QUICK VIEW -->
+    <div class="card" style="--cc:var(--r);cursor:default">
+      <div class="badge" style="--cc:var(--r);animation:blink 1s infinite">ACTIVE</div>
+      <div class="card-hd">
+        <div class="card-icon">🌪</div>
+        <div class="card-meta">
+          <div class="card-title">US THREAT STATUS</div>
+          <div class="card-desc">Active NWS alerts by severity. Direct API count of current tornado, hurricane, flood, and extreme weather warnings.</div>
+        </div>
+      </div>
+      <div class="live">
+        <div class="lr"><span class="ll">EXTREME</span><span class="lv loading" id="sig-extreme">—</span></div>
+        <div class="lr"><span class="ll">SEVERE</span><span class="lv loading" id="sig-severe">—</span></div>
+        <div class="lr"><span class="ll">MODERATE</span><span class="lv loading" id="sig-moderate">—</span></div>
+        <div class="lr"><span class="ll">TOTAL ACTIVE</span><span class="lv loading" id="sig-total">—</span></div>
+      </div>
+      <div id="sig-alerts" style="margin-top:6px;max-height:80px;overflow-y:auto;scrollbar-width:none;font-size:7.5px;line-height:1.7"></div>
+      <div class="tags"><span class="tag">NWS API</span><span class="tag">NO KEY</span><span class="tag">2m REFRESH</span></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ REALMAIN END ══ -->
+<div id="realmain-end"></div>
+
 <!-- ══ FOOTER ════════════════════════════════════════════ -->
 <footer>
   <span>J.A.R.V.I.S. OPS HUB // SOAL INDUSTRIES // CHARLOTTE NC</span>
@@ -1047,6 +1310,367 @@ async function loadTicker(){
   document.getElementById('ticker').innerHTML=mk(items)+mk(items);
 }
 
+/* ── LIVE PULSE: NWS ACTIVE ALERTS ──────────── */
+async function loadNWS(){
+  try {
+    const r=await sf('https://api.weather.gov/alerts/active?status=actual&message_type=alert&severity=Extreme,Severe&limit=20');
+    const d=await r.json();
+    const f=d.features||[];
+    const extreme=f.filter(a=>a.properties.severity==='Extreme').length;
+    const severe=f.filter(a=>a.properties.severity==='Severe').length;
+    upd('nws-extreme',String(extreme)||'0',extreme>0?'crit':'up');
+    upd('nws-severe',String(severe)||'0',severe>0?'warn':'up');
+    upd('nws-total',String(f.length)||'0',f.length>0?'warn':'up');
+    const el=document.getElementById('nws-events');
+    if(el&&f.length){
+      el.innerHTML=f.slice(0,5).map(a=>{
+        const evt=escH((a.properties.event||'Alert').substring(0,28));
+        const area=escH((a.properties.areaDesc||'').split(';')[0].substring(0,30));
+        const sev=a.properties.severity==='Extreme'?'color:var(--r)':'color:var(--o)';
+        return `<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><span style="${sev};font-size:7.5px">${evt}</span> <span style="color:var(--dim);font-size:7px">${area}</span></div>`;
+      }).join('');
+    } else if(el){
+      el.innerHTML='<div style="color:var(--g);font-size:7.5px">No active extreme/severe alerts ✓</div>';
+    }
+  } catch(e){ upd('nws-total','ERR'); }
+}
+
+/* ── LIVE PULSE: NASA EONET ─────────────────── */
+async function loadEONET(){
+  try {
+    const r=await sf('https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=50');
+    const d=await r.json();
+    const evts=d.events||[];
+    const fires=evts.filter(e=>e.categories?.some(c=>c.id==='wildfires')).length;
+    const storms=evts.filter(e=>e.categories?.some(c=>c.id==='severeStorms'||c.id==='tropicalCyclone')).length;
+    const volc=evts.filter(e=>e.categories?.some(c=>c.id==='volcanoes')).length;
+    upd('eonet-fire',String(fires),fires>0?'warn':'up');
+    upd('eonet-storm',String(storms),storms>0?'warn':'up');
+    upd('eonet-volc',String(volc),volc>0?'warn':'up');
+    upd('eonet-total',String(evts.length),'up');
+    const el=document.getElementById('eonet-list');
+    if(el&&evts.length){
+      el.innerHTML=evts.slice(0,8).map(e=>{
+        const cat=e.categories?.[0]?.title||'Event';
+        const nm=escH((e.title||'').substring(0,40));
+        const ico=cat.includes('ire')?'🔥':cat.includes('torm')||cat.includes('yclone')?'🌀':cat.includes('olcan')?'🌋':'🌐';
+        return `<div style="padding:1px 0">${ico} <span style="color:var(--text)">${nm}</span> <span style="color:var(--dim2);font-size:6.5px">${cat}</span></div>`;
+      }).join('');
+    }
+  } catch(e){ upd('eonet-total','ERR'); }
+}
+
+/* ── LIVE PULSE: SPACE WEATHER ──────────────── */
+async function loadSpaceWx(){
+  try {
+    const r=await sf('https://services.swpc.noaa.gov/products/geospace/propagated-solar-wind-1-hour.json');
+    const d=await r.json();
+    const last=d[d.length-1];
+    if(last){
+      const speed=parseFloat(last[2])||0;
+      const bz=parseFloat(last[3])||0;
+      const density=parseFloat(last[4])||0;
+      upd('sw-wind',speed.toFixed(0)+' km/s',speed>600?'crit':speed>450?'warn':'up');
+      upd('sw-bz',bz.toFixed(1)+' nT',bz<-10?'crit':bz<-5?'warn':bz>5?'up':'');
+      upd('sw-density',density.toFixed(1)+' /cm³',density>20?'warn':'up');
+    }
+    const r2=await sf('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json');
+    const kd=await r2.json(); const kp=kd[kd.length-1];
+    if(kp){
+      const k=parseFloat(kp[1])||0;
+      upd('sw-kp',k.toFixed(1),k>=7?'crit':k>=5?'warn':'up');
+      const stormLvl=k>=9?'G5-EXTREME':k>=8?'G4-SEVERE':k>=7?'G3-STRONG':k>=6?'G2-MODERATE':k>=5?'G1-MINOR':'QUIET';
+      upd('sw-storm',stormLvl,k>=7?'crit':k>=5?'warn':'up');
+    }
+  } catch(e){ upd('sw-wind','ERR'); }
+}
+
+/* ── LIVE PULSE: ISS PANEL 2 ─────────────────── */
+async function loadISS2(){
+  try {
+    const r=await sf('https://api.wheretheiss.at/v1/satellites/25544');
+    const d=await r.json();
+    const lat=parseFloat(d.latitude).toFixed(2);
+    const lon=parseFloat(d.longitude).toFixed(2);
+    const alt=Math.round(d.altitude);
+    const vel=Math.round(d.velocity);
+    upd('iss2-lat',lat+'°','up');
+    upd('iss2-lon',lon+'°','up');
+    upd('iss2-alt',alt+' km','up');
+    upd('iss2-vel',vel.toLocaleString()+' km/h','up');
+    upd('iss2-vis',(d.visibility||'unknown').toUpperCase(),d.visibility==='daylight'?'up':'');
+  } catch(e){}
+}
+
+/* ── LIVE PULSE: SEISMIC ────────────────────── */
+async function loadSeismicPulse(){
+  try {
+    const r=await sf('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson');
+    const d=await r.json();
+    const f=(d.features||[]).sort((a,b)=>(b.properties.mag||0)-(a.properties.mag||0));
+    const max=(f[0]?.properties?.mag||0).toFixed(1);
+    upd('sq-count',String(f.length),f.length>50?'warn':'up');
+    upd('sq-max','M'+max,parseFloat(max)>=6?'crit':parseFloat(max)>=5?'warn':'up');
+    const el=document.getElementById('sq-list');
+    if(el&&f.length){
+      const now=Date.now();
+      el.innerHTML=f.slice(0,6).map(q=>{
+        const m=(q.properties.mag||0).toFixed(1);
+        const loc=escH((q.properties.place||'Unknown').substring(0,45));
+        const h=Math.round((now-(q.properties.time||now))/3600000);
+        const clr=parseFloat(m)>=6?'var(--r)':parseFloat(m)>=5?'var(--o)':parseFloat(m)>=4?'var(--y)':'var(--dim)';
+        return `<div style="display:flex;gap:5px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:7.5px">
+          <span style="color:${clr};font-weight:bold;min-width:28px">M${m}</span>
+          <span style="flex:1;color:var(--text)">${loc}</span>
+          <span style="color:var(--dim2);min-width:20px">${h}h</span></div>`;
+      }).join('');
+    }
+  } catch(e){ upd('sq-count','ERR'); }
+}
+
+/* ── LIVE PULSE: HACKER NEWS ─────────────────── */
+async function loadHN(){
+  try {
+    const r=await sf('https://hacker-news.firebaseio.com/v0/topstories.json');
+    const ids=await r.json();
+    const stories=await Promise.allSettled(ids.slice(0,8).map(id=>
+      sf(`https://hacker-news.firebaseio.com/v0/item/${id}.json`).then(r=>r.json())
+    ));
+    const el=document.getElementById('hn-list');
+    if(!el) return;
+    el.innerHTML=stories.filter(s=>s.status==='fulfilled'&&s.value).map((s,i)=>{
+      const st=s.value;
+      const title=escH((st.title||'').substring(0,72));
+      const pts=st.score||0;
+      let domain='ycombinator.com';
+      try{ if(st.url) domain=new URL(st.url).hostname.replace('www.','').substring(0,22); }catch(e){}
+      const href=escH(st.url||'https://news.ycombinator.com/item?id='+st.id);
+      return `<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer" onclick="window.open('${href}','_blank')">
+        <div style="font-size:8px;color:var(--text);line-height:1.3">${i+1}. ${title}</div>
+        <div style="font-size:6.5px;color:var(--dim);margin-top:1px">${pts}pts · ${escH(domain)}</div>
+      </div>`;
+    }).join('');
+  } catch(e){ const el=document.getElementById('hn-list'); if(el) el.innerHTML='<div style="color:var(--dim);font-size:7.5px">Feed unavailable</div>'; }
+}
+
+/* ── SIGNAL: WIKIPEDIA RECENT CHANGES ───────── */
+async function loadWikiChanges(){
+  try {
+    const url='https://en.wikipedia.org/w/api.php?action=query&list=recentchanges&rcshow=!bot&rcprop=title|timestamp|comment|sizes&rclimit=25&rcnamespace=0&rctype=edit&format=json&origin=*';
+    const r=await sf(url);
+    const d=await r.json();
+    const changes=(d.query?.recentchanges||[]);
+    const human=changes.length;
+    // estimate rate: last change vs now
+    const newest=changes[0]?.timestamp?new Date(changes[0].timestamp):null;
+    const oldest=changes[changes.length-1]?.timestamp?new Date(changes[changes.length-1].timestamp):null;
+    let rate='—';
+    if(newest&&oldest){
+      const mins=(newest-oldest)/60000||1;
+      rate=(changes.length/mins).toFixed(1)+'/min';
+    }
+    upd('wiki-rate',rate,'up');
+    upd('wiki-human',String(human),'up');
+    const el=document.getElementById('wiki-list');
+    if(el&&changes.length){
+      el.innerHTML=changes.slice(0,15).map(c=>{
+        const title=escH((c.title||'').substring(0,52));
+        const ts=c.timestamp?new Date(c.timestamp):new Date();
+        const ago=Math.max(0,Math.round((Date.now()-ts)/60000));
+        const agoStr=ago<1?'just now':ago<60?ago+'m ago':Math.round(ago/60)+'h ago';
+        const sizediff=(c.newlen||0)-(c.oldlen||0);
+        const diff=sizediff>0?`<span style="color:var(--g)">+${sizediff}</span>`:`<span style="color:var(--r)">${sizediff}</span>`;
+        return `<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer" onclick="window.open('https://en.wikipedia.org/wiki/${encodeURIComponent(c.title||'')}','_blank')">
+          <div style="font-size:8px;color:var(--text);line-height:1.3">${title}</div>
+          <div style="font-size:6.5px;color:var(--dim);margin-top:1px">${agoStr} · ${diff} bytes</div>
+        </div>`;
+      }).join('');
+    }
+  } catch(e){ const el=document.getElementById('wiki-list'); if(el) el.innerHTML='<div style="color:var(--dim);font-size:7.5px">Feed unavailable</div>'; }
+}
+
+/* ── SIGNAL: REDDIT r/WORLDNEWS ─────────────── */
+async function loadRedditPulse(){
+  try {
+    const enc=encodeURIComponent('https://www.reddit.com/r/worldnews/hot.json?limit=10&raw_json=1');
+    const r=await sf(`https://api.allorigins.win/get?url=${enc}`);
+    const o=await r.json();
+    const d=JSON.parse(o.contents);
+    const posts=(d.data?.children||[]).filter(p=>!p.data?.stickied);
+    const el=document.getElementById('reddit-list');
+    if(!el) return;
+    el.innerHTML=posts.slice(0,8).map(p=>{
+      const post=p.data;
+      const title=escH((post.title||'').substring(0,90));
+      const score=post.score>999?(post.score/1000).toFixed(1)+'K':String(post.score||0);
+      const comms=post.num_comments>999?(post.num_comments/1000).toFixed(1)+'K':String(post.num_comments||0);
+      const domain=escH((post.domain||'').substring(0,24));
+      const href=escH('https://reddit.com'+post.permalink);
+      const hrs=Math.round((Date.now()-(post.created_utc||0)*1000)/3600000);
+      const age=hrs<1?'<1h ago':hrs<24?hrs+'h ago':Math.round(hrs/24)+'d ago';
+      const flair=post.link_flair_text?`<span style="background:rgba(255,136,68,0.15);color:var(--o);padding:0 4px;border-radius:2px;font-size:6px">${escH(post.link_flair_text.substring(0,12))}</span> `:'';
+      return `<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer" onclick="window.open('${href}','_blank')">
+        <div style="font-size:7.5px;color:var(--text);line-height:1.35">${flair}${title}</div>
+        <div style="font-size:6.5px;color:var(--dim);margin-top:2px">▲ ${score} · 💬 ${comms} · ${domain} · ${age}</div>
+      </div>`;
+    }).join('');
+  } catch(e){ const el=document.getElementById('reddit-list'); if(el) el.innerHTML='<div style="color:var(--dim);font-size:7.5px">Feed unavailable</div>'; }
+}
+
+/* ── SIGNAL: LAST-HOUR SEISMIC ───────────────── */
+async function loadSeismicHour(){
+  try {
+    const r=await sf('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson');
+    const d=await r.json();
+    const f=(d.features||[]).sort((a,b)=>(b.properties.mag||0)-(a.properties.mag||0));
+    const sig=f.filter(q=>(q.properties.mag||0)>=4).length;
+    const max=(f[0]?.properties?.mag||0).toFixed(1);
+    upd('sq1h-count',String(f.length),f.length>20?'warn':'up');
+    upd('sq1h-max','M'+max,parseFloat(max)>=5?'crit':parseFloat(max)>=4?'warn':'up');
+    upd('sq1h-sig',String(sig),sig>0?'warn':'up');
+    const el=document.getElementById('sq1h-list');
+    if(el&&f.length){
+      const now=Date.now();
+      el.innerHTML=f.slice(0,6).map(q=>{
+        const m=(q.properties.mag||0).toFixed(1);
+        const loc=escH((q.properties.place||'Unknown').substring(0,44));
+        const mins=Math.max(0,Math.round((now-(q.properties.time||now))/60000));
+        const age=mins<2?'just now':mins+'m ago';
+        const clr=parseFloat(m)>=5?'var(--r)':parseFloat(m)>=4?'var(--o)':parseFloat(m)>=3?'var(--y)':'var(--dim)';
+        return `<div style="display:flex;gap:5px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:7.5px">
+          <span style="color:${clr};font-weight:bold;min-width:26px">M${m}</span>
+          <span style="flex:1;color:var(--text)">${loc}</span>
+          <span style="color:var(--dim2);white-space:nowrap">${age}</span></div>`;
+      }).join('');
+    } else if(el){
+      el.innerHTML='<div style="color:var(--g);font-size:7.5px">No significant quakes this hour ✓</div>';
+    }
+  } catch(e){ upd('sq1h-count','ERR'); }
+}
+
+/* ── SIGNAL: GLOBAL SKIES ───────────────────── */
+async function loadGlobalSkies(){
+  try {
+    const r=await sf('https://opensky-network.org/api/states/all');
+    const d=await r.json();
+    const all=(d.states||[]);
+    const total=all.length;
+    const onGround=all.filter(s=>s[8]===true).length;
+    const airborne=total-onGround;
+    const disp=total>999?(total/1000).toFixed(1)+'K':String(total);
+    upd('sky-global',disp,'up');
+    upd('sky-ground',onGround.toLocaleString(),'');
+    upd('sky-air',airborne.toLocaleString(),'up');
+    const bar=document.getElementById('sky-bar-fill');
+    if(bar) bar.style.width=Math.min(total/20000,1)*100+'%';
+  } catch(e){
+    // fallback to N. America count if global fails
+    upd('sky-global','RATE LIMITED');
+  }
+}
+
+/* ── SIGNAL: N. AMERICA COUNT FOR SIGNAL TAB ── */
+async function loadSignalNA(){
+  try {
+    // Try N. America bounding box first (lighter)
+    const r=await sf('https://opensky-network.org/api/states/all?lamin=24&lomin=-125&lamax=50&lomax=-66');
+    const d=await r.json();
+    const states=d.states||[];
+    const n=states.length;
+    const onGnd=states.filter(s=>s[8]===true).length;
+    upd('sky-na',n.toLocaleString()+' A/C','up');
+    upd('sky-global','~'+(n*5.5/1000).toFixed(0)+'K est','');
+    upd('sky-ground',onGnd.toLocaleString(),'');
+    upd('sky-air',(n-onGnd).toLocaleString(),'up');
+    const bar=document.getElementById('sky-bar-fill');
+    if(bar) bar.style.width=Math.min(n/8000,1)*100+'%';
+  } catch(e){ upd('sky-na','—'); }
+}
+
+/* ── SIGNAL: UNIFIED FEED ───────────────────── */
+let _signalCache=[];
+function buildSignalFeed(newEvents){
+  _signalCache=[..._signalCache,...newEvents].sort((a,b)=>b.ts-a.ts).slice(0,40);
+  const el=document.getElementById('signal-feed');
+  if(!el) return;
+  const now=Date.now();
+  el.innerHTML=_signalCache.map(ev=>{
+    const mins=Math.max(0,Math.round((now-ev.ts)/60000));
+    const age=mins<1?'just now':mins<60?mins+'m ago':Math.round(mins/60)+'h ago';
+    const clrMap={quake:'var(--y)',weather:'var(--r)',nasa:'var(--o)',space:'var(--p)',iss:'var(--g)'};
+    const clr=clrMap[ev.type]||'var(--b)';
+    const srcMap={quake:'🌐 USGS',weather:'⚠️ NWS',nasa:'🌋 NASA',space:'☀️ SWPC',iss:'🛰 ISS'};
+    const src=srcMap[ev.type]||'📡';
+    return `<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:6px;align-items:flex-start">
+      <span style="color:${clr};font-size:6px;min-width:52px;padding-top:1px">${src}</span>
+      <span style="flex:1;font-size:7.5px;color:var(--text);line-height:1.3">${ev.msg}</span>
+      <span style="color:var(--dim2);font-size:6.5px;white-space:nowrap">${age}</span>
+    </div>`;
+  }).join('');
+}
+
+async function loadSignalFeed(){
+  const events=[];
+  try {
+    const r=await sf('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson');
+    const d=await r.json();
+    (d.features||[]).forEach(q=>{
+      const m=(q.properties.mag||0).toFixed(1);
+      if(parseFloat(m)<1.5) return;
+      const loc=(q.properties.place||'Unknown').substring(0,50);
+      events.push({ts:q.properties.time||Date.now(),type:'quake',msg:`M${m} — ${loc}`});
+    });
+  } catch(e){}
+  try {
+    const r=await sf('https://api.weather.gov/alerts/active?status=actual&message_type=alert&severity=Extreme,Severe&limit=10');
+    const d=await r.json();
+    (d.features||[]).forEach(a=>{
+      const evt=(a.properties.event||'Alert').substring(0,30);
+      const area=(a.properties.areaDesc||'').split(';')[0].substring(0,30);
+      const onset=a.properties.onset?new Date(a.properties.onset).getTime():Date.now();
+      events.push({ts:onset,type:'weather',msg:`${evt} — ${area}`});
+    });
+  } catch(e){}
+  try {
+    const r=await sf('https://eonet.gsfc.nasa.gov/api/v3/events?status=open&limit=15');
+    const d=await r.json();
+    (d.events||[]).forEach(ev=>{
+      const title=(ev.title||'').substring(0,50);
+      const ts=ev.geometry?.[0]?.date?new Date(ev.geometry[0].date).getTime():Date.now()-86400000;
+      events.push({ts,type:'nasa',msg:`${title}`});
+    });
+  } catch(e){}
+  buildSignalFeed(events);
+}
+
+/* ── SIGNAL: NWS DETAIL ─────────────────────── */
+async function loadSignalNWS(){
+  try {
+    const r=await sf('https://api.weather.gov/alerts/active?status=actual&message_type=alert&limit=50');
+    const d=await r.json();
+    const f=d.features||[];
+    const extreme=f.filter(a=>a.properties.severity==='Extreme').length;
+    const severe=f.filter(a=>a.properties.severity==='Severe').length;
+    const moderate=f.filter(a=>a.properties.severity==='Moderate').length;
+    upd('sig-extreme',String(extreme)||'0',extreme>0?'crit':'up');
+    upd('sig-severe',String(severe)||'0',severe>0?'warn':'up');
+    upd('sig-moderate',String(moderate)||'0',moderate>0?'':'up');
+    upd('sig-total',String(f.length)||'0',f.length>5?'warn':'up');
+    const el=document.getElementById('sig-alerts');
+    if(el&&f.length){
+      el.innerHTML=f.slice(0,5).map(a=>{
+        const evt=escH((a.properties.event||'Alert').substring(0,30));
+        const area=escH((a.properties.areaDesc||'').split(';')[0].substring(0,32));
+        const sev=a.properties.severity;
+        const clr=sev==='Extreme'?'color:var(--r)':sev==='Severe'?'color:var(--o)':'color:var(--y)';
+        return `<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span style="${clr};font-size:7.5px">${evt}</span> <span style="color:var(--dim);font-size:7px">${area}</span></div>`;
+      }).join('');
+    } else if(el){
+      el.innerHTML='<div style="color:var(--g);font-size:7.5px">No active extreme/severe alerts ✓</div>';
+    }
+  } catch(e){ upd('sig-total','ERR'); }
+}
+
 /* ── BOOT ───────────────────────────────────── */
 async function boot(){
   const jobs=[
@@ -1058,17 +1682,32 @@ async function boot(){
     ['iss',     loadISS],
     ['weather', loadWeather],
     ['ticker',  loadTicker],
+    ['nws',     loadNWS],
+    ['eonet',   loadEONET],
+    ['spacewx',  loadSpaceWx],
+    ['iss2',    loadISS2],
+    ['seismic',  loadSeismicPulse],
+    ['hn',      loadHN],
+    ['wiki',    loadWikiChanges],
+    ['reddit',  loadRedditPulse],
+    ['sq1h',    loadSeismicHour],
+    ['skyNA',   loadSignalNA],
+    ['signalNWS',loadSignalNWS],
+    ['sigFeed', loadSignalFeed],
   ];
   const res=await Promise.allSettled(jobs.map(([,fn])=>fn()));
   res.forEach((r,i)=>{ if(r.status==='rejected') console.warn(`[OpsHub] ${jobs[i][0]}:`,r.reason?.message); });
   document.getElementById('last-sync').textContent='LAST SYNC: '+new Date().toISOString().replace('T',' ').split('.')[0]+'Z';
 }
 
-async function issLoop(){ while(true){ await new Promise(r=>setTimeout(r,10000)); try{await loadISS();}catch(e){} } }
-
+setInterval(()=>Promise.allSettled([loadQuakes(),loadFlights(),loadFear(),loadCrypto(),loadMarkets(),loadWeather()]),90000);
+setInterval(()=>Promise.allSettled([loadNWS(),loadEONET(),loadSpaceWx(),loadSeismicPulse()]),120000);
+setInterval(()=>loadHN(),300000);
+setInterval(()=>Promise.allSettled([loadWikiChanges(),loadSeismicHour(),loadSignalNWS(),loadSignalFeed()]),30000);
+setInterval(()=>Promise.allSettled([loadRedditPulse()]),300000);
+setInterval(()=>Promise.allSettled([loadSignalNA()]),60000);
 boot();
 issLoop();
-setInterval(()=>Promise.allSettled([loadQuakes(),loadFlights(),loadFear(),loadCrypto(),loadMarkets(),loadWeather()]),90000);
 </script>
 </body>
 </html>
