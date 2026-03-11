@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long-Term Market Screener</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --border: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --accent-green: #3fb950;
+            --accent-red: #f85149;
+            --accent-blue: #58a6ff;
+            --accent-yellow: #d29922;
+            --accent-purple: #bc8cff;
+            --accent-orange: #f0883e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; }
+        .header { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 24px; font-weight: 600; }
+        .header h1 span { color: var(--accent-blue); }
+        .header-meta { display: flex; gap: 20px; align-items: center; color: var(--text-secondary); font-size: 13px; }
+        .header-meta .live-dot { width: 8px; height: 8px; background: var(--accent-green); border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .controls { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .controls label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .filter-group { display: flex; flex-direction: column; gap: 4px; }
+        select, input[type="number"], input[type="text"] { background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-primary); padding: 8px 12px; border-radius: 6px; font-size: 14px; outline: none; }
+        select:focus, input:focus { border-color: var(--accent-blue); }
+        .btn { padding: 10px 20px; border-radius: 6px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: var(--accent-blue); color: #fff; }
+        .btn-primary:hover { background: #79c0ff; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--border); }
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; padding: 24px 32px; }
+        .stat-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+        .stat-card .label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .stat-card .value { font-size: 28px; font-weight: 700; }
+        .stat-card .sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+        .main-content { padding: 0 32px 32px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .section-header h2 { font-size: 18px; font-weight: 600; }
+        .table-wrapper { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: var(--bg-tertiary); padding: 12px 16px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); font-weight: 600; cursor: pointer; user-select: none; white-space: nowrap; position: sticky; top: 0; }
+        th:hover { color: var(--text-primary); }
+        th .sort-arrow { margin-left: 4px; opacity: 0.3; }
+        th.sorted .sort-arrow { opacity: 1; color: var(--accent-blue); }
+        td { padding: 14px 16px; border-top: 1px solid var(--border); font-size: 14px; white-space: nowrap; }
+        tr:hover td { background: rgba(88, 166, 255, 0.04); }
+        .ticker-cell { display: flex; align-items: center; gap: 10px; }
+        .ticker-symbol { font-weight: 700; color: var(--accent-blue); font-size: 15px; }
+        .ticker-name { color: var(--text-secondary); font-size: 12px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+        .positive { color: var(--accent-green); }
+        .negative { color: var(--accent-red); }
+        .score-bar { display: flex; align-items: center; gap: 8px; }
+        .score-bar-track { flex: 1; height: 6px; background: var(--bg-tertiary); border-radius: 3px; overflow: hidden; min-width: 60px; }
+        .score-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+        .score-value { font-weight: 700; font-size: 14px; min-width: 32px; text-align: right; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+        .badge-strong-buy { background: rgba(63, 185, 80, 0.15); color: var(--accent-green); }
+        .badge-buy { background: rgba(63, 185, 80, 0.1); color: #7ee787; }
+        .badge-hold { background: rgba(210, 153, 34, 0.15); color: var(--accent-yellow); }
+        .badge-sector { background: rgba(88, 166, 255, 0.1); color: var(--accent-blue); }
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(13, 17, 23, 0.85); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; gap: 16px; }
+        .loading-overlay.active { display: flex; }
+        .spinner { width: 48px; height: 48px; border: 3px solid var(--border); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { color: var(--text-secondary); font-size: 14px; }
+        .progress-bar { width: 300px; height: 4px; background: var(--bg-tertiary); border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent-blue); border-radius: 2px; transition: width 0.3s; width: 0%; }
+        .disclaimer { text-align: center; padding: 20px 32px; color: var(--text-secondary); font-size: 11px; border-top: 1px solid var(--border); margin-top: 40px; }
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+        .empty-state h3 { font-size: 18px; margin-bottom: 8px; color: var(--text-primary); }
+        .criteria-pills { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 32px; }
+        .pill { display: flex; align-items: center; gap: 6px; padding: 6px 14px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 20px; font-size: 12px; color: var(--text-secondary); }
+        .pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+        .detail-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(13, 17, 23, 0.9); z-index: 2000; justify-content: center; align-items: center; }
+        .detail-modal.active { display: flex; }
+        .detail-content { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; padding: 32px; }
+        .detail-content h2 { margin-bottom: 4px; }
+        .detail-content .subtitle { color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; }
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .detail-item { padding: 12px; background: var(--bg-tertiary); border-radius: 8px; }
+        .detail-item .label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .detail-item .value { font-size: 18px; font-weight: 600; }
+        .close-btn { float: right; background: none; border: none; color: var(--text-secondary); font-size: 24px; cursor: pointer; padding: 4px 8px; }
+        .close-btn:hover { color: var(--text-primary); }
+        .scoring-breakdown { margin-top: 16px; }
+        .scoring-breakdown h4 { font-size: 14px; margin-bottom: 12px; color: var(--text-secondary); }
+        .breakdown-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+        .breakdown-item:last-child { border-bottom: none; }
+        @media (max-width: 768px) { .header { padding: 16px; } .controls { padding: 12px 16px; } .dashboard { padding: 16px; grid-template-columns: repeat(2, 1fr); } .main-content { padding: 0 16px 16px; } .table-wrapper { overflow-x: auto; } .detail-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loadingText">Fetching market data...</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+    <div class="detail-modal" id="detailModal">
+        <div class="detail-content" id="detailContent"></div>
+    </div>
+    <header class="header">
+        <h1><span>&#9679;</span> Long-Term Market Screener</h1>
+        <div class="header-meta">
+            <span><span class="live-dot"></span> Live Data</span>
+            <span id="lastUpdated">--</span>
+            <a href="index.html" style="color:var(--text-secondary);font-size:12px;text-decoration:none;border:1px solid var(--border);padding:4px 10px;border-radius:4px">← OPS HUB</a>
+        </div>
+    </header>
+    <div class="controls">
+        <div class="filter-group">
+            <label>Sector</label>
+            <select id="sectorFilter">
+                <option value="all">All Sectors</option>
+                <option value="Technology">Technology</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Financial Services">Financial Services</option>
+                <option value="Consumer Cyclical">Consumer Cyclical</option>
+                <option value="Industrials">Industrials</option>
+                <option value="Communication Services">Communication Services</option>
+                <option value="Consumer Defensive">Consumer Defensive</option>
+                <option value="Energy">Energy</option>
+                <option value="Utilities">Utilities</option>
+                <option value="Real Estate">Real Estate</option>
+                <option value="Basic Materials">Basic Materials</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Market Cap</label>
+            <select id="capFilter">
+                <option value="all">All Caps</option>
+                <option value="mega">Mega ($200B+)</option>
+                <option value="large">Large ($10B-$200B)</option>
+                <option value="mid">Mid ($2B-$10B)</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Min Score</label>
+            <input type="number" id="minScore" min="0" max="100" value="50" style="width:80px">
+        </div>
+        <div class="filter-group">
+            <label>Strategy</label>
+            <select id="strategyFilter">
+                <option value="balanced">Balanced Growth</option>
+                <option value="value">Deep Value</option>
+                <option value="growth">High Growth</option>
+                <option value="dividend">Dividend Focus</option>
+                <option value="momentum">Quality Momentum</option>
+            </select>
+        </div>
+        <div class="filter-group" style="align-self: flex-end;">
+            <button class="btn btn-primary" id="runScreener" onclick="runScreener()">Run Screener</button>
+        </div>
+        <div class="filter-group" style="align-self: flex-end;">
+            <button class="btn btn-secondary" onclick="exportCSV()">Export CSV</button>
+        </div>
+    </div>
+    <div class="criteria-pills" id="criteriaPills">
+        <div class="pill"><span class="dot" style="background:var(--accent-green)"></span> P/E &lt; 25</div>
+        <div class="pill"><span class="dot" style="background:var(--accent-blue)"></span> Revenue Growth &gt; 5%</div>
+        <div class="pill"><span class="dot" style="background:var(--accent-purple)"></span> ROE &gt; 12%</div>
+        <div class="pill"><span class="dot" style="background:var(--accent-yellow)"></span> Debt/Equity &lt; 1.5</div>
+        <div class="pill"><span class="dot" style="background:var(--accent-orange)"></span> Positive Free Cash Flow</div>
+        <div class="pill"><span class="dot" style="background:var(--accent-green)"></span> Insider Ownership</div>
+    </div>
+    <div class="dashboard" id="dashboard">
+        <div class="stat-card"><div class="label">Stocks Screened</div><div class="value" id="totalScreened">--</div><div class="sub">from S&amp;P 500 + NASDAQ 100</div></div>
+        <div class="stat-card"><div class="label">Passed Filter</div><div class="value positive" id="totalPassed">--</div><div class="sub">meeting all criteria</div></div>
+        <div class="stat-card"><div class="label">Avg Composite Score</div><div class="value" style="color:var(--accent-blue)" id="avgScore">--</div><div class="sub">out of 100</div></div>
+        <div class="stat-card"><div class="label">Top Sector</div><div class="value" style="color:var(--accent-purple);font-size:20px" id="topSector">--</div><div class="sub">most represented</div></div>
+        <div class="stat-card"><div class="label">Avg Dividend Yield</div><div class="value" style="color:var(--accent-yellow)" id="avgDividend">--</div><div class="sub">of screened stocks</div></div>
+    </div>
+    <div class="main-content">
+        <div class="section-header">
+            <h2>Screener Results</h2>
+            <span style="color:var(--text-secondary);font-size:13px" id="resultCount">Click "Run Screener" to start</span>
+        </div>
+        <div class="table-wrapper">
+            <table id="resultsTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">Rank <span class="sort-arrow">&#9650;</span></th>
+                        <th onclick="sortTable(1)">Ticker <span class="sort-arrow">&#9650;</span></th>
+                        <th onclick="sortTable(2)">Price <span class="sort-arrow">&#9650;</span></th>
+                        <th onclick="sortTable(3)">Mkt Cap <span class="sort-arrow">&#9650;</span></th>
+                        <th onclick="sortTable(4)">P/E <span class="sort-arrow">&#9650;</span></th>
+                        <th onclick="sortTable(5)">Rev Growth <span class="sort-arrow">&#9650;</span></th>
+                        <th onclick="sortTable(6)">ROE <span class="sort-arrow">&#9650;</span></th>
+                        <th onclick="sortTable(7)">D/E <span class="sort-arrow">&#9650;</span></th>
+                        <th onclick="sortTable(8)">FCF Yield <span class="sort-arrow">&#9650;</span></th>
+                        <th onclick="sortTable(9)">Div Yield <span class="sort-arrow">&#9650;</span></th>
+                        <th onclick="sortTable(10)">Score <span class="sort-arrow">&#9650;</span></th>
+                        <th onclick="sortTable(11)">Signal <span class="sort-arrow">&#9650;</span></th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody">
+                    <tr><td colspan="12"><div class="empty-state"><h3>Ready to Screen</h3><p>Configure your filters and click "Run Screener" to find long-term opportunities</p></div></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="disclaimer">This screener is for informational and educational purposes only. It does not constitute financial advice. Always do your own research and consult a qualified financial advisor before making investment decisions.</div>
+
+    <script>
+    const STOCK_UNIVERSE = [
+        'AAPL','MSFT','GOOGL','AMZN','NVDA','META','TSLA','AVGO','ORCL','CRM',
+        'AMD','ADBE','INTC','CSCO','ACN','TXN','QCOM','IBM','NOW','INTU',
+        'AMAT','MU','LRCX','KLAC','SNPS','CDNS','MRVL','FTNT','PANW','CRWD',
+        'UNH','JNJ','LLY','ABBV','MRK','PFE','TMO','ABT','DHR','BMY',
+        'AMGN','MDT','ISRG','GILD','VRTX','CI','ELV','SYK','REGN','ZTS',
+        'BRK-B','JPM','V','MA','BAC','WFC','GS','MS','SPGI','BLK',
+        'AXP','C','CB','MMC','PGR','ICE','CME','AON','SCHW','USB',
+        'WMT','PG','KO','PEP','COST','MCD','NKE','SBUX','TGT','LOW',
+        'HD','TJX','BKNG','ABNB','MAR','HLT','DG','DLTR','ORLY','AZO',
+        'CAT','DE','UNP','RTX','HON','LMT','BA','GE','MMM','UPS',
+        'FDX','EMR','ETN','ITW','PH','ROK','FAST','WM','RSG','CARR',
+        'GOOG','DIS','NFLX','CMCSA','T','VZ','TMUS','CHTR','EA','TTWO',
+        'XOM','CVX','COP','SLB','EOG','MPC','PSX','VLO','OXY','PXD',
+        'NEE','DUK','SO','D','AEP','SRE','AMT','PLD','CCI','EQIX',
+        'LIN','APD','SHW','ECL','NEM','FCX','DOW','DD','PPG','VMC'
+    ];
+
+    let allResults = [];
+    let sortCol = 10;
+    let sortAsc = false;
+
+    async function fetchBatchQuotes(symbols) {
+        const chunk = symbols.join(',');
+        const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(chunk)}&fields=regularMarketPrice,regularMarketChangePercent,regularMarketChange,regularMarketVolume,averageDailyVolume3Month,trailingPE,forwardPE,dividendYield,beta,marketCap,fiftyTwoWeekHigh,fiftyTwoWeekLow,trailingAnnualDividendYield,returnOnEquity,revenueGrowth,debtToEquity,profitMargins,currentRatio,pegRatio,epsTrailingTwelveMonths`;
+        const proxies = [
+            { url: `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`, wrapper: true },
+            { url: `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl.replace('query1','query2'))}`, wrapper: true },
+            { url: `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`, wrapper: false },
+        ];
+
+        function parse(data, wrapper) {
+            let d = data;
+            if (wrapper && data?.contents) { try { d = JSON.parse(data.contents); } catch(e) { return []; } }
+            return d?.quoteResponse?.result || [];
+        }
+
+        for (const p of proxies) {
+            try {
+                const resp = await fetch(p.url, { signal: AbortSignal.timeout(10000), referrerPolicy: 'no-referrer' });
+                if (!resp.ok) continue;
+                const data = await resp.json();
+                const results = parse(data, p.wrapper);
+                if (results.length > 0) return results;
+            } catch(e) { continue; }
+        }
+        return [];
+    }
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+    function updateProgress(pct) { document.getElementById('progressFill').style.width = pct + '%'; }
+
+    function computeScore(stock, strategy) {
+        let score = 0;
+        let breakdown = {};
+        const pe = stock.trailingPE || stock.forwardPE || 999;
+        const fpe = stock.forwardPE || pe;
+        const roe = stock.returnOnEquity * 100 || 0;
+        const revGrowth = stock.revenueGrowth * 100 || 0;
+        const de = stock.debtToEquity || 0;
+        const fcfYield = stock.freeCashflowYield || 0;
+        const divYield = stock.dividendYield * 100 || 0;
+        const profitMargin = stock.profitMargins * 100 || 0;
+        const beta = stock.beta || 1;
+        const pegRatio = stock.pegRatio || 99;
+        const w = { balanced:{value:0.25,growth:0.25,quality:0.25,safety:0.25}, value:{value:0.45,growth:0.10,quality:0.25,safety:0.20}, growth:{value:0.10,growth:0.45,quality:0.25,safety:0.20}, dividend:{value:0.20,growth:0.10,quality:0.25,safety:0.20,dividend:0.25}, momentum:{value:0.15,growth:0.30,quality:0.35,safety:0.20} }[strategy] || {value:0.25,growth:0.25,quality:0.25,safety:0.25};
+        let v=0; if(pe>0&&pe<10)v=40; else if(pe<15)v=35; else if(pe<20)v=28; else if(pe<25)v=20; else if(pe<30)v=10; else if(pe<40)v=5; if(fpe>0&&fpe<pe)v+=15; else if(fpe>0&&fpe<20)v+=10; if(pegRatio>0&&pegRatio<1)v+=30; else if(pegRatio<1.5)v+=20; else if(pegRatio<2)v+=10; if(fcfYield>8)v+=15; else if(fcfYield>5)v+=10; else if(fcfYield>3)v+=5; v=Math.min(v,100); breakdown['Value']=v;
+        let g=0; if(revGrowth>30)g=40; else if(revGrowth>20)g=35; else if(revGrowth>15)g=28; else if(revGrowth>10)g=22; else if(revGrowth>5)g=15; else if(revGrowth>0)g=8; const eg=(stock.earningsQuarterlyGrowth||0)*100; if(eg>25)g+=35; else if(eg>15)g+=25; else if(eg>10)g+=18; else if(eg>5)g+=10; else if(eg>0)g+=5; if(revGrowth>0&&eg>revGrowth)g+=15; else if(eg>0)g+=8; g=Math.min(g,100); breakdown['Growth']=g;
+        let q=0; if(roe>25)q=35; else if(roe>20)q=28; else if(roe>15)q=22; else if(roe>12)q=15; else if(roe>8)q=8; if(profitMargin>25)q+=30; else if(profitMargin>20)q+=25; else if(profitMargin>15)q+=20; else if(profitMargin>10)q+=12; else if(profitMargin>5)q+=6; if(fcfYield>0)q+=20; if(stock.currentRatio>1.5)q+=15; else if(stock.currentRatio>1)q+=8; q=Math.min(q,100); breakdown['Quality']=q;
+        let s=0; if(de<0.3)s=35; else if(de<0.5)s=28; else if(de<0.8)s=22; else if(de<1.0)s=15; else if(de<1.5)s=8; if(beta<0.8)s+=25; else if(beta<1.0)s+=20; else if(beta<1.2)s+=15; else if(beta<1.5)s+=8; if(stock.marketCap>200e9)s+=25; else if(stock.marketCap>50e9)s+=20; else if(stock.marketCap>10e9)s+=12; else s+=5; s=Math.min(s,100); breakdown['Safety']=s;
+        let d2=0; if(divYield>4)d2=90; else if(divYield>3)d2=75; else if(divYield>2)d2=60; else if(divYield>1)d2=40; else if(divYield>0.5)d2=20; breakdown['Dividend']=d2;
+        score = v*(w.value||0)+g*(w.growth||0)+q*(w.quality||0)+s*(w.safety||0)+d2*(w.dividend||0);
+        return { score: Math.round(score), breakdown };
+    }
+
+    function getSignal(s) { if(s>=75)return'Strong Buy'; if(s>=60)return'Buy'; return'Hold'; }
+    function getSignalBadge(sig) { const c=sig==='Strong Buy'?'badge-strong-buy':sig==='Buy'?'badge-buy':'badge-hold'; return `<span class="badge ${c}">${sig}</span>`; }
+    function getScoreColor(s) { if(s>=75)return'var(--accent-green)'; if(s>=60)return'var(--accent-blue)'; if(s>=45)return'var(--accent-yellow)'; return'var(--accent-red)'; }
+    function formatMarketCap(v) { if(!v)return'--'; if(v>=1e12)return'$'+(v/1e12).toFixed(2)+'T'; if(v>=1e9)return'$'+(v/1e9).toFixed(1)+'B'; if(v>=1e6)return'$'+(v/1e6).toFixed(0)+'M'; return'$'+v.toLocaleString(); }
+    function capCategory(mc) { if(mc>=200e9)return'mega'; if(mc>=10e9)return'large'; if(mc>=2e9)return'mid'; return'small'; }
+
+    async function runScreener() {
+        const btn = document.getElementById('runScreener');
+        btn.disabled = true;
+        document.getElementById('loadingOverlay').classList.add('active');
+        document.getElementById('loadingText').textContent = 'Fetching market data for ' + STOCK_UNIVERSE.length + ' stocks...';
+        updateProgress(5);
+        const strategy = document.getElementById('strategyFilter').value;
+        const sectorFilter = document.getElementById('sectorFilter').value;
+        const capFilter = document.getElementById('capFilter').value;
+        const minScore = parseInt(document.getElementById('minScore').value) || 0;
+        updateCriteriaPills(strategy);
+        try {
+            const BATCH = 25;
+            const batches = [];
+            for(let i=0;i<STOCK_UNIVERSE.length;i+=BATCH) batches.push(STOCK_UNIVERSE.slice(i,i+BATCH));
+            document.getElementById('loadingText').textContent = `Fetching ${STOCK_UNIVERSE.length} stocks in ${batches.length} batches...`;
+            let rawQuotes = [];
+            for(let i=0;i<batches.length;i++) {
+                const r = await fetchBatchQuotes(batches[i]);
+                rawQuotes = rawQuotes.concat(r);
+                updateProgress(10 + (i/batches.length)*75);
+                await sleep(300);
+            }
+            if(rawQuotes.length===0) { document.getElementById('loadingText').textContent='API unavailable — demo mode (static scoring)'; await sleep(800); }
+            document.getElementById('loadingText').textContent = 'Scoring fundamentals...';
+            updateProgress(88);
+            const liveMap = {};
+            rawQuotes.forEach(q => { liveMap[q.symbol] = q; });
+            const processed = STOCK_UNIVERSE.map(sym => {
+                const q = liveMap[sym] || {};
+                const stock = {
+                    symbol: sym, name: q.shortName||q.longName||sym, price: q.regularMarketPrice||0,
+                    marketCap: q.marketCap||0, sector: q.sector||'Unknown', trailingPE: q.trailingPE||0,
+                    forwardPE: q.forwardPE||0, pegRatio: q.pegRatio||0,
+                    returnOnEquity: q.returnOnEquity||0, revenueGrowth: q.revenueGrowth||0,
+                    earningsQuarterlyGrowth: q.earningsQuarterlyGrowth||0,
+                    debtToEquity: (q.debtToEquity||0)/100, dividendYield: q.dividendYield||q.trailingAnnualDividendYield||0,
+                    profitMargins: q.profitMargins||0, beta: q.beta||1, currentRatio: q.currentRatio||0,
+                    fiftyTwoWeekHigh: q.fiftyTwoWeekHigh||0, fiftyTwoWeekLow: q.fiftyTwoWeekLow||0,
+                    epsTrailingTwelveMonths: q.epsTrailingTwelveMonths||0, freeCashflowYield: 0,
+                };
+                if(stock.epsTrailingTwelveMonths>0&&stock.price>0) stock.freeCashflowYield=(stock.epsTrailingTwelveMonths/stock.price)*100*0.8;
+                const {score,breakdown} = computeScore(stock, strategy);
+                stock.compositeScore = score; stock.breakdown = breakdown; stock.signal = getSignal(score);
+                return stock;
+            });
+            let filtered = processed.filter(s => {
+                if(sectorFilter!=='all'&&s.sector!==sectorFilter) return false;
+                if(capFilter!=='all'&&capCategory(s.marketCap)!==capFilter) return false;
+                if(s.compositeScore<minScore) return false;
+                return true;
+            });
+            filtered.sort((a,b) => b.compositeScore - a.compositeScore);
+            allResults = filtered;
+            updateProgress(100);
+            await sleep(300);
+            renderResults(filtered, STOCK_UNIVERSE.length);
+        } catch(err) {
+            console.error(err);
+            document.getElementById('loadingText').textContent = 'Error: ' + err.message;
+            await sleep(2000);
+        }
+        document.getElementById('loadingOverlay').classList.remove('active');
+        btn.disabled = false;
+    }
+
+    function renderResults(results, totalScreened) {
+        document.getElementById('totalScreened').textContent = totalScreened;
+        document.getElementById('totalPassed').textContent = results.length;
+        if(results.length>0) {
+            document.getElementById('avgScore').textContent = Math.round(results.reduce((a,b)=>a+b.compositeScore,0)/results.length)+'/100';
+            const sc={}; results.forEach(s=>{sc[s.sector]=(sc[s.sector]||0)+1;}); const top=Object.entries(sc).sort((a,b)=>b[1]-a[1])[0];
+            document.getElementById('topSector').textContent = top?top[0]:'--';
+            document.getElementById('avgDividend').textContent = (results.reduce((a,b)=>a+(b.dividendYield*100||0),0)/results.length).toFixed(2)+'%';
+        }
+        document.getElementById('resultCount').textContent = `Showing ${results.length} stocks ranked by composite score`;
+        document.getElementById('lastUpdated').textContent = 'Updated: '+new Date().toLocaleString();
+        const tbody = document.getElementById('resultsBody');
+        if(!results.length) { tbody.innerHTML='<tr><td colspan="12"><div class="empty-state"><h3>No Results</h3><p>Try adjusting filters or lowering minimum score</p></div></td></tr>'; return; }
+        tbody.innerHTML = results.map((s,i) => {
+            const rg=(s.revenueGrowth*100), roe=(s.returnOnEquity*100), dy=(s.dividendYield*100);
+            const sc=getScoreColor(s.compositeScore);
+            const priceStr = s.price>0 ? '$'+s.price.toFixed(2) : '<span style="color:#555">N/A</span>';
+            return `<tr onclick="showDetail(${i})" style="cursor:pointer">
+                <td style="color:var(--text-secondary)">${i+1}</td>
+                <td><div class="ticker-cell"><div><div class="ticker-symbol">${s.symbol}</div><div class="ticker-name">${s.name}</div></div></div></td>
+                <td>${priceStr}</td>
+                <td>${formatMarketCap(s.marketCap)}</td>
+                <td>${s.trailingPE>0?s.trailingPE.toFixed(1):'--'}</td>
+                <td class="${rg>=0?'positive':'negative'}">${rg.toFixed(1)}%</td>
+                <td class="${roe>=15?'positive':''}">${roe.toFixed(1)}%</td>
+                <td class="${s.debtToEquity<1?'positive':s.debtToEquity>2?'negative':''}">${s.debtToEquity.toFixed(2)}</td>
+                <td>${s.freeCashflowYield.toFixed(1)}%</td>
+                <td>${dy.toFixed(2)}%</td>
+                <td><div class="score-bar"><div class="score-bar-track"><div class="score-bar-fill" style="width:${s.compositeScore}%;background:${sc}"></div></div><span class="score-value" style="color:${sc}">${s.compositeScore}</span></div></td>
+                <td>${getSignalBadge(s.signal)}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    function showDetail(idx) {
+        const s = allResults[idx]; if(!s) return;
+        const sc=getScoreColor(s.compositeScore), rg=s.revenueGrowth*100, roe=s.returnOnEquity*100, dy=s.dividendYield*100;
+        const bdHTML = Object.entries(s.breakdown).map(([k,v]) => { const c=getScoreColor(v); return `<div class="breakdown-item"><span>${k}</span><div class="score-bar" style="width:200px"><div class="score-bar-track"><div class="score-bar-fill" style="width:${v}%;background:${c}"></div></div><span class="score-value" style="color:${c}">${v}</span></div></div>`; }).join('');
+        document.getElementById('detailContent').innerHTML = `<button class="close-btn" onclick="closeDetail()">&times;</button><h2>${s.symbol} <span style="color:var(--text-secondary);font-weight:400;font-size:16px">${s.name}</span></h2><div class="subtitle"><span class="badge badge-sector">${s.sector}</span></div><div class="detail-grid"><div class="detail-item"><div class="label">Composite Score</div><div class="value" style="color:${sc}">${s.compositeScore}/100</div></div><div class="detail-item"><div class="label">Signal</div><div class="value">${getSignalBadge(s.signal)}</div></div><div class="detail-item"><div class="label">Price</div><div class="value">${s.price>0?'$'+s.price.toFixed(2):'N/A'}</div></div><div class="detail-item"><div class="label">Market Cap</div><div class="value">${formatMarketCap(s.marketCap)}</div></div><div class="detail-item"><div class="label">P/E</div><div class="value">${s.trailingPE>0?s.trailingPE.toFixed(1):'N/A'}</div></div><div class="detail-item"><div class="label">Rev Growth</div><div class="value ${rg>=0?'positive':'negative'}">${rg.toFixed(1)}%</div></div><div class="detail-item"><div class="label">ROE</div><div class="value">${roe.toFixed(1)}%</div></div><div class="detail-item"><div class="label">Div Yield</div><div class="value">${dy.toFixed(2)}%</div></div></div><div class="scoring-breakdown"><h4>Score Breakdown</h4>${bdHTML}</div>`;
+        document.getElementById('detailModal').classList.add('active');
+    }
+
+    function closeDetail() { document.getElementById('detailModal').classList.remove('active'); }
+    document.getElementById('detailModal').addEventListener('click', function(e) { if(e.target===this)closeDetail(); });
+
+    function sortTable(ci) {
+        if(sortCol===ci)sortAsc=!sortAsc; else{sortCol=ci;sortAsc=ci<=1;}
+        const getV=(s,c)=>{switch(c){case 0:return allResults.indexOf(s);case 1:return s.symbol;case 2:return s.price;case 3:return s.marketCap;case 4:return s.trailingPE||999;case 5:return s.revenueGrowth;case 6:return s.returnOnEquity;case 7:return s.debtToEquity;case 8:return s.freeCashflowYield;case 9:return s.dividendYield;case 10:return s.compositeScore;case 11:return s.compositeScore;default:return 0;}};
+        allResults.sort((a,b)=>{let va=getV(a,sortCol),vb=getV(b,sortCol);if(typeof va==='string')return sortAsc?va.localeCompare(vb):vb.localeCompare(va);return sortAsc?va-vb:vb-va;});
+        renderResults(allResults, document.getElementById('totalScreened').textContent);
+        document.querySelectorAll('th').forEach((th,i)=>{th.classList.toggle('sorted',i===sortCol);const a=th.querySelector('.sort-arrow');if(a)a.innerHTML=(i===sortCol&&sortAsc)?'&#9650;':'&#9660;';});
+    }
+
+    function updateCriteriaPills(strategy) {
+        const pills={balanced:[{color:'var(--accent-green)',text:'Balanced Value + Growth'},{color:'var(--accent-blue)',text:'Quality Fundamentals'},{color:'var(--accent-purple)',text:'ROE > 12%'},{color:'var(--accent-yellow)',text:'Moderate Debt'}],value:[{color:'var(--accent-green)',text:'P/E < 20'},{color:'var(--accent-blue)',text:'PEG < 1.5'},{color:'var(--accent-yellow)',text:'Low D/E'}],growth:[{color:'var(--accent-green)',text:'Rev Growth > 15%'},{color:'var(--accent-blue)',text:'Earnings Acceleration'},{color:'var(--accent-purple)',text:'High ROE'}],dividend:[{color:'var(--accent-green)',text:'Div Yield > 2%'},{color:'var(--accent-blue)',text:'Stable Payout'},{color:'var(--accent-yellow)',text:'Low Debt'}],momentum:[{color:'var(--accent-green)',text:'Quality Score'},{color:'var(--accent-blue)',text:'Growth + ROE > 20%'}]};
+        document.getElementById('criteriaPills').innerHTML=(pills[strategy]||pills.balanced).map(p=>`<div class="pill"><span class="dot" style="background:${p.color}"></span> ${p.text}</div>`).join('');
+    }
+
+    function exportCSV() {
+        if(!allResults.length){alert('Run the screener first!');return;}
+        const h=['Rank','Symbol','Name','Sector','Price','Market Cap','P/E','Rev Growth %','ROE %','D/E','FCF Yield %','Div Yield %','Beta','Score','Signal'];
+        const rows=allResults.map((s,i)=>[i+1,s.symbol,`"${s.name}"`,s.sector,s.price>0?s.price.toFixed(2):'N/A',s.marketCap,s.trailingPE.toFixed(1),(s.revenueGrowth*100).toFixed(1),(s.returnOnEquity*100).toFixed(1),s.debtToEquity.toFixed(2),s.freeCashflowYield.toFixed(1),(s.dividendYield*100).toFixed(2),s.beta.toFixed(2),s.compositeScore,s.signal]);
+        const csv=[h.join(','),...rows.map(r=>r.join(','))].join('\n');
+        const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`long_term_screener_${new Date().toISOString().split('T')[0]}.csv`;a.click();URL.revokeObjectURL(url);
+    }
+
+    document.addEventListener('keydown', e => { if(e.key==='Escape')closeDetail(); });
+    </script>
+</body>
+</html>
