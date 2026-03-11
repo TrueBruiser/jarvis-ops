@@ -485,7 +485,7 @@ footer {
 
   <div class="header-right">
     <div id="clock">--:--:-- UTC</div>
-    <div class="threat" id="threat">THREAT: —</div>
+    <div class="threat" id="threat">THREAT: MODERATE</div>
   </div>
 </header>
 
@@ -559,13 +559,13 @@ footer {
   <div class="grid grid-3">
 
     <!-- WORLDVIEW GLOBE -->
-    <a class="card" href="worldview.html" target="_blank" rel="noopener" style="--cc:var(--g)">
+    <a class="card" href="worldview.html" style="--cc:var(--g)">
       <div class="badge">LIVE</div>
       <div class="card-hd">
         <div class="card-icon">🌍</div>
         <div class="card-meta">
           <div class="card-title">WORLDVIEW GLOBE</div>
-          <div class="card-desc">3D geospatial intelligence — live ADS-B flight tracking overlay, USGS seismic feeds, ISS orbital position. Leaflet/D3 mapping layer. Open in new tab for full globe view.</div>
+          <div class="card-desc">3D geospatial intelligence — live ADS-B flight tracking, USGS seismic feeds, real-time satellite orbital propagation. ISS, Starlink, GPS, military birds. CRT / Night Vision / FLIR sensor modes.</div>
         </div>
       </div>
       <div class="live">
@@ -575,7 +575,7 @@ footer {
         <div class="lr"><span class="ll">ISS VELOCITY</span><span class="lv up" id="c-iss-vel">…</span></div>
       </div>
       <div class="tags">
-        <span class="tag">ADS-B LIVE</span><span class="tag">SEISMIC</span><span class="tag">ISS TRACK</span><span class="tag">LEAFLET/D3</span>
+        <span class="tag">ADS-B LIVE</span><span class="tag">SEISMIC</span><span class="tag">SAT TRACK</span><span class="tag">CESIUMJS</span>
       </div>
     </a>
 
@@ -586,7 +586,7 @@ footer {
         <div class="card-icon">📡</div>
         <div class="card-meta">
           <div class="card-title">WORLDVIEW ENGINE</div>
-          <div class="card-desc">Flask OSINT collection backend (localhost:5055). When running: ADS-B, USGS, GDELT, Celestrak TLE aggregation with threshold alerting and PDF SITREP generation. Seismic feed below is direct USGS — engine not required.</div>
+          <div class="card-desc">Flask OSINT collection server. ADS-B every 90s · USGS every 5min · GDELT news every 15min · Celestrak TLE every 12h. Threshold alerting, PDF SITREP generation on demand. Auto-report at 06:00Z.</div>
         </div>
       </div>
       <div class="live">
@@ -601,7 +601,7 @@ footer {
     </div>
 
     <!-- ISS LIVE -->
-    <div class="card" role="button" tabindex="0" onclick="openModal('iss')" onkeydown="if(event.key==='Enter')openModal('iss')" style="--cc:var(--p)">
+    <div class="card" style="--cc:var(--p);cursor:default">
       <div class="badge" style="--cc:var(--p)">10s LIVE</div>
       <div class="card-hd">
         <div class="card-icon">🛸</div>
@@ -630,13 +630,13 @@ footer {
   <div class="grid grid-3">
 
     <!-- MERIDIAN -->
-    <a class="card" href="screener.html" target="_blank" rel="noopener" style="--cc:var(--y)">
+    <a class="card" href="screener.html" style="--cc:var(--y)">
       <div class="badge" style="--cc:var(--y)">LIVE DATA</div>
       <div class="card-hd">
         <div class="card-icon">📊</div>
         <div class="card-meta">
           <div class="card-title">MERIDIAN SCREENER</div>
-          <div class="card-desc">Bloomberg-style market terminal. Live quotes via Yahoo Finance, sector heatmap, P/E · dividend · beta · momentum filters. Buffett Oracle BUY/HOLD/CAUTION signals. Dark pool and options flow tags.</div>
+          <div class="card-desc">Bloomberg-style market terminal. Russell 3000 live quotes, sector heatmap, P/E · dividend · beta · momentum filters. Buffett Oracle BUY/HOLD/CAUTION signals. Unusual Whales dark pool integration.</div>
         </div>
       </div>
       <div class="live">
@@ -653,12 +653,12 @@ footer {
         </div>
       </div>
       <div class="tags">
-        <span class="tag">YAHOO FINANCE</span><span class="tag">BUFFETT ORACLE</span><span class="tag">SECTOR HEATMAP</span><span class="tag">OPTIONS FLOW</span>
+        <span class="tag">RUSSELL 3000</span><span class="tag">BUFFETT ORACLE</span><span class="tag">DARK POOL</span><span class="tag">HEATMAP</span>
       </div>
     </a>
 
     <!-- CRYPTO -->
-    <div class="card" role="button" tabindex="0" onclick="openModal('crypto')" onkeydown="if(event.key==='Enter')openModal('crypto')" style="--cc:var(--o)">
+    <div class="card" style="--cc:var(--o);cursor:default">
       <div class="badge" style="--cc:var(--o)">LIVE</div>
       <div class="card-hd">
         <div class="card-icon">₿</div>
@@ -679,7 +679,7 @@ footer {
     </div>
 
     <!-- DAILY BRIEF -->
-    <div class="card" role="button" tabindex="0" onclick="openModal('dailybrief')" onkeydown="if(event.key==='Enter')openModal('dailybrief')" style="--cc:var(--b)">
+    <div class="card" style="--cc:var(--b);cursor:default">
       <div class="badge" style="--cc:var(--b)">SCHEDULED</div>
       <div class="card-hd">
         <div class="card-icon">📋</div>
@@ -732,9 +732,9 @@ footer {
       <div class="tags">
         <span class="tag">WIFI PINEAPPLE</span><span class="tag">EVIL TWIN</span><span class="tag">CLIENT TRACK</span><span class="tag">OSINT</span>
       </div>
-    </div>
+    </a>
 
-    <div class="card" role="button" tabindex="0" onclick="openModal('hackrf')" onkeydown="if(event.key==='Enter')openModal('hackrf')" style="--cc:var(--y)">
+    <div class="card" style="--cc:var(--y);cursor:default">
       <div class="badge" style="--cc:var(--y)">PASSIVE</div>
       <div class="card-hd">
         <div class="card-icon">📻</div>
@@ -748,7 +748,7 @@ footer {
       </div>
     </div>
 
-    <div class="card" role="button" tabindex="0" onclick="openModal('flipper')" onkeydown="if(event.key==='Enter')openModal('flipper')" style="--cc:var(--p)">
+    <div class="card" style="--cc:var(--p);cursor:default">
       <div class="badge" style="--cc:var(--p)">MULTI-PROTOCOL</div>
       <div class="card-hd">
         <div class="card-icon">🐬</div>
@@ -796,7 +796,7 @@ footer {
     </div>
 
     <!-- SOAL INDUSTRIES -->
-    <div class="card" role="button" tabindex="0" onclick="openModal('soal')" onkeydown="if(event.key==='Enter')openModal('soal')" style="--cc:var(--g)">
+    <div class="card" style="--cc:var(--g);cursor:default">
       <div class="badge" style="--cc:var(--g)">MISSION</div>
       <div class="card-hd">
         <div class="card-icon">⚡</div>
@@ -906,7 +906,7 @@ footer {
         <div class="card-icon">🛰</div>
         <div class="card-meta">
           <div class="card-title">ISS LIVE TRACK</div>
-          <div class="card-desc">International Space Station exact orbital position, updated every 10 seconds. Lat, lon, altitude, velocity. Currently over:</div>
+          <div class="card-desc">International Space Station exact orbital position, updated every 5 seconds. Lat, lon, altitude, velocity. Currently over:</div>
         </div>
       </div>
       <div class="live">
@@ -916,16 +916,16 @@ footer {
         <div class="lr"><span class="ll">VELOCITY</span><span class="lv loading" id="iss2-vel">—</span></div>
         <div class="lr"><span class="ll">VISIBILITY</span><span class="lv loading" id="iss2-vis">—</span></div>
       </div>
-      <div class="tags"><span class="tag">WHERETHEISS.AT</span><span class="tag">10s REFRESH</span><span class="tag">ORBITAL TRACK</span></div>
+      <div class="tags"><span class="tag">WHERETHEISS.AT</span><span class="tag">5s REFRESH</span><span class="tag">ORBITAL TRACK</span></div>
     </div>
 
     <div class="card" style="--cc:var(--y);cursor:default">
-      <div class="badge" style="--cc:var(--y)">24H</div>
+      <div class="badge" style="--cc:var(--y)">LAST HOUR</div>
       <div class="card-hd">
         <div class="card-icon">🌐</div>
         <div class="card-meta">
           <div class="card-title">SEISMIC PULSE</div>
-          <div class="card-desc">USGS M2.5+ earthquakes in the last 24 hours, sorted by magnitude. Top events with location and time offset.</div>
+          <div class="card-desc">USGS M2.5+ events in the last 24 hours, sorted by magnitude. Top 5 most significant events with location and time offset.</div>
         </div>
       </div>
       <div class="live">
@@ -1043,7 +1043,7 @@ footer {
         </div>
       </div>
       <div class="live">
-        <div class="lr"><span class="ll">GLOBAL A/C</span><span class="lv" id="sky-global" style="color:var(--dim);font-size:7px">NO AUTH (N/A)</span></div>
+        <div class="lr"><span class="ll">GLOBAL A/C</span><span class="lv loading" id="sky-global">—</span></div>
         <div class="lr"><span class="ll">N. AMERICA</span><span class="lv loading" id="sky-na">—</span></div>
         <div class="lr"><span class="ll">ON GROUND</span><span class="lv loading" id="sky-ground">—</span></div>
         <div class="lr"><span class="ll">AIRBORNE</span><span class="lv loading" id="sky-air">—</span></div>
@@ -1086,7 +1086,6 @@ footer {
   <div class="footer-r">
     <span><span class="live-dot"></span>ALL FEEDS LIVE · 90s REFRESH</span>
     <span id="last-sync">LAST SYNC: —</span>
-    <span id="cache-stats" style="color:var(--dim2)">CACHE: —</span>
     <span>SECURITY TOOLS: AUTHORIZED ENGAGEMENTS ONLY</span>
   </div>
 </footer>
@@ -1118,221 +1117,6 @@ All targets require explicit written sign-off on file before execution.`
     body: `Deploy from your WiFi Pineapple device web interface.<br><br>
 <strong class="hi">Capabilities:</strong> Passive recon · evil twin AP · client probe capture · credential harvest<br><br>
 <strong class="warn">Authorized social engineering engagements only.</strong>`
-  },
-
-  iss: {
-    title: '🛸 ISS TRACKER // ORBITAL STATUS',
-    body: `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-  <div style="background:rgba(0,0,0,.4);padding:8px;border:1px solid rgba(204,68,255,.2)">
-    <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:3px">LATITUDE</div>
-    <div style="font-family:var(--orb);font-size:13px;color:var(--p)" id="m-iss-lat">—</div>
-  </div>
-  <div style="background:rgba(0,0,0,.4);padding:8px;border:1px solid rgba(204,68,255,.2)">
-    <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:3px">LONGITUDE</div>
-    <div style="font-family:var(--orb);font-size:13px;color:var(--p)" id="m-iss-lon">—</div>
-  </div>
-  <div style="background:rgba(0,0,0,.4);padding:8px;border:1px solid rgba(204,68,255,.2)">
-    <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:3px">ALTITUDE</div>
-    <div style="font-family:var(--orb);font-size:13px;color:var(--p)" id="m-iss-alt">—</div>
-  </div>
-  <div style="background:rgba(0,0,0,.4);padding:8px;border:1px solid rgba(204,68,255,.2)">
-    <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:3px">VELOCITY</div>
-    <div style="font-family:var(--orb);font-size:13px;color:var(--p)" id="m-iss-vel">—</div>
-  </div>
-</div>
-<div style="margin-bottom:10px">
-  <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:4px">ORBITAL MECHANICS</div>
-  <div style="font-size:8px;line-height:2;color:var(--text)">
-    Inclination: <span style="color:var(--p)">51.6°</span> &nbsp;·&nbsp; Period: <span style="color:var(--p)">~92.5 min</span> &nbsp;·&nbsp; Orbits/day: <span style="color:var(--p)">15.5</span><br>
-    Orbit: <span style="color:var(--p)">Low Earth Orbit</span> &nbsp;·&nbsp; Altitude range: <span style="color:var(--p)">400–420 km</span>
-  </div>
-</div>
-<div style="border-top:1px solid rgba(255,255,255,.08);padding-top:10px">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-    <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px">CHARLOTTE PASS PREDICTIONS</div>
-    <button onclick="fetchISSPasses()" style="font-size:6.5px;letter-spacing:2px;padding:3px 9px;background:transparent;border:1px solid var(--p);color:var(--p);cursor:pointer;font-family:var(--mono)">⟳ FETCH</button>
-  </div>
-  <div id="m-iss-passes" style="font-size:7.5px;color:var(--dim);line-height:1.8">Click FETCH for upcoming passes over Charlotte NC (35.22°N, 80.84°W)</div>
-</div>`
-  },
-
-  crypto: {
-    title: '₿ CRYPTO INTEL // LIVE MARKET',
-    body: `<div id="m-crypto-grid" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">
-  <div style="color:var(--dim);font-size:7.5px">Loading live data…</div>
-</div>
-<div style="border-top:1px solid rgba(255,255,255,.08);padding-top:10px;margin-bottom:10px">
-  <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:5px">FEAR &amp; GREED</div>
-  <div style="display:flex;align-items:center;gap:10px">
-    <div style="font-family:var(--orb);font-size:22px;color:var(--o)" id="m-fg-val">—</div>
-    <div>
-      <div style="font-size:8px;color:var(--text)" id="m-fg-lbl">—</div>
-      <div style="height:4px;width:140px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:4px">
-        <div id="m-fg-bar" style="height:100%;background:linear-gradient(90deg,var(--g),var(--y),var(--r));border-radius:2px;width:0%;transition:width .8s"></div>
-      </div>
-    </div>
-  </div>
-</div>
-<div style="display:flex;justify-content:space-between;align-items:center">
-  <div style="font-size:7px;color:var(--dim)">Source: CoinGecko · No API key</div>
-  <button onclick="refreshCryptoModal()" style="font-size:6.5px;letter-spacing:2px;padding:3px 9px;background:transparent;border:1px solid var(--o);color:var(--o);cursor:pointer;font-family:var(--mono)">⟳ REFRESH</button>
-</div>`
-  },
-
-  dailybrief: {
-    title: '📋 DAILY INTEL BRIEF // OPERATIONS',
-    body: `<div style="margin-bottom:14px">
-  <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:6px">RUNNERS</div>
-  <div style="background:rgba(0,0,0,.5);border:1px solid rgba(51,170,255,.2);padding:10px;font-size:8px;line-height:2.2;font-family:var(--mono)">
-    <span style="color:var(--dim)">SITREP →</span> <span style="color:var(--b)">C:\\Users\\jackg\\Daily Briefing\\run_briefing.py</span><br>
-    <span style="color:var(--dim)">EXEC   →</span> <span style="color:var(--b)">C:\\Users\\jackg\\Executive Brief\\run_briefing.py</span>
-  </div>
-</div>
-<div style="margin-bottom:14px">
-  <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:6px">QUICK LAUNCH</div>
-  <div style="background:rgba(0,0,0,.5);border:1px solid rgba(0,255,136,.12);padding:10px;font-size:8px;line-height:2;font-family:var(--mono);color:var(--g)">
-    <span style="color:var(--dim)">&gt;</span> cd "C:\\Users\\jackg\\Daily Briefing"<br>
-    <span style="color:var(--dim)">&gt;</span> python run_briefing.py<br>
-    <span style="color:var(--dim)"># Output: WORLDVIEW_LIVE_SITREP_[DATE].pdf</span>
-  </div>
-</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-  <div style="background:rgba(0,0,0,.4);padding:8px;border:1px solid rgba(51,170,255,.15)">
-    <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:3px">SCHEDULE</div>
-    <div style="font-size:8px;color:var(--b)">06:00Z DAILY<br><span style="color:var(--dim);font-size:7px">Auto via Task Scheduler</span></div>
-  </div>
-  <div style="background:rgba(0,0,0,.4);padding:8px;border:1px solid rgba(51,170,255,.15)">
-    <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:3px">DELIVERY</div>
-    <div style="font-size:8px;color:var(--b)">PDF + MMS<br><span style="color:var(--dim);font-size:7px">Twilio → Your Number</span></div>
-  </div>
-  <div style="background:rgba(0,0,0,.4);padding:8px;border:1px solid rgba(51,170,255,.15)">
-    <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:3px">ENGINE</div>
-    <div style="font-size:8px;color:var(--b)">Claude Sonnet<br><span style="color:var(--dim);font-size:7px">SITREP Narrative</span></div>
-  </div>
-  <div style="background:rgba(0,0,0,.4);padding:8px;border:1px solid rgba(51,170,255,.15)">
-    <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:3px">SECTIONS</div>
-    <div style="font-size:8px;color:var(--b)">BLUF · SORD<br><span style="color:var(--dim);font-size:7px">HERMES · Markets</span></div>
-  </div>
-</div>`
-  },
-
-  hackrf: {
-    title: '📻 HACKRF ONE // SPECTRUM REFERENCE',
-    body: `<div style="margin-bottom:12px">
-  <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:8px">FREQUENCY COVERAGE · 1 MHz – 6 GHz</div>
-  <div style="position:relative;height:28px;background:rgba(0,0,0,.5);border:1px solid rgba(255,204,0,.15);border-radius:2px;overflow:hidden;margin-bottom:4px">
-    <div style="position:absolute;left:0%;width:3%;height:100%;background:rgba(255,204,0,.6)" title="AM/HF"></div>
-    <div style="position:absolute;left:3%;width:4%;height:100%;background:rgba(255,136,68,.5)" title="FM/VHF"></div>
-    <div style="position:absolute;left:7%;width:5%;height:100%;background:rgba(51,170,255,.5)" title="Aircraft/ATC"></div>
-    <div style="position:absolute;left:12%;width:8%;height:100%;background:rgba(204,68,255,.4)" title="UHF/Cell"></div>
-    <div style="position:absolute;left:20%;width:6%;height:100%;background:rgba(255,51,68,.5)" title="GPS/GNSS"></div>
-    <div style="position:absolute;left:36%;width:8%;height:100%;background:rgba(0,255,136,.6)" title="WiFi 2.4GHz"></div>
-    <div style="position:absolute;left:72%;width:12%;height:100%;background:rgba(0,200,255,.5)" title="WiFi 5GHz"></div>
-    <div style="height:100%;display:flex;align-items:center;padding:0 6px">
-      <span style="font-size:6px;color:rgba(255,255,255,.4);letter-spacing:1px">1MHz ←────────────────────────────────────────────────────────────→ 6GHz</span>
-    </div>
-  </div>
-</div>
-<div style="margin-bottom:12px">
-  <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:6px">KEY TARGETS</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:7.5px">
-    <div style="display:flex;justify-content:space-between;padding:3px 6px;background:rgba(0,0,0,.3);border-left:2px solid var(--y)"><span style="color:var(--dim)">AM RADIO</span><span style="color:var(--y)">530–1700 kHz</span></div>
-    <div style="display:flex;justify-content:space-between;padding:3px 6px;background:rgba(0,0,0,.3);border-left:2px solid var(--o)"><span style="color:var(--dim)">FM RADIO</span><span style="color:var(--o)">87.5–108 MHz</span></div>
-    <div style="display:flex;justify-content:space-between;padding:3px 6px;background:rgba(0,0,0,.3);border-left:2px solid var(--b)"><span style="color:var(--dim)">AIRCRAFT</span><span style="color:var(--b)">108–137 MHz</span></div>
-    <div style="display:flex;justify-content:space-between;padding:3px 6px;background:rgba(0,0,0,.3);border-left:2px solid var(--p)"><span style="color:var(--dim)">ADS-B</span><span style="color:var(--p)">1090 MHz</span></div>
-    <div style="display:flex;justify-content:space-between;padding:3px 6px;background:rgba(0,0,0,.3);border-left:2px solid var(--r)"><span style="color:var(--dim)">GPS L1</span><span style="color:var(--r)">1575.42 MHz</span></div>
-    <div style="display:flex;justify-content:space-between;padding:3px 6px;background:rgba(0,0,0,.3);border-left:2px solid var(--p)"><span style="color:var(--dim)">GSM 900</span><span style="color:var(--p)">880–960 MHz</span></div>
-    <div style="display:flex;justify-content:space-between;padding:3px 6px;background:rgba(0,0,0,.3);border-left:2px solid var(--g)"><span style="color:var(--dim)">WIFI 2.4G</span><span style="color:var(--g)">2.400–2.484 GHz</span></div>
-    <div style="display:flex;justify-content:space-between;padding:3px 6px;background:rgba(0,0,0,.3);border-left:2px solid var(--b)"><span style="color:var(--dim)">WIFI 5G</span><span style="color:var(--b)">5.180–5.825 GHz</span></div>
-  </div>
-</div>
-<div>
-  <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:5px">QUICK CAPTURE</div>
-  <div style="background:rgba(0,0,0,.5);border:1px solid rgba(255,204,0,.15);padding:8px;font-size:7.5px;font-family:var(--mono);line-height:2;color:var(--y)">
-    hackrf_transfer -r capture.iq -f 433920000 -s 2000000 -n 10000000<br>
-    <span style="color:var(--dim)"># -f freq_hz · -s sample_rate · -n num_samples</span><br>
-    hackrf_transfer -t replay.iq -f 433920000 -s 2000000
-  </div>
-</div>`
-  },
-
-  flipper: {
-    title: '🐬 FLIPPER ZERO // PROTOCOL MATRIX',
-    body: `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:12px">
-  <div style="background:rgba(204,68,255,.08);border:1px solid rgba(204,68,255,.25);padding:8px;border-radius:2px">
-    <div style="font-family:var(--orb);font-size:7px;color:var(--p);margin-bottom:5px">SUB-GHz</div>
-    <div style="font-size:7px;color:var(--text);line-height:1.9">300–928 MHz<br>KEELOQ<br>CAME · NiceFlo<br>Holtek HT12x<br>Gate/Car/Garage</div>
-  </div>
-  <div style="background:rgba(255,204,0,.06);border:1px solid rgba(255,204,0,.2);padding:8px;border-radius:2px">
-    <div style="font-family:var(--orb);font-size:7px;color:var(--y);margin-bottom:5px">RFID 125kHz</div>
-    <div style="font-size:7px;color:var(--text);line-height:1.9">EM4100 / 4200<br>HID Prox / Corp<br>Indala / Motorola<br>IO Prox / Paradox<br>Access Control</div>
-  </div>
-  <div style="background:rgba(51,170,255,.06);border:1px solid rgba(51,170,255,.2);padding:8px;border-radius:2px">
-    <div style="font-family:var(--orb);font-size:7px;color:var(--b);margin-bottom:5px">NFC 13.56MHz</div>
-    <div style="font-size:7px;color:var(--text);line-height:1.9">ISO-14443A/B<br>Mifare Classic/Plus<br>NTAG213/215/216<br>FeliCa<br>EMV (read only)</div>
-  </div>
-  <div style="background:rgba(255,136,68,.06);border:1px solid rgba(255,136,68,.2);padding:8px;border-radius:2px">
-    <div style="font-family:var(--orb);font-size:7px;color:var(--o);margin-bottom:5px">INFRARED</div>
-    <div style="font-size:7px;color:var(--text);line-height:1.9">NEC · RC5 · RC6<br>Samsung/LG/Sony<br>Panasonic/SIRC<br>TV · AC · Projector<br>Universal Remote</div>
-  </div>
-  <div style="background:rgba(255,51,68,.06);border:1px solid rgba(255,51,68,.2);padding:8px;border-radius:2px">
-    <div style="font-family:var(--orb);font-size:7px;color:var(--r);margin-bottom:5px">BADUSB</div>
-    <div style="font-size:7px;color:var(--text);line-height:1.9">Rubber Ducky<br>HID Injection<br>DuckyScript 1.0<br>Cross-platform<br>Auth Engagements</div>
-  </div>
-  <div style="background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.18);padding:8px;border-radius:2px">
-    <div style="font-family:var(--orb);font-size:7px;color:var(--g);margin-bottom:5px">GPIO / UART</div>
-    <div style="font-size:7px;color:var(--text);line-height:1.9">SPI · I2C · UART<br>1-Wire / iButton<br>Dallas DS1990A<br>Wiegand 26/34<br>Custom Protocol</div>
-  </div>
-</div>
-<div style="background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.07);padding:8px">
-  <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:5px">FIELD NOTES</div>
-  <div style="font-size:7.5px;color:var(--dim);line-height:1.8">
-    <span style="color:var(--g)">▸</span> Sub-GHz: use Frequency Analyzer to identify unknown signals first<br>
-    <span style="color:var(--g)">▸</span> RFID: always Read before attempting clone/emulate<br>
-    <span style="color:var(--g)">▸</span> NFC: saved cards in /ext/nfc/ — check dump before replay<br>
-    <span style="color:var(--r)">▸</span> <strong>Written authorization required for all active engagements</strong>
-  </div>
-</div>`
-  },
-
-  soal: {
-    title: '⚡ SOAL INDUSTRIES // MISSION BRIEF',
-    body: `<div style="background:rgba(0,255,136,.04);border:1px solid rgba(0,255,136,.15);padding:10px;margin-bottom:12px">
-  <div style="font-size:7.5px;color:var(--g);line-height:1.9;font-family:var(--raj)">
-    <strong style="font-family:var(--orb);font-size:8px;letter-spacing:2px">NOT A SOFTWARE COMPANY.</strong><br>
-    A practice. An advisor positioned in important rooms — the kind people seek out because their judgment is trusted, not because their product was purchased. SOAL builds intelligence capability that makes clients dangerous in their own field.
-  </div>
-</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
-  <div style="background:rgba(0,0,0,.4);padding:8px;border:1px solid rgba(0,255,136,.12)">
-    <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:4px">OPERATOR</div>
-    <div style="font-size:9px;color:var(--g);font-family:var(--orb)">JACK SPENCER</div>
-    <div style="font-size:7px;color:var(--dim);margin-top:2px">Charlotte, NC · IT · SOAL Founder</div>
-  </div>
-  <div style="background:rgba(0,0,0,.4);padding:8px;border:1px solid rgba(0,255,136,.12)">
-    <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:4px">CERTIFICATIONS</div>
-    <div style="font-size:8px;color:var(--b);line-height:1.8">CompTIA Sec+ · Net+<br>Microsoft SC-900 · AZ-900<br>Apple ACT · Geek Squad MVP</div>
-  </div>
-</div>
-<div style="margin-bottom:12px">
-  <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:6px">FIRST OPPORTUNITY — SPENCER PRODUCTS</div>
-  <div style="background:rgba(0,0,0,.4);border-left:3px solid var(--g);padding:8px;font-size:8px;color:var(--text);line-height:1.9">
-    Family-owned fastener distributor · Matthews, NC<br>
-    IT role → intelligence case study → proof of concept<br>
-    Wedge: <span style="color:var(--g)">operational intelligence that improves real decisions</span>
-  </div>
-</div>
-<div>
-  <div style="font-size:6.5px;color:#3a6650;letter-spacing:2px;margin-bottom:5px">CAPABILITY STACK</div>
-  <div style="display:flex;flex-wrap:wrap;gap:4px">
-    <span style="font-size:6.5px;padding:3px 7px;border:1px solid rgba(0,255,136,.25);color:var(--g)">OSINT PLATFORM</span>
-    <span style="font-size:6.5px;padding:3px 7px;border:1px solid rgba(51,170,255,.25);color:var(--b)">AI BRIEFINGS</span>
-    <span style="font-size:6.5px;padding:3px 7px;border:1px solid rgba(255,204,0,.25);color:var(--y)">MARKET INTEL</span>
-    <span style="font-size:6.5px;padding:3px 7px;border:1px solid rgba(255,51,68,.25);color:var(--r)">SECURITY OPS</span>
-    <span style="font-size:6.5px;padding:3px 7px;border:1px solid rgba(204,68,255,.25);color:var(--p)">HOME AUTOMATION</span>
-    <span style="font-size:6.5px;padding:3px 7px;border:1px solid rgba(0,255,136,.15);color:var(--dim)">SDR · RF</span>
-  </div>
-</div>`
   }
 };
 
@@ -1347,8 +1131,8 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 
 /* ── LOCAL LINK HANDLER ─────────────────────── */
 function localLink(e, url, title, hint){
-  const isLocal = window.location.protocol === 'file:' || ['localhost','127.0.0.1','0.0.0.0'].includes(window.location.hostname);
-  if(isLocal){ window.open(url,'_blank','noopener'); return false; }
+  const isLocal = ['localhost','127.0.0.1','0.0.0.0'].includes(window.location.hostname);
+  if(isLocal) return true;
   e.preventDefault();
   document.getElementById('modal-content').innerHTML=`
     <div class="modal-title">🖥 LOCAL SERVICE — ${escH(title)}</div>
@@ -1377,125 +1161,14 @@ function navTo(id, el) {
 
 /* nav active handled by navTo() */
 
-/* ── CACHE (IndexedDB) ───────────────────────── */
-const CACHE_DB_NAME='jarvis-ops-cache', CACHE_STORE='feeds', CACHE_DB_VER=1;
-let _cacheDB=null;
-
-async function openCacheDB(){
-  if(_cacheDB) return _cacheDB;
-  return new Promise((res,rej)=>{
-    const req=indexedDB.open(CACHE_DB_NAME,CACHE_DB_VER);
-    req.onupgradeneeded=e=>e.target.result.createObjectStore(CACHE_STORE,{keyPath:'url'});
-    req.onsuccess=e=>{ _cacheDB=e.target.result; res(_cacheDB); };
-    req.onerror=e=>rej(e.target.error);
-  });
-}
-
-async function cacheGet(url){
-  try{
-    const db=await openCacheDB();
-    return new Promise((res,rej)=>{
-      const tx=db.transaction(CACHE_STORE,'readonly');
-      const req=tx.objectStore(CACHE_STORE).get(url);
-      req.onsuccess=e=>res(e.target.result||null);
-      req.onerror=()=>res(null);
-    });
-  }catch(e){ return null; }
-}
-
-async function cachePut(url,data,ttl){
-  try{
-    const db=await openCacheDB();
-    return new Promise((res,rej)=>{
-      const tx=db.transaction(CACHE_STORE,'readwrite');
-      tx.objectStore(CACHE_STORE).put({url,data,ts:Date.now(),ttl});
-      tx.oncomplete=()=>res();
-      tx.onerror=()=>res();
-    });
-  }catch(e){}
-}
-
-// TTL map in milliseconds — keyed by URL fragment
-const CACHE_TTLS=[
-  ['wheretheiss.at',       10_000],
-  ['coingecko.com',        90_000],
-  ['alternative.me',       90_000],
-  ['allorigins.win',       90_000],  // yahoo finance proxied
-  ['query1.finance.yahoo', 90_000],
-  ['query2.finance.yahoo', 90_000],
-  ['usgs.gov',            120_000],
-  ['weather.gov',         120_000],
-  ['opensky-network.org',  90_000],
-  ['swpc.noaa.gov',       120_000],
-  ['eonet.gsfc.nasa.gov', 300_000],
-  ['hacker-news',         300_000],
-  ['wikipedia.org',        30_000],
-  ['reddit.com',          300_000],
-  ['wttr.in',             600_000],
-  ['bbci.co.uk',          300_000],
-];
-function getTTL(url){
-  for(const [k,v] of CACHE_TTLS) if(url.includes(k)) return v;
-  return 120_000;
-}
-
-/* ── SAFE FETCH (cache-aware) ────────────────── */
-async function sf(url, opts={}){
-  const ttl=opts.ttl||getTTL(url);
-  const cached=await cacheGet(url);
-  const age=cached?Date.now()-cached.ts:Infinity;
-  const fresh=age<ttl;
-
-  // Return a fake Response-like object wrapping cached data
-  function makeCachedResponse(data, stale=false){
-    return {
-      ok:true,
-      _stale:stale,
-      _age:age,
-      json:()=>Promise.resolve(data),
-      text:()=>Promise.resolve(typeof data==='string'?data:JSON.stringify(data)),
-    };
-  }
-
-  if(fresh && cached) return makeCachedResponse(cached.data);
-
-  // Fetch fresh — fall back to stale cache on failure
+/* ── SAFE FETCH ─────────────────────────────── */
+async function sf(url){
   const ac=new AbortController(); const t=setTimeout(()=>ac.abort(),10000);
   try{
     const r=await fetch(url,{signal:ac.signal,credentials:'omit',mode:'cors',referrerPolicy:'no-referrer'});
-    clearTimeout(t);
-    if(!r.ok) throw new Error(`HTTP ${r.status}`);
-    const data=await r.json();
-    cachePut(url,data,ttl); // fire-and-forget
-    return makeCachedResponse(data);
-  }catch(e){
-    clearTimeout(t);
-    if(cached){
-      console.warn(`[cache] stale fallback for ${url.substring(0,60)} (${Math.round(age/1000)}s old)`);
-      return makeCachedResponse(cached.data, true);
-    }
-    throw e;
-  }
-}
-
-/* ── STALE INDICATOR ─────────────────────────── */
-function maybeMarkStale(response){
-  if(!response._stale) return;
-  const el=document.getElementById('last-sync');
-  if(el) el.style.color='var(--y)';
-}
-
-async function preheat(){
-  // Immediately render any data already in IndexedDB — page feels alive before any network request.
-  // We run all loaders; sf() will serve cache synchronously if TTL is fresh, skip if stale.
-  // Network calls fire in parallel behind the scenes via boot().
-  await Promise.allSettled([
-    loadQuakes(), loadFlights(), loadFear(), loadCrypto(),
-    loadISS(), loadNWS(), loadEONET(), loadSpaceWx(),
-    loadISS2(), loadSeismicPulse(), loadHN(),
-    loadWikiChanges(), loadRedditPulse(), loadSeismicHour(),
-    loadSignalNA(), loadSignalNWS(), loadSignalFeed(),
-  ]);
+    clearTimeout(t); if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r;
+  }catch(e){ clearTimeout(t); throw e; }
 }
 
 /* ── HELPERS ────────────────────────────────── */
@@ -1512,93 +1185,72 @@ function cc(c){ return c>=0?'up':'dn'; }
 
 /* ── FEEDS ──────────────────────────────────── */
 async function loadQuakes(){
-  try {
-    const r=await sf('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson');
-    const d=await r.json();
-    const f=d.features||[];
-    const s=[...f].sort((a,b)=>(b.properties.mag||0)-(a.properties.mag||0));
-    const max=(s[0]?.properties?.mag||0).toFixed(1);
-    upd(['h-eq','sb-eq','sb-eq2'],String(f.length),parseFloat(max)>=5?'warn':'');
-    upd('sb-mag','M'+max);
-    const eqs=document.getElementById('h-eq-s'); if(eqs) eqs.textContent='MAX M'+max;
-    upd('c-eq',f.length+' / M'+max,parseFloat(max)>=5?'warn':'up');
-    const list=document.getElementById('quake-list');
-    if(list&&s.length){
-      const now=Date.now();
-      list.innerHTML=s.slice(0,5).map(q=>{
-        const m=(q.properties.mag||0).toFixed(1);
-        const loc=escH((q.properties.place||'Unknown').substring(0,55));
-        const h=Math.round((now-(q.properties.time||now))/3600000);
-        const cls=m>=6?'m6':m>=5?'m5':m>=4?'m4':'m3';
-        return `<div class="qrow"><span class="qmag ${cls}">M${m}</span><span class="qloc">${loc}</span><span class="qage">${h}h</span></div>`;
-      }).join('');
-    }
-  } catch(e){ upd(['h-eq','c-eq'],'ERR'); console.warn('[quakes]',e?.message); }
+  const r=await sf('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson');
+  const d=await r.json();
+  const f=d.features||[];
+  const s=[...f].sort((a,b)=>(b.properties.mag||0)-(a.properties.mag||0));
+  const max=(s[0]?.properties?.mag||0).toFixed(1);
+  upd(['h-eq','sb-eq','sb-eq2'],String(f.length),parseFloat(max)>=5?'warn':'');
+  upd('sb-mag','M'+max);
+  document.getElementById('h-eq-s').textContent='MAX M'+max;
+  upd('c-eq',f.length+' / M'+max,parseFloat(max)>=5?'warn':'up');
+
+  const list=document.getElementById('quake-list');
+  if(list&&s.length){
+    const now=Date.now();
+    list.innerHTML=s.slice(0,5).map(q=>{
+      const m=(q.properties.mag||0).toFixed(1);
+      const loc=escH((q.properties.place||'Unknown').substring(0,55));
+      const h=Math.round((now-(q.properties.time||now))/3600000);
+      const cls=m>=6?'m6':m>=5?'m5':m>=4?'m4':'m3';
+      return `<div class="qrow"><span class="qmag ${cls}">M${m}</span><span class="qloc">${loc}</span><span class="qage">${h}h</span></div>`;
+    }).join('');
+  }
 }
 
 async function loadFlights(){
-  try {
-    const r=await sf('https://opensky-network.org/api/states/all?lamin=24&lomin=-125&lamax=50&lomax=-66');
-    const d=await r.json(); const n=(d.states||[]).length;
-    const disp=n>999?(n/1000).toFixed(1)+'K':String(n);
-    upd(['h-fl','c-fl'],disp,'up');
-    upd(['sb-fl','sb-fl2'],n.toLocaleString()+' FLIGHTS');
-    const hfl=document.getElementById('h-fl-s'); if(hfl) hfl.textContent=n.toLocaleString()+' OVER N. AMERICA';
-    const bar=document.getElementById('c-fl-bar');
-    if(bar) bar.style.width=Math.min(n/7500,1)*100+'%';
-  } catch(e){ upd(['h-fl','c-fl'],'ERR'); console.warn('[flights]',e?.message); }
+  const r=await sf('https://opensky-network.org/api/states/all?lamin=24&lomin=-125&lamax=50&lomax=-66');
+  const d=await r.json(); const n=(d.states||[]).length;
+  const disp=n>999?(n/1000).toFixed(1)+'K':String(n);
+  upd(['h-fl','c-fl'],disp,'up');
+  upd(['sb-fl','sb-fl2'],n.toLocaleString()+' FLIGHTS');
+  document.getElementById('h-fl-s').textContent=n.toLocaleString()+' OVER N. AMERICA';
+  const bar=document.getElementById('c-fl-bar');
+  if(bar) bar.style.width=Math.min(n/7500,1)*100+'%';
 }
 
 async function loadFear(){
-  try {
-    const r=await sf('https://api.alternative.me/fng/?limit=1&format=json');
-    const d=await r.json();
-    const v=parseInt(d.data?.[0]?.value||0);
-    if(!v){ upd(['h-fg','sb-fg','sb-fg2'],'—',''); return; }
-    const lbl=(d.data?.[0]?.value_classification||'').toUpperCase();
-    const cls=v<=25?'crit':v<=40?'warn':v>=60?'up':'';
-    upd(['h-fg','sb-fg','sb-fg2'],String(v),cls);
-    upd('fg-label',lbl);
-    const fgs=document.getElementById('h-fg-s'); if(fgs) fgs.textContent=lbl;
-    const bar=document.getElementById('fg-bar'); if(bar) bar.style.width=v+'%';
-    // Derive threat level from actual data — never use a hardcoded default
-    const t=document.getElementById('threat');
-    if(t){
-      if(v<=20)     { t.textContent='THREAT: CRITICAL';  t.className='threat crit'; }
-      else if(v<=35){ t.textContent='THREAT: HIGH';      t.className='threat high'; }
-      else if(v<=50){ t.textContent='THREAT: ELEVATED';  t.className='threat warn'; }
-      else          { t.textContent='THREAT: NORMAL';    t.className='threat'; }
-    }
-  } catch(e){ upd(['h-fg','sb-fg','sb-fg2'],'ERR',''); console.warn('[fear]',e?.message); }
+  const r=await sf('https://api.alternative.me/fng/?limit=1&format=json');
+  const d=await r.json();
+  const v=parseInt(d.data?.[0]?.value||50);
+  const lbl=(d.data?.[0]?.value_classification||'').toUpperCase();
+  const cls=v<=25?'crit':v<=40?'warn':v>=60?'up':'';
+  upd(['h-fg','sb-fg','sb-fg2'],String(v),cls);
+  upd('fg-label',lbl);
+  document.getElementById('h-fg-s').textContent=lbl;
+  const bar=document.getElementById('fg-bar'); if(bar) bar.style.width=v+'%';
+  if(v<=25){ const t=document.getElementById('threat'); t.textContent='THREAT: CRITICAL'; t.className='threat crit'; }
 }
 
 async function loadCrypto(){
-  try {
-    const r=await sf('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true');
-    const d=await r.json();
-    const btc=d.bitcoin?.usd||0, btcC=d.bitcoin?.usd_24h_change||0;
-    const eth=d.ethereum?.usd||0, ethC=d.ethereum?.usd_24h_change||0;
-    const sol=d.solana?.usd||0,   solC=d.solana?.usd_24h_change||0;
-    if(!btc){ upd(['h-btc','c-btc'],'ERR',''); return; }
-    const fb='$'+(btc>999?(btc/1000).toFixed(1)+'K':btc.toFixed(0));
-    upd(['h-btc','sb-btc','sb-btc2'],fb+' '+fc(btcC),cc(btcC));
-    const hbs=document.getElementById('h-btc-s'); if(hbs) hbs.textContent=fc(btcC)+' 24H';
-    upd('c-btc',fb+' '+fc(btcC),cc(btcC));
-    upd(['c-eth','sb-eth'],'$'+(eth/1000).toFixed(2)+'K '+fc(ethC),cc(ethC));
-    upd('c-sol','$'+sol.toFixed(2)+' '+fc(solC),cc(solC));
-    upd('c-trend',fc((btcC+ethC+solC)/3)+' AVG',cc((btcC+ethC+solC)/3));
-  } catch(e){ upd(['h-btc','c-btc'],'ERR',''); console.warn('[crypto]',e?.message); }
+  const r=await sf('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true');
+  const d=await r.json();
+  const btc=d.bitcoin?.usd||0, btcC=d.bitcoin?.usd_24h_change||0;
+  const eth=d.ethereum?.usd||0, ethC=d.ethereum?.usd_24h_change||0;
+  const sol=d.solana?.usd||0,   solC=d.solana?.usd_24h_change||0;
+  const fb='$'+(btc>999?(btc/1000).toFixed(1)+'K':btc.toFixed(0));
+  upd(['h-btc','sb-btc','sb-btc2'],fb+' '+fc(btcC),cc(btcC));
+  document.getElementById('h-btc-s').textContent=fc(btcC)+' 24H';
+  upd('c-btc',fb+' '+fc(btcC),cc(btcC));
+  upd(['c-eth','sb-eth'],'$'+(eth/1000).toFixed(2)+'K '+fc(ethC),cc(ethC));
+  upd('c-sol','$'+sol.toFixed(2)+' '+fc(solC),cc(solC));
+  upd('c-trend',fc((btcC+ethC+solC)/3)+' AVG',cc((btcC+ethC+solC)/3));
 }
 
 async function loadYahoo(sym,ids){
   const enc=encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`);
   const r=await sf(`https://api.allorigins.win/get?url=${enc}`);
-  const o=await r.json();
-  if(!o?.contents) throw new Error(`allorigins empty for ${sym}`);
-  const parsed=JSON.parse(o.contents);
-  const result=parsed?.chart?.result?.[0];
-  if(!result) throw new Error(`No chart result for ${sym}`);
-  const m=result.meta;
+  const o=await r.json(); const m=JSON.parse(o.contents).chart.result[0].meta;
   const p=m.regularMarketPrice, prev=m.previousClose||p, chg=((p-prev)/prev)*100;
   const fmt='$'+p.toFixed(2)+' '+fc(chg);
   ids.forEach(id=>upd(id,fmt,cc(chg)));
@@ -1619,53 +1271,43 @@ async function loadMarkets(){
 }
 
 async function loadISS(){
-  // initial population — issLoop() takes over at 10s intervals
-  try {
-    const r=await sf('https://api.wheretheiss.at/v1/satellites/25544');
-    const d=await r.json();
-    const lat=parseFloat(d.latitude).toFixed(2), lon=parseFloat(d.longitude).toFixed(2);
-    const alt=Math.round(d.altitude), vel=Math.round(d.velocity);
-    const pos=`${Math.abs(lat)}°${lat>=0?'N':'S'} ${Math.abs(lon)}°${lon>=0?'E':'W'}`;
-    upd(['h-iss'],alt+'km','up');
-    upd(['sb-iss','sb-iss2'],pos);
-    upd(['c-iss','iss-lat'],lat+'°','up');
-    upd(['c-iss-vel','iss-vel'],vel.toLocaleString()+' km/h','up');
-    upd('iss-lon',lon+'°','up');
-    upd('iss-alt',alt+' km','up');
-    document.getElementById('h-iss-s').textContent=vel.toLocaleString()+' KM/H';
-  } catch(e){}
+  const r=await sf('https://api.wheretheiss.at/v1/satellites/25544');
+  const d=await r.json();
+  const lat=parseFloat(d.latitude).toFixed(2), lon=parseFloat(d.longitude).toFixed(2);
+  const alt=Math.round(d.altitude), vel=Math.round(d.velocity);
+  const pos=`${Math.abs(lat)}°${lat>=0?'N':'S'} ${Math.abs(lon)}°${lon>=0?'E':'W'}`;
+  upd(['h-iss'],alt+'km','up');
+  upd(['sb-iss','sb-iss2'],pos);
+  upd(['c-iss','iss-lat'],lat+'°','up');
+  upd(['c-iss-vel','iss-vel'],vel.toLocaleString()+' km/h','up');
+  upd('iss-lon',lon+'°','up');
+  upd('iss-alt',alt+' km','up');
+  document.getElementById('h-iss-s').textContent=vel.toLocaleString()+' KM/H';
 }
 
 async function loadWeather(){
-  try {
-    const r=await sf('https://wttr.in/Charlotte,NC?format=j1');
-    const d=await r.json();
-    const c=d.current_condition?.[0];
-    if(!c) return;
-    const el=document.getElementById('wx-t');
-    if(el){ el.textContent=c.temp_F+'°F'; el.classList.remove('loading'); }
-    const wd=document.getElementById('wx-desc'); if(wd) wd.textContent=c.weatherDesc[0].value;
-    const wf=document.getElementById('wx-feels'); if(wf) wf.textContent='Feels like '+c.FeelsLikeF+'°F';
-    const wh=document.getElementById('wx-hum'); if(wh) wh.textContent='Humidity '+c.humidity+'%';
-    upd('sb-wx',c.temp_F+'°F · '+c.weatherDesc[0].value.substring(0,10));
-  } catch(e){ const el=document.getElementById('wx-t'); if(el){el.textContent='ERR'; el.classList.remove('loading');} console.warn('[weather]',e?.message); }
+  const r=await sf('https://wttr.in/Charlotte,NC?format=j1');
+  const d=await r.json(); const c=d.current_condition[0];
+  const el=document.getElementById('wx-t');
+  el.textContent=c.temp_F+'°F'; el.classList.remove('loading');
+  document.getElementById('wx-desc').textContent=c.weatherDesc[0].value;
+  document.getElementById('wx-feels').textContent='Feels like '+c.FeelsLikeF+'°F';
+  document.getElementById('wx-hum').textContent='Humidity '+c.humidity+'%';
+  upd('sb-wx',c.temp_F+'°F · '+c.weatherDesc[0].value.substring(0,10));
 }
 
 async function loadTicker(){
-  try {
-    const enc=encodeURIComponent('https://feeds.bbci.co.uk/news/world/rss.xml');
-    const r=await sf(`https://api.allorigins.win/get?url=${enc}`);
-    const o=await r.json();
-    if(!o?.contents) return;
-    const xml=new DOMParser().parseFromString(o.contents,'text/xml');
-    const items=Array.from(xml.querySelectorAll('item')).slice(0,10);
-    if(!items.length) return;
-    const mk=its=>its.map(i=>{
-      const t=escH((i.querySelector('title')?.textContent||'').replace(/^<!\[CDATA\[|\]\]>$/g,'').trim().substring(0,100));
-      return `<span class="t-item"><span class="t-src">BBC</span>${t}</span>`;
-    }).join('');
-    document.getElementById('ticker').innerHTML=mk(items)+mk(items);
-  } catch(e){ console.warn('[ticker]',e?.message); }
+  const enc=encodeURIComponent('https://feeds.bbci.co.uk/news/world/rss.xml');
+  const r=await sf(`https://api.allorigins.win/get?url=${enc}`);
+  const o=await r.json();
+  const xml=new DOMParser().parseFromString(o.contents,'text/xml');
+  const items=Array.from(xml.querySelectorAll('item')).slice(0,10);
+  if(!items.length) return;
+  const mk=its=>its.map(i=>{
+    const t=escH((i.querySelector('title')?.textContent||'').replace(/^<!\[CDATA\[|\]\]>$/g,'').trim().substring(0,100));
+    return `<span class="t-item"><span class="t-src">BBC</span>${t}</span>`;
+  }).join('');
+  document.getElementById('ticker').innerHTML=mk(items)+mk(items);
 }
 
 /* ── LIVE PULSE: NWS ACTIVE ALERTS ──────────── */
@@ -1723,14 +1365,11 @@ async function loadSpaceWx(){
   try {
     const r=await sf('https://services.swpc.noaa.gov/products/geospace/propagated-solar-wind-1-hour.json');
     const d=await r.json();
-    // Format: [time_tag, speed, density, temperature, bx, by, bz, bt, vx, vy, vz, propagated_time_tag]
-    // Find last row with valid (non-null) speed
-    const rows=Array.isArray(d)?d:[];
-    const last=rows.slice().reverse().find(row=>row[1]!=null&&row[1]!=='speed');
+    const last=d[d.length-1];
     if(last){
-      const speed=parseFloat(last[1])||0;   // index 1 = solar wind speed km/s
-      const density=parseFloat(last[2])||0; // index 2 = proton density /cm³
-      const bz=parseFloat(last[6])||0;      // index 6 = Bz nT
+      const speed=parseFloat(last[2])||0;
+      const bz=parseFloat(last[3])||0;
+      const density=parseFloat(last[4])||0;
       upd('sw-wind',speed.toFixed(0)+' km/s',speed>600?'crit':speed>450?'warn':'up');
       upd('sw-bz',bz.toFixed(1)+' nT',bz<-10?'crit':bz<-5?'warn':bz>5?'up':'');
       upd('sw-density',density.toFixed(1)+' /cm³',density>20?'warn':'up');
@@ -1805,9 +1444,8 @@ async function loadHN(){
       const pts=st.score||0;
       let domain='ycombinator.com';
       try{ if(st.url) domain=new URL(st.url).hostname.replace('www.','').substring(0,22); }catch(e){}
-      // Use HN item page as safe fallback — avoids injecting arbitrary external URLs into onclick
-      const safeHref='https://news.ycombinator.com/item?id='+encodeURIComponent(String(st.id||''));
-      return `<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer" onclick="window.open('${safeHref}','_blank')">
+      const href=escH(st.url||'https://news.ycombinator.com/item?id='+st.id);
+      return `<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer" onclick="window.open('${href}','_blank')">
         <div style="font-size:8px;color:var(--text);line-height:1.3">${i+1}. ${title}</div>
         <div style="font-size:6.5px;color:var(--dim);margin-top:1px">${pts}pts · ${escH(domain)}</div>
       </div>`;
@@ -1867,12 +1505,11 @@ async function loadRedditPulse(){
       const score=post.score>999?(post.score/1000).toFixed(1)+'K':String(post.score||0);
       const comms=post.num_comments>999?(post.num_comments/1000).toFixed(1)+'K':String(post.num_comments||0);
       const domain=escH((post.domain||'').substring(0,24));
-      // Use safe Reddit permalink only — never inject arbitrary external URLs into onclick
-      const safeHref='https://www.reddit.com'+encodeURI(String(post.permalink||'/r/worldnews'));
+      const href=escH('https://reddit.com'+post.permalink);
       const hrs=Math.round((Date.now()-(post.created_utc||0)*1000)/3600000);
       const age=hrs<1?'<1h ago':hrs<24?hrs+'h ago':Math.round(hrs/24)+'d ago';
       const flair=post.link_flair_text?`<span style="background:rgba(255,136,68,0.15);color:var(--o);padding:0 4px;border-radius:2px;font-size:6px">${escH(post.link_flair_text.substring(0,12))}</span> `:'';
-      return `<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer" onclick="window.open('${safeHref}','_blank')">
+      return `<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer" onclick="window.open('${href}','_blank')">
         <div style="font-size:7.5px;color:var(--text);line-height:1.35">${flair}${title}</div>
         <div style="font-size:6.5px;color:var(--dim);margin-top:2px">▲ ${score} · 💬 ${comms} · ${domain} · ${age}</div>
       </div>`;
@@ -1911,6 +1548,27 @@ async function loadSeismicHour(){
   } catch(e){ upd('sq1h-count','ERR'); }
 }
 
+/* ── SIGNAL: GLOBAL SKIES ───────────────────── */
+async function loadGlobalSkies(){
+  try {
+    const r=await sf('https://opensky-network.org/api/states/all');
+    const d=await r.json();
+    const all=(d.states||[]);
+    const total=all.length;
+    const onGround=all.filter(s=>s[8]===true).length;
+    const airborne=total-onGround;
+    const disp=total>999?(total/1000).toFixed(1)+'K':String(total);
+    upd('sky-global',disp,'up');
+    upd('sky-ground',onGround.toLocaleString(),'');
+    upd('sky-air',airborne.toLocaleString(),'up');
+    const bar=document.getElementById('sky-bar-fill');
+    if(bar) bar.style.width=Math.min(total/20000,1)*100+'%';
+  } catch(e){
+    // fallback to N. America count if global fails
+    upd('sky-global','RATE LIMITED');
+  }
+}
+
 /* ── SIGNAL: N. AMERICA COUNT FOR SIGNAL TAB ── */
 async function loadSignalNA(){
   try {
@@ -1921,7 +1579,7 @@ async function loadSignalNA(){
     const n=states.length;
     const onGnd=states.filter(s=>s[8]===true).length;
     upd('sky-na',n.toLocaleString()+' A/C','up');
-    upd('sky-global','N/A (rate limited)','');  // Global OpenSky requires auth — N. America bbox used
+    upd('sky-global','~'+(n*5.5/1000).toFixed(0)+'K est','');
     upd('sky-ground',onGnd.toLocaleString(),'');
     upd('sky-air',(n-onGnd).toLocaleString(),'up');
     const bar=document.getElementById('sky-bar-fill');
@@ -2015,8 +1673,6 @@ async function loadSignalNWS(){
 
 /* ── BOOT ───────────────────────────────────── */
 async function boot(){
-  await preheat(); // render cache instantly, then background-refresh below
-
   const jobs=[
     ['quakes',  loadQuakes],
     ['flights', loadFlights],
@@ -2040,14 +1696,8 @@ async function boot(){
     ['sigFeed', loadSignalFeed],
   ];
   const res=await Promise.allSettled(jobs.map(([,fn])=>fn()));
-  const errs=res.filter(r=>r.status==='rejected').length;
   res.forEach((r,i)=>{ if(r.status==='rejected') console.warn(`[OpsHub] ${jobs[i][0]}:`,r.reason?.message); });
-  const syncEl=document.getElementById('last-sync');
-  if(syncEl){
-    syncEl.textContent='LAST SYNC: '+new Date().toISOString().replace('T',' ').split('.')[0]+'Z'+(errs>0?` · ${errs} STALE`:'');
-    syncEl.style.color=errs>0?'var(--y)':'';
-  }
-  updateCacheStats();
+  document.getElementById('last-sync').textContent='LAST SYNC: '+new Date().toISOString().replace('T',' ').split('.')[0]+'Z';
 }
 
 setInterval(()=>Promise.allSettled([loadQuakes(),loadFlights(),loadFear(),loadCrypto(),loadMarkets(),loadWeather()]),90000);
@@ -2056,76 +1706,6 @@ setInterval(()=>loadHN(),300000);
 setInterval(()=>Promise.allSettled([loadWikiChanges(),loadSeismicHour(),loadSignalNWS(),loadSignalFeed()]),30000);
 setInterval(()=>Promise.allSettled([loadRedditPulse()]),300000);
 setInterval(()=>Promise.allSettled([loadSignalNA()]),60000);
-
-/* ── CACHE STATS (footer) ─────────────────── */
-async function updateCacheStats(){
-  try{
-    const db=await openCacheDB();
-    const tx=db.transaction(CACHE_STORE,'readonly');
-    const req=tx.objectStore(CACHE_STORE).getAll();
-    req.onsuccess=e=>{
-      const entries=e.target.result||[];
-      const now=Date.now();
-      const fresh=entries.filter(e=>now-e.ts<e.ttl).length;
-      const stale=entries.length-fresh;
-      const el=document.getElementById('cache-stats');
-      if(el) el.textContent=`CACHE: ${fresh} FRESH · ${stale} STALE · ${entries.length} TOTAL`;
-    };
-  }catch(e){}
-}
-setInterval(updateCacheStats, 15000);
-
-/* ── ISS LIVE LOOP (10s) ────────────────────── */
-function issLoop(){
-  async function tick(){
-    try{
-      const r=await sf('https://api.wheretheiss.at/v1/satellites/25544');
-      const d=await r.json();
-      const lat=parseFloat(d.latitude).toFixed(2);
-      const lon=parseFloat(d.longitude).toFixed(2);
-      const alt=Math.round(d.altitude);
-      const vel=Math.round(d.velocity);
-      const pos=`${Math.abs(lat)}°${lat>=0?'N':'S'} ${Math.abs(lon)}°${lon>=0?'E':'W'}`;
-      // card values
-      upd(['c-iss','iss-lat'],lat+'°','up');
-      upd(['c-iss-vel','iss-vel'],vel.toLocaleString()+' km/h','up');
-      upd('iss-lon',lon+'°','up');
-      upd('iss-alt',alt+' km','up');
-      upd(['h-iss'],alt+'km','up');
-      upd(['sb-iss','sb-iss2'],pos);
-      document.getElementById('h-iss-s').textContent=vel.toLocaleString()+' KM/H';
-      // modal values (if open)
-      upd('m-iss-lat',lat+'°');
-      upd('m-iss-lon',lon+'°');
-      upd('m-iss-alt',alt+' km');
-      upd('m-iss-vel',vel.toLocaleString()+' km/h');
-      // live pulse panel
-      upd('iss2-lat',lat+'°','up');
-      upd('iss2-lon',lon+'°','up');
-      upd('iss2-alt',alt+' km','up');
-      upd('iss2-vel',vel.toLocaleString()+' km/h','up');
-      upd('iss2-vis',(d.visibility||'unknown').toUpperCase(),d.visibility==='daylight'?'up':'');
-    }catch(e){}
-    setTimeout(tick,10000);
-  }
-  tick();
-}
-
-async function fetchISSPasses(){
-  const el=document.getElementById('m-iss-passes');
-  if(!el) return;
-  el.textContent='Fetching passes…';
-  try{
-    const r=await sf('https://api.wheretheiss.at/v1/satellites/25544/passes?lat=35.22&lon=-80.84&alt=0.27&n=5');
-    const d=await r.json();
-    el.innerHTML=(d||[]).slice(0,5).map(p=>{
-      const rise=new Date(p.risetime*1000).toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-      const dur=Math.round(p.duration/60);
-      return `<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,.06)">${rise} · <span style="color:var(--p)">${dur} min</span></div>`;
-    }).join('') || 'No passes found';
-  }catch(e){ el.textContent='Pass data unavailable (API may require key)'; }
-}
-
 boot();
 issLoop();
 </script>

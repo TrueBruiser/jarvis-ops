@@ -1227,46 +1227,66 @@ function sectorBadge(s) {
 // ──────────────────────────────────────────────────────────────────────
 async function fetchYahooQuotes(symbols) {
   const chunk = symbols.join(',');
-  const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(chunk)}&fields=regularMarketPrice,regularMarketChangePercent,regularMarketChange,regularMarketVolume,averageDailyVolume3Month,regularMarketDayHigh,regularMarketDayLow,regularMarketOpen,regularMarketPreviousClose,trailingPE,forwardPE,dividendYield,beta,marketCap,fiftyTwoWeekHigh,fiftyTwoWeekLow,trailingAnnualDividendYield,regularMarketTime,marketState`;
-  const endpoints = [
-    url,
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  const fields = 'regularMarketPrice,regularMarketChangePercent,regularMarketChange,regularMarketVolume,averageDailyVolume3Month,regularMarketDayHigh,regularMarketDayLow,regularMarketOpen,regularMarketPreviousClose,trailingPE,forwardPE,dividendYield,beta,marketCap,fiftyTwoWeekHigh,fiftyTwoWeekLow,trailingAnnualDividendYield,regularMarketTime,marketState';
+  const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(chunk)}&fields=${fields}`;
+
+  // JARVIS local proxy is first (no CORS, no rate limits, no third-party dependency)
+  // External proxies are cold fallbacks only
+  const proxies = [
+    { url: `http://localhost:3000/proxy/yahoo?symbols=${encodeURIComponent(chunk)}`, local: true },
+    { url: `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}` },
+    { url: `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}` },
+    { url: `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(chunk)}&fields=${fields}` },
   ];
-  for (const ep of endpoints) {
-    try {
-      const resp = await fetch(ep, {
-        signal: AbortSignal.timeout(8000),
-        referrerPolicy: 'no-referrer',
-        credentials: 'omit'
-      });
-      if (!resp.ok) continue;
-      const data = await resp.json();
-      const results = data?.quoteResponse?.result || [];
-      results.forEach(q => {
-        liveData[q.symbol] = {
-          price: q.regularMarketPrice,
-          chg: q.regularMarketChange,
-          chgPct: q.regularMarketChangePercent,
-          volume: q.regularMarketVolume,
-          avgVol: q.averageDailyVolume3Month,
-          open: q.regularMarketOpen,
-          prevClose: q.regularMarketPreviousClose,
-          dayHigh: q.regularMarketDayHigh,
-          dayLow: q.regularMarketDayLow,
-          marketCap: q.marketCap,
-          pe: q.trailingPE || q.forwardPE,
-          divYield: (q.trailingAnnualDividendYield||q.dividendYield||0)*100,
-          beta: q.beta,
-          h52: q.fiftyTwoWeekHigh,
-          l52: q.fiftyTwoWeekLow,
-          marketState: q.marketState,
-        };
-      });
-      return true;
-    } catch(e) {}
+
+  function applyResults(data) {
+    const results = data?.quoteResponse?.result || [];
+    if (!results.length) throw new Error('empty');
+    results.forEach(q => {
+      liveData[q.symbol] = {
+        price: q.regularMarketPrice,
+        chg: q.regularMarketChange,
+        chgPct: q.regularMarketChangePercent,
+        volume: q.regularMarketVolume,
+        avgVol: q.averageDailyVolume3Month,
+        open: q.regularMarketOpen,
+        prevClose: q.regularMarketPreviousClose,
+        dayHigh: q.regularMarketDayHigh,
+        dayLow: q.regularMarketDayLow,
+        marketCap: q.marketCap,
+        pe: q.trailingPE || q.forwardPE,
+        divYield: (q.trailingAnnualDividendYield||q.dividendYield||0)*100,
+        beta: q.beta,
+        h52: q.fiftyTwoWeekHigh,
+        l52: q.fiftyTwoWeekLow,
+        marketState: q.marketState,
+      };
+    });
+    return true;
   }
-  return false;
+
+  // Try JARVIS proxy first (fast, local) — if it succeeds, skip external proxies entirely
+  try {
+    const resp = await fetch(proxies[0].url, { signal: AbortSignal.timeout(4000), credentials: 'omit' });
+    if (resp.ok) {
+      const data = await resp.json();
+      return applyResults(data);
+    }
+  } catch(e) {}
+
+  // JARVIS offline — race external fallbacks in parallel
+  const settled = await Promise.allSettled(proxies.slice(1).map(async p => {
+    const resp = await fetch(p.url, {
+      signal: AbortSignal.timeout(6000),
+      referrerPolicy: 'no-referrer',
+      credentials: 'omit'
+    });
+    if (!resp.ok) throw new Error(`${resp.status}`);
+    const data = await resp.json();
+    return applyResults(data);
+  }));
+
+  return settled.some(r => r.status === 'fulfilled');
 }
 
 async function fetchSparkline(sym) {
@@ -1296,14 +1316,32 @@ function setLoadMsg(m, pct) {
 
 async function init() {
   setLoadMsg('LOADING RUSSELL 3000 DATABASE...', 5);
-  const syms = [...new Set(STOCK_DB.map(s=>s.sym))]; // deduplicate
+  const syms = [...new Set(STOCK_DB.map(s=>s.sym))];
 
+  // Build batches
   const BATCH = 25;
-  for (let i=0; i<syms.length; i+=BATCH) {
-    const batch = syms.slice(i, i+BATCH);
-    await fetchYahooQuotes(batch);
-    const pct = 5 + (i/syms.length) * 80;
-    setLoadMsg(`FETCHING LIVE PRICES... ${Math.min(i+BATCH, syms.length)}/${syms.length} STOCKS`, pct);
+  const batches = [];
+  for (let i=0; i<syms.length; i+=BATCH) batches.push(syms.slice(i,i+BATCH));
+
+  setLoadMsg(`FETCHING ${syms.length} STOCKS (PARALLEL)...`, 10);
+
+  // Fetch ALL batches in parallel, hard-capped at 12 seconds total.
+  // If proxies are down we proceed immediately with static fallback data.
+  let completed = 0;
+  const fetchAll = Promise.allSettled(
+    batches.map(b => fetchYahooQuotes(b).then(ok => {
+      completed++;
+      const pct = 10 + (completed / batches.length) * 75;
+      setLoadMsg(`RECEIVING MARKET DATA... ${completed}/${batches.length} BATCHES`, pct);
+    }))
+  );
+  const hardCap = new Promise(r => setTimeout(r, 12000));
+  await Promise.race([fetchAll, hardCap]);
+
+  const liveCount = Object.keys(liveData).length;
+  if (liveCount === 0) {
+    setLoadMsg('LIVE DATA UNAVAILABLE — STATIC MODE', 86);
+    await new Promise(r=>setTimeout(r,600));
   }
 
   setLoadMsg('MERGING DATA STREAMS...', 88);
@@ -1338,11 +1376,15 @@ async function init() {
   filtered = [...allStocks];
   document.getElementById('bb-total').textContent = allStocks.length;
   document.getElementById('bb-update').textContent = new Date().toLocaleTimeString();
-
-  // UW status
-  if (uwToken) {
-    document.getElementById('bb-uw').textContent = 'TOKEN LOADED';
-    document.getElementById('bb-uw').style.color = 'var(--uw)';
+  // Show live vs static mode indicator
+  const liveLoaded = Object.keys(liveData).length;
+  const bbUW = document.getElementById('bb-uw');
+  if (liveLoaded > 0) {
+    bbUW.textContent = `LIVE: ${liveLoaded} STOCKS`;
+    bbUW.style.color = 'var(--gr)';
+  } else {
+    bbUW.textContent = 'STATIC MODE';
+    bbUW.style.color = 'var(--g)';
   }
 
   setLoadMsg('RENDERING INTERFACE...', 95);

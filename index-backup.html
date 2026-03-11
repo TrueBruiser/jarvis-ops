@@ -1,0 +1,1075 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://earthquake.usgs.gov https://opensky-network.org https://api.alternative.me https://api.coingecko.com https://api.wheretheiss.at https://wttr.in https://api.allorigins.win; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none';">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Referrer-Policy" content="no-referrer">
+<meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=()">
+<title>J.A.R.V.I.S. // OPS HUB</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* â”€â”€ TOKENS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+:root {
+  --g:#00ff88; --g2:rgba(0,255,136,0.08); --g3:rgba(0,255,136,0.15);
+  --b:#33aaff; --r:#ff3344; --y:#ffcc00; --p:#cc44ff; --o:#ff8844;
+  --bg:#020b05; --card:#030e07; --card-h:#05120a;
+  --border:rgba(0,255,136,0.10); --border2:rgba(0,255,136,0.22);
+  --text:#c4e8d2; --dim:#3a6650; --dim2:#2a4a3a;
+  --mono:'Share Tech Mono',monospace;
+  --raj:'Rajdhani',sans-serif;
+  --orb:'Orbitron',sans-serif;
+  --header-h: 52px;
+  --ticker-h: 32px;
+  --nav-h: 40px;
+}
+
+/* â”€â”€ RESET â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { font-size:16px; scroll-behavior:smooth; }
+html, body {
+  width:100%; max-width:100vw; min-height:100vh;
+  overflow-x:hidden; background:var(--bg); color:var(--text);
+  font-family:var(--mono);
+}
+
+/* â”€â”€ SCANLINES + VIGNETTE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:900;
+  background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.045) 2px,rgba(0,0,0,.045) 4px);
+}
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:899;
+  background: radial-gradient(ellipse 110% 55% at 50% 0%,rgba(0,255,136,.04) 0%,transparent 60%);
+}
+
+/* â”€â”€ HEADER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+#header {
+  position:sticky; top:0; z-index:200;
+  height:var(--header-h);
+  display:flex; align-items:center; gap:16px;
+  padding:0 20px;
+  background:rgba(1,5,3,.97);
+  border-bottom:1px solid var(--border2);
+  backdrop-filter:blur(12px);
+  min-width:0;
+}
+.logo { flex-shrink:0; }
+.logo-main {
+  font-family:var(--orb); font-size:12px; font-weight:900;
+  color:var(--g); letter-spacing:4px;
+  text-shadow:0 0 16px rgba(0,255,136,.5);
+  white-space:nowrap;
+}
+.logo-sub { font-size:7px; color:var(--dim); letter-spacing:4px; white-space:nowrap; }
+
+.sysbar {
+  flex:1; min-width:0; overflow:hidden;
+  mask:linear-gradient(90deg,transparent,black 30px,black calc(100% - 30px),transparent);
+}
+.sysbar-inner {
+  display:flex; gap:28px; width:max-content;
+  animation:scroll-sb 35s linear infinite;
+}
+@keyframes scroll-sb { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+.sb-item { display:flex; gap:6px; font-size:8px; white-space:nowrap; }
+.sb-lbl { color:var(--dim2); letter-spacing:1px; }
+.sb-val { color:var(--text); }
+.sb-val.up { color:var(--g); }
+.sb-val.dn { color:var(--r); }
+.sb-val.warn { color:var(--y); }
+
+.header-right { flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
+#clock { font-family:var(--orb); font-size:9px; color:var(--g); letter-spacing:2px; white-space:nowrap; }
+.threat {
+  font-family:var(--orb); font-size:6.5px; letter-spacing:2px;
+  padding:2px 7px; border:1px solid var(--y); color:var(--y);
+  background:rgba(255,204,0,.06); white-space:nowrap;
+}
+.threat.high  { border-color:var(--o); color:var(--o); background:rgba(255,136,68,.06); }
+.threat.crit  { border-color:var(--r); color:var(--r); background:rgba(255,51,68,.06); animation:blink 2s infinite; }
+
+/* â”€â”€ TICKER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+#ticker-bar {
+  height:var(--ticker-h);
+  display:flex; align-items:center;
+  background:rgba(0,255,136,.02);
+  border-bottom:1px solid var(--border);
+  overflow:hidden; position:relative; z-index:100;
+}
+.ticker-lbl {
+  flex-shrink:0; padding:0 12px 0 16px;
+  font-size:7px; color:var(--g); letter-spacing:3px;
+  border-right:1px solid var(--border2);
+}
+.ticker-wrap { flex:1; min-width:0; overflow:hidden; }
+.ticker-inner {
+  display:flex; gap:40px; width:max-content;
+  animation:scroll-tick 55s linear infinite;
+}
+@keyframes scroll-tick { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+.t-item { font-size:8px; color:var(--text); white-space:nowrap; opacity:.7; display:flex; gap:6px; }
+.t-src { color:var(--g); font-size:7px; padding:1px 4px; border:1px solid rgba(0,255,136,.2); opacity:1; }
+
+/* â”€â”€ NAV TABS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+#nav {
+  height:var(--nav-h);
+  display:flex; align-items:stretch;
+  background:rgba(1,5,3,.95);
+  border-bottom:1px solid var(--border);
+  overflow-x:auto; overflow-y:hidden;
+  scrollbar-width:none; position:sticky;
+  top:var(--header-h); z-index:150;
+}
+#nav::-webkit-scrollbar { display:none; }
+.nav-tab {
+  flex-shrink:0; padding:0 18px;
+  display:flex; align-items:center; gap:6px;
+  font-size:8px; letter-spacing:2px; color:var(--dim);
+  cursor:pointer; border-bottom:2px solid transparent;
+  transition:color .2s, border-color .2s;
+  white-space:nowrap; text-decoration:none;
+  font-family:var(--orb);
+}
+.nav-tab:hover { color:var(--text); }
+.nav-tab.active { color:var(--g); border-bottom-color:var(--g); }
+.nav-dot { width:5px; height:5px; border-radius:50%; background:currentColor; opacity:.6; }
+
+/* â”€â”€ MAIN LAYOUT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+main { width:100%; max-width:100%; }
+
+/* â”€â”€ HERO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+#hero {
+  padding:48px 24px 36px;
+  text-align:center;
+  background:radial-gradient(ellipse 90% 80% at 50% 0%,rgba(0,255,136,.05) 0%,transparent 60%);
+}
+.hero-eye { font-size:7.5px; letter-spacing:7px; color:var(--dim); margin-bottom:12px; }
+.hero-title {
+  font-family:var(--orb); font-weight:900;
+  font-size:clamp(32px,6vw,68px); line-height:.9;
+  letter-spacing:clamp(4px,2vw,14px);
+  color:var(--g);
+  text-shadow:0 0 60px rgba(0,255,136,.4),0 0 120px rgba(0,255,136,.15);
+  margin-bottom:8px;
+}
+.hero-sub { font-size:clamp(7px,1.2vw,9px); color:var(--dim); letter-spacing:5px; margin-bottom:32px; }
+
+/* stat pills */
+.stat-row {
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:2px; max-width:960px; margin:0 auto;
+}
+.stat {
+  padding:12px 8px; background:var(--card);
+  border:1px solid var(--border); border-top:2px solid transparent;
+  position:relative; overflow:hidden; cursor:default;
+  transition:background .2s;
+}
+.stat:hover { background:var(--card-h); }
+.stat::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,var(--sc,var(--g)),transparent);
+  opacity:.35;
+}
+.sv {
+  font-family:var(--orb); font-size:clamp(14px,2.5vw,22px); font-weight:700;
+  color:var(--sc,var(--g)); line-height:1; margin-bottom:4px;
+  text-shadow:0 0 12px var(--sc,rgba(0,255,136,.4));
+}
+.sv.loading { color:var(--dim); animation:blink 1.2s infinite; font-size:14px; }
+.sl { font-size:clamp(5.5px,1vw,7px); letter-spacing:2px; color:var(--dim); }
+.ss { font-size:6.5px; color:var(--dim2); margin-top:2px; }
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+/* â”€â”€ SECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.section { margin-top:2px; }
+.sec-hd {
+  display:flex; align-items:center; gap:10px;
+  padding:18px 20px 8px;
+  font-size:7px; letter-spacing:4px; color:var(--dim);
+}
+.sec-hd::before { content:'//'; color:var(--g); opacity:.5; font-size:9px; }
+.sec-line { flex:1; height:1px; background:var(--border); }
+
+/* â”€â”€ GRID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));
+  gap:2px; background:var(--border);
+}
+.grid-3 { grid-template-columns:repeat(auto-fill,minmax(min(100%,380px),1fr)); }
+
+/* â”€â”€ CARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.card {
+  background:var(--card); padding:20px;
+  display:flex; flex-direction:column; gap:10px;
+  text-decoration:none; color:inherit;
+  position:relative; overflow:hidden;
+  transition:background .2s; cursor:pointer;
+  min-width:0;
+}
+.card:hover { background:var(--card-h); }
+.card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,var(--cc,var(--g)),transparent);
+  opacity:0; transition:opacity .3s;
+}
+.card:hover::before { opacity:.6; }
+.card::after {
+  content:''; position:absolute; bottom:14px; right:14px;
+  width:14px; height:14px;
+  border-bottom:1px solid var(--cc,var(--g));
+  border-right:1px solid var(--cc,var(--g));
+  opacity:.15; transition:opacity .3s;
+}
+.card:hover::after { opacity:.5; }
+
+.badge {
+  position:absolute; top:0; right:0;
+  font-size:6.5px; letter-spacing:2px; padding:2px 8px;
+  border-bottom:1px solid var(--cc,var(--g)); border-left:1px solid var(--cc,var(--g));
+  color:var(--cc,var(--g)); background:rgba(0,0,0,.6);
+  font-family:var(--orb);
+}
+.card-hd { display:flex; gap:10px; align-items:flex-start; }
+.card-icon { font-size:22px; flex-shrink:0; line-height:1; margin-top:2px; }
+.card-meta { flex:1; min-width:0; }
+.card-title {
+  font-family:var(--orb); font-size:9.5px; font-weight:700;
+  letter-spacing:2.5px; color:var(--cc,var(--text));
+  margin-bottom:4px; line-height:1.2; transition:color .2s;
+}
+.card:hover .card-title { color:var(--cc,var(--g)); text-shadow:0 0 10px var(--cc,rgba(0,255,136,.3)); }
+.card-desc { font-size:8px; color:var(--dim); line-height:1.9; font-family:var(--raj); }
+
+.tags { display:flex; flex-wrap:wrap; gap:3px; margin-top:4px; }
+.tag { font-size:6px; letter-spacing:1.5px; padding:2px 5px; border:1px solid rgba(255,255,255,.07); color:var(--dim2); }
+
+/* live data */
+.live { padding-top:8px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:5px; }
+.lr { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.ll { font-size:7px; letter-spacing:2px; color:var(--dim); flex-shrink:0; }
+.lv { font-family:var(--orb); font-size:10.5px; color:var(--g); text-shadow:0 0 8px rgba(0,255,136,.3); }
+.lv.up  { color:var(--g); }
+.lv.dn  { color:var(--r); text-shadow:0 0 8px rgba(255,51,68,.3); }
+.lv.warn{ color:var(--y); }
+.lv.loading { color:var(--dim); animation:blink 1.2s infinite; font-size:8px; }
+
+/* progress bar */
+.prog { height:3px; background:rgba(255,255,255,.06); border-radius:2px; overflow:hidden; margin-top:2px; }
+.prog-f { height:100%; border-radius:2px; transition:width 1.5s cubic-bezier(.25,.46,.45,.94); }
+
+/* quake list */
+.qlist { display:flex; flex-direction:column; gap:3px; }
+.qrow { display:flex; gap:6px; align-items:center; padding:3px 6px; background:rgba(0,0,0,.3); border-left:2px solid var(--border2); }
+.qrow:hover { border-left-color:var(--g); }
+.qmag { font-family:var(--orb); font-size:8.5px; font-weight:700; min-width:28px; }
+.qmag.m3{color:var(--g)}.qmag.m4{color:var(--y)}.qmag.m5{color:var(--o)}.qmag.m6{color:var(--r)}
+.qloc { font-size:7px; color:var(--dim); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.qage { font-size:6.5px; color:var(--dim2); flex-shrink:0; }
+
+/* weather */
+.wx { display:flex; gap:12px; align-items:center; }
+.wx-t { font-family:var(--orb); font-size:clamp(20px,4vw,28px); font-weight:700; color:var(--b); line-height:1; }
+.wx-t.loading { color:var(--dim); animation:blink 1.2s infinite; }
+.wx-d { display:flex; flex-direction:column; gap:2px; font-size:7.5px; color:var(--dim); }
+
+/* â”€â”€ MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+#modal {
+  display:none; position:fixed; inset:0; z-index:500;
+  background:rgba(0,0,0,.88); backdrop-filter:blur(6px);
+  align-items:center; justify-content:center; padding:20px;
+}
+#modal.open { display:flex; }
+.modal-box {
+  background:var(--card); border:1px solid var(--border2);
+  border-top:2px solid var(--r); max-width:480px; width:100%;
+  padding:24px; position:relative; animation:fadeup .2s ease;
+}
+@keyframes fadeup { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+.modal-x {
+  position:absolute; top:10px; right:12px;
+  font-size:7.5px; color:var(--dim); letter-spacing:2px;
+  cursor:pointer; padding:3px 7px; border:1px solid var(--border);
+  transition:color .2s,border-color .2s;
+}
+.modal-x:hover { color:var(--r); border-color:var(--r); }
+.modal-title { font-family:var(--orb); font-size:9px; letter-spacing:3px; color:var(--r); margin-bottom:14px; }
+.modal-body { font-size:8.5px; color:var(--text); line-height:2; font-family:var(--raj); }
+.modal-body .hi { color:var(--g); }
+.modal-body .warn { color:var(--r); }
+
+/* â”€â”€ FOOTER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+footer {
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;
+  padding:14px 20px;
+  background:rgba(1,4,2,.95); border-top:1px solid var(--border);
+  font-size:7px; color:var(--dim); letter-spacing:2px;
+}
+.footer-r { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+.live-dot {
+  display:inline-block; width:5px; height:5px; border-radius:50%;
+  background:var(--g); box-shadow:0 0 6px var(--g);
+  animation:pulse 2s infinite; margin-right:5px;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   RESPONSIVE â€” every breakpoint
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+
+/* â”€â”€ 1440px+ (wide desktop) â€” 3 col grids â”€â”€ */
+@media (min-width:1440px) {
+  .grid   { grid-template-columns:repeat(3,1fr); }
+  .grid-3 { grid-template-columns:repeat(3,1fr); }
+  .stat-row { grid-template-columns:repeat(6,1fr); }
+}
+
+/* â”€â”€ 1200px (desktop landscape standard) â”€â”€ */
+@media (max-width:1199px) {
+  .grid   { grid-template-columns:repeat(2,1fr); }
+  .grid-3 { grid-template-columns:repeat(2,1fr); }
+}
+
+/* â”€â”€ 900px (desktop portrait / large tablet landscape) â”€â”€ */
+@media (max-width:900px) {
+  .stat-row { grid-template-columns:repeat(3,1fr); }
+  .grid   { grid-template-columns:repeat(2,1fr); }
+  .grid-3 { grid-template-columns:repeat(2,1fr); }
+  #hero { padding:36px 20px 28px; }
+  .hero-sub { letter-spacing:3px; }
+}
+
+/* â”€â”€ 768px (tablet portrait) â”€â”€ */
+@media (max-width:768px) {
+  :root { --header-h:48px; }
+  #header { padding:0 14px; gap:10px; }
+  .logo-main { font-size:10px; letter-spacing:3px; }
+  .logo-sub { font-size:6px; letter-spacing:3px; }
+  #clock { font-size:8px; letter-spacing:1px; }
+  .threat { font-size:6px; padding:2px 5px; }
+  .stat-row { grid-template-columns:repeat(3,1fr); }
+  .grid   { grid-template-columns:1fr; }
+  .grid-3 { grid-template-columns:1fr; }
+  .sec-hd { padding:14px 16px 6px; }
+  .card { padding:16px; }
+  .ticker-lbl { padding:0 8px 0 12px; font-size:6.5px; }
+  footer { font-size:6.5px; gap:6px; padding:10px 14px; }
+  .footer-r { gap:10px; }
+}
+
+/* â”€â”€ 600px (large phone landscape / small tablet) â”€â”€ */
+@media (max-width:600px) {
+  :root { --header-h:44px; }
+  .sysbar { display:none; } /* hide scrolling bar â€” too cramped */
+  #header { grid-template-columns:1fr auto; padding:0 12px; }
+  .logo-main { font-size:9px; letter-spacing:2px; }
+  .nav-tab { padding:0 12px; font-size:7px; letter-spacing:1px; }
+  .stat-row { grid-template-columns:repeat(2,1fr); }
+  .sv { font-size:16px; }
+}
+
+/* â”€â”€ 480px (standard phone portrait) â”€â”€ */
+@media (max-width:480px) {
+  :root { --header-h:42px; --ticker-h:28px; --nav-h:36px; }
+
+  /* header: logo left, clock+threat right â€” sysbar hidden */
+  #header { padding:0 10px; gap:8px; }
+  .sysbar { display:none; }
+  .logo-main { font-size:9px; letter-spacing:2px; }
+  .logo-sub { display:none; }
+  #clock { font-size:7.5px; }
+  .threat { font-size:5.5px; padding:1px 5px; letter-spacing:1.5px; }
+
+  /* ticker */
+  .ticker-lbl { display:none; }
+  .t-item { font-size:7.5px; }
+
+  /* nav */
+  .nav-tab { padding:0 10px; font-size:6.5px; letter-spacing:1px; }
+  .nav-dot { display:none; }
+
+  /* hero */
+  #hero { padding:24px 12px 20px; }
+  .hero-eye { font-size:6.5px; letter-spacing:4px; }
+  .hero-sub { font-size:6.5px; letter-spacing:2.5px; }
+
+  /* stats: 2x3 */
+  .stat-row { grid-template-columns:repeat(2,1fr); gap:2px; }
+  .stat { padding:10px 8px; }
+  .sv { font-size:15px; }
+  .sl { font-size:5.5px; letter-spacing:1.5px; }
+  .ss { font-size:6px; }
+
+  /* cards */
+  .card { padding:14px 12px; gap:8px; }
+  .card-icon { font-size:18px; }
+  .card-title { font-size:8.5px; letter-spacing:2px; }
+  .card-desc { font-size:7.5px; line-height:1.75; }
+  .ll { font-size:6.5px; }
+  .lv { font-size:9.5px; }
+  .tag { font-size:5.5px; padding:1px 4px; }
+  .badge { font-size:5.5px; padding:1px 6px; }
+  .sec-hd { font-size:6.5px; padding:12px 12px 5px; }
+
+  footer { flex-direction:column; align-items:flex-start; padding:10px 12px; font-size:6px; }
+  .footer-r { gap:8px; }
+}
+
+/* â”€â”€ 360px (smallest Android) â”€â”€ */
+@media (max-width:360px) {
+  .hero-title { font-size:28px; letter-spacing:3px; }
+  .sv { font-size:13px; }
+  .card-title { font-size:8px; }
+  .nav-tab { padding:0 8px; font-size:6px; }
+}
+
+/* â”€â”€ Phone landscape (short & wide, â‰¤ 430px tall) â”€â”€ */
+@media (max-height:430px) and (orientation:landscape) {
+  #hero { padding:16px 20px 12px; }
+  .hero-title { font-size:clamp(22px,6vh,40px); margin-bottom:4px; }
+  .hero-eye, .hero-sub { display:none; }
+  .stat-row { grid-template-columns:repeat(6,1fr); }
+  .stat { padding:8px; }
+  .sv { font-size:12px; }
+  .sl { font-size:5px; }
+  .ss { display:none; }
+}
+
+/* â”€â”€ Desktop portrait (tall narrow window â‰¥ 900px tall, â‰¤ 1100px wide) â”€â”€ */
+@media (min-height:900px) and (max-width:1100px) {
+  .stat-row { grid-template-columns:repeat(3,1fr); }
+  .grid   { grid-template-columns:repeat(2,1fr); }
+  .grid-3 { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- â•â• HEADER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<header id="header">
+  <div class="logo">
+    <div class="logo-main">J.A.R.V.I.S.</div>
+    <div class="logo-sub">SOAL INDUSTRIES // OPS HUB</div>
+  </div>
+
+  <div class="sysbar" aria-hidden="true">
+    <div class="sysbar-inner" id="sysbar">
+      <span class="sb-item"><span class="sb-lbl">FLIGHTS</span><span class="sb-val up" id="sb-fl">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">QUAKES 24H</span><span class="sb-val" id="sb-eq">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">MAX MAG</span><span class="sb-val warn" id="sb-mag">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">FEAR/GREED</span><span class="sb-val warn" id="sb-fg">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">BTC</span><span class="sb-val" id="sb-btc">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">ETH</span><span class="sb-val" id="sb-eth">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">SPY</span><span class="sb-val" id="sb-spy">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">QQQ</span><span class="sb-val" id="sb-qqq">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">VIX</span><span class="sb-val" id="sb-vix">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">ISS</span><span class="sb-val up" id="sb-iss">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">CHARLOTTE</span><span class="sb-val" id="sb-wx">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">OPERATOR</span><span class="sb-val">JACK SPENCER</span></span>
+      <!-- duplicate for loop -->
+      <span class="sb-item"><span class="sb-lbl">FLIGHTS</span><span class="sb-val up" id="sb-fl2">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">QUAKES</span><span class="sb-val" id="sb-eq2">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">FEAR/GREED</span><span class="sb-val warn" id="sb-fg2">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">BTC</span><span class="sb-val" id="sb-btc2">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">SPY</span><span class="sb-val" id="sb-spy2">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">VIX</span><span class="sb-val" id="sb-vix2">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">ISS</span><span class="sb-val up" id="sb-iss2">â€¦</span></span>
+      <span class="sb-item"><span class="sb-lbl">OPERATOR</span><span class="sb-val">JACK SPENCER</span></span>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div id="clock">--:--:-- UTC</div>
+    <div class="threat" id="threat">THREAT: MODERATE</div>
+  </div>
+</header>
+
+<!-- â•â• TICKER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div id="ticker-bar">
+  <div class="ticker-lbl">INTEL</div>
+  <div class="ticker-wrap">
+    <div class="ticker-inner" id="ticker">
+      <span class="t-item"><span class="t-src">SYS</span>Loading intelligence feedsâ€¦</span>
+    </div>
+  </div>
+</div>
+
+<!-- â•â• NAV â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<nav id="nav">
+  <div class="nav-tab active" role="button" tabindex="0" onclick="navTo('sec-intel',this)" onkeydown="if(event.key==='Enter')navTo('sec-intel',this)"><span class="nav-dot"></span>INTELLIGENCE</div>
+  <div class="nav-tab" role="button" tabindex="0" onclick="navTo('sec-financial',this)" onkeydown="if(event.key==='Enter')navTo('sec-financial',this)"><span class="nav-dot"></span>FINANCIAL</div>
+  <div class="nav-tab" role="button" tabindex="0" onclick="navTo('sec-security',this)" onkeydown="if(event.key==='Enter')navTo('sec-security',this)"><span class="nav-dot"></span>SECURITY</div>
+  <div class="nav-tab" role="button" tabindex="0" onclick="navTo('sec-ai',this)" onkeydown="if(event.key==='Enter')navTo('sec-ai',this)"><span class="nav-dot"></span>AI / AUTOMATION</div>
+</nav>
+
+<!-- â•â• MAIN â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<main>
+
+<!-- â”€â”€ HERO â”€â”€ -->
+<section id="hero">
+  <div class="hero-eye">// UNIFIED COMMAND INTERFACE //</div>
+  <div class="hero-title">OPS HUB</div>
+  <div class="hero-sub">INTELLIGENCE Â· SURVEILLANCE Â· RECONNAISSANCE Â· FINANCIAL</div>
+
+  <div class="stat-row">
+    <div class="stat" style="--sc:var(--g)">
+      <div class="sv loading" id="h-fl">â€”</div>
+      <div class="sl">AIRBORNE</div>
+      <div class="ss" id="h-fl-s">N. AMERICA</div>
+    </div>
+    <div class="stat" style="--sc:var(--o)">
+      <div class="sv loading" id="h-eq">â€”</div>
+      <div class="sl">QUAKES 24H</div>
+      <div class="ss" id="h-eq-s">M2.5+</div>
+    </div>
+    <div class="stat" style="--sc:var(--r)">
+      <div class="sv loading" id="h-fg">â€”</div>
+      <div class="sl">FEAR INDEX</div>
+      <div class="ss" id="h-fg-s">CRYPTO</div>
+    </div>
+    <div class="stat" style="--sc:var(--y)">
+      <div class="sv loading" id="h-btc">â€”</div>
+      <div class="sl">BTC / USD</div>
+      <div class="ss" id="h-btc-s">24H CHG</div>
+    </div>
+    <div class="stat" style="--sc:var(--b)">
+      <div class="sv loading" id="h-spy">â€”</div>
+      <div class="sl">SPY</div>
+      <div class="ss" id="h-spy-s">S&amp;P 500 ETF</div>
+    </div>
+    <div class="stat" style="--sc:var(--p)">
+      <div class="sv loading" id="h-iss">â€”</div>
+      <div class="sl">ISS ALT</div>
+      <div class="ss" id="h-iss-s">KM</div>
+    </div>
+  </div>
+</section>
+
+<!-- â•â•â•â•â•â•â•â•â•â• INTELLIGENCE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<section class="section" id="sec-intel">
+  <div class="sec-hd">INTELLIGENCE &amp; SURVEILLANCE<div class="sec-line"></div></div>
+  <div class="grid grid-3">
+
+    <!-- WORLDVIEW GLOBE -->
+    <a class="card" href="worldview.html" style="--cc:var(--g)">
+      <div class="badge">LIVE</div>
+      <div class="card-hd">
+        <div class="card-icon">ðŸŒ</div>
+        <div class="card-meta">
+          <div class="card-title">WORLDVIEW GLOBE</div>
+          <div class="card-desc">3D geospatial intelligence â€” live ADS-B flight tracking, USGS seismic feeds, real-time satellite orbital propagation. ISS, Starlink, GPS, military birds. CRT / Night Vision / FLIR sensor modes.</div>
+        </div>
+      </div>
+      <div class="live">
+        <div class="lr"><span class="ll">FLIGHTS AIRBORNE</span><span class="lv loading" id="c-fl">â€¦</span></div>
+        <div class="prog"><div class="prog-f" id="c-fl-bar" style="width:0%;background:var(--g)"></div></div>
+        <div class="lr"><span class="ll">ISS POSITION</span><span class="lv up" id="c-iss">â€¦</span></div>
+        <div class="lr"><span class="ll">ISS VELOCITY</span><span class="lv up" id="c-iss-vel">â€¦</span></div>
+      </div>
+      <div class="tags">
+        <span class="tag">ADS-B LIVE</span><span class="tag">SEISMIC</span><span class="tag">SAT TRACK</span><span class="tag">CESIUMJS</span>
+      </div>
+    </a>
+
+    <!-- WORLDVIEW ENGINE -->
+    <div class="card" role="button" tabindex="0" onclick="localLink(event,'http://localhost:5055','WORLDVIEW ENGINE','Flask server Â· run: python worldview.py')" onkeydown="if(event.key==='Enter')localLink(event,'http://localhost:5055','WORLDVIEW ENGINE','Flask server Â· run: python worldview.py')" style="--cc:var(--b)">
+      <div class="badge" style="--cc:var(--b)">LOCAL :5055</div>
+      <div class="card-hd">
+        <div class="card-icon">ðŸ“¡</div>
+        <div class="card-meta">
+          <div class="card-title">WORLDVIEW ENGINE</div>
+          <div class="card-desc">Flask OSINT collection server. ADS-B every 90s Â· USGS every 5min Â· GDELT news every 15min Â· Celestrak TLE every 12h. Threshold alerting, PDF SITREP generation on demand. Auto-report at 06:00Z.</div>
+        </div>
+      </div>
+      <div class="live">
+        <div class="qlist" id="quake-list">
+          <div class="qrow"><span class="qmag m3">Mâ€”</span><span class="qloc">Loading seismic feedâ€¦</span></div>
+        </div>
+        <div class="lr" style="margin-top:6px"><span class="ll">QUAKES 24H / MAX MAG</span><span class="lv loading" id="c-eq">â€¦</span></div>
+      </div>
+      <div class="tags">
+        <span class="tag">FLASK</span><span class="tag">GDELT</span><span class="tag">PDF SITREP</span><span class="tag">SCHEDULED</span>
+      </div>
+    </div>
+
+    <!-- ISS LIVE -->
+    <div class="card" style="--cc:var(--p);cursor:default">
+      <div class="badge" style="--cc:var(--p)">10s LIVE</div>
+      <div class="card-hd">
+        <div class="card-icon">ðŸ›¸</div>
+        <div class="card-meta">
+          <div class="card-title">ISS TRACKER</div>
+          <div class="card-desc">International Space Station real-time orbital position. Updates every 10 seconds via wheretheiss.at. Altitude, velocity, lat/lon â€” no API key required.</div>
+        </div>
+      </div>
+      <div class="live">
+        <div class="lr"><span class="ll">LATITUDE</span><span class="lv up" id="iss-lat">â€¦</span></div>
+        <div class="lr"><span class="ll">LONGITUDE</span><span class="lv up" id="iss-lon">â€¦</span></div>
+        <div class="lr"><span class="ll">ALTITUDE</span><span class="lv up" id="iss-alt">â€¦</span></div>
+        <div class="lr"><span class="ll">VELOCITY</span><span class="lv up" id="iss-vel">â€¦</span></div>
+      </div>
+      <div class="tags">
+        <span class="tag">WHERETHEISS.AT</span><span class="tag">NO KEY</span><span class="tag">10s REFRESH</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- â•â•â•â•â•â•â•â•â•â• FINANCIAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<section class="section" id="sec-financial">
+  <div class="sec-hd">FINANCIAL INTELLIGENCE<div class="sec-line"></div></div>
+  <div class="grid grid-3">
+
+    <!-- MERIDIAN -->
+    <a class="card" href="screener.html" style="--cc:var(--y)">
+      <div class="badge" style="--cc:var(--y)">LIVE DATA</div>
+      <div class="card-hd">
+        <div class="card-icon">ðŸ“Š</div>
+        <div class="card-meta">
+          <div class="card-title">MERIDIAN SCREENER</div>
+          <div class="card-desc">Bloomberg-style market terminal. Russell 3000 live quotes, sector heatmap, P/E Â· dividend Â· beta Â· momentum filters. Buffett Oracle BUY/HOLD/CAUTION signals. Unusual Whales dark pool integration.</div>
+        </div>
+      </div>
+      <div class="live">
+        <div class="lr"><span class="ll">SPY</span><span class="lv loading" id="c-spy">â€¦</span></div>
+        <div class="lr"><span class="ll">QQQ</span><span class="lv loading" id="c-qqq">â€¦</span></div>
+        <div class="lr"><span class="ll">VIX</span><span class="lv loading" id="c-vix">â€¦</span></div>
+        <div class="lr"><span class="ll">IWM</span><span class="lv loading" id="c-iwm">â€¦</span></div>
+        <div style="margin-top:6px">
+          <div style="font-size:6.5px;letter-spacing:2px;color:var(--dim);margin-bottom:3px">FEAR &amp; GREED INDEX</div>
+          <div class="prog"><div class="prog-f" id="fg-bar" style="width:0%;background:linear-gradient(90deg,var(--g),var(--y),var(--r))"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:6px;color:var(--dim2);margin-top:2px">
+            <span>FEAR</span><span id="fg-label" style="color:var(--text)">â€”</span><span>GREED</span>
+          </div>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag">RUSSELL 3000</span><span class="tag">BUFFETT ORACLE</span><span class="tag">DARK POOL</span><span class="tag">HEATMAP</span>
+      </div>
+    </a>
+
+    <!-- CRYPTO -->
+    <div class="card" style="--cc:var(--o);cursor:default">
+      <div class="badge" style="--cc:var(--o)">LIVE</div>
+      <div class="card-hd">
+        <div class="card-icon">â‚¿</div>
+        <div class="card-meta">
+          <div class="card-title">CRYPTO INTEL</div>
+          <div class="card-desc">Live cryptocurrency market data via CoinGecko. BTC, ETH, SOL with 24h change and trend indicators. Zero API key. Auto-refreshes every 90 seconds. Full CORS â€” no proxy needed.</div>
+        </div>
+      </div>
+      <div class="live">
+        <div class="lr"><span class="ll">BITCOIN</span><span class="lv loading" id="c-btc">â€¦</span></div>
+        <div class="lr"><span class="ll">ETHEREUM</span><span class="lv loading" id="c-eth">â€¦</span></div>
+        <div class="lr"><span class="ll">SOLANA</span><span class="lv loading" id="c-sol">â€¦</span></div>
+        <div class="lr"><span class="ll">24H TREND AVG</span><span class="lv loading" id="c-trend">â€¦</span></div>
+      </div>
+      <div class="tags">
+        <span class="tag">COINGECKO</span><span class="tag">NO KEY</span><span class="tag">90s REFRESH</span><span class="tag">CORS FREE</span>
+      </div>
+    </div>
+
+    <!-- DAILY BRIEF -->
+    <div class="card" style="--cc:var(--b);cursor:default">
+      <div class="badge" style="--cc:var(--b)">SCHEDULED</div>
+      <div class="card-hd">
+        <div class="card-icon">ðŸ“‹</div>
+        <div class="card-meta">
+          <div class="card-title">DAILY INTEL BRIEF</div>
+          <div class="card-desc">Military SITREP-format PDF. Aggregates news, weather, markets, prediction markets via Claude API narrative generation. SORD page Â· HERMES companion Â· market screener. Twilio SMS/MMS delivery.</div>
+        </div>
+      </div>
+      <div class="live">
+        <div class="lr"><span class="ll">RUNNER</span><span class="lv" style="color:var(--b);font-size:7.5px">Daily Briefing\run_briefing.py</span></div>
+        <div class="lr"><span class="ll">SITREP</span><span class="lv" style="color:var(--b);font-size:7.5px">Executive Brief\run_briefing.py</span></div>
+        <div class="lr"><span class="ll">OUTPUT</span><span class="lv up">PDF + SMS/MMS</span></div>
+      </div>
+      <div class="tags">
+        <span class="tag">PDF OUTPUT</span><span class="tag">CLAUDE API</span><span class="tag">TWILIO SMS</span><span class="tag">SITREP</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- â•â•â•â•â•â•â•â•â•â• SECURITY â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<section class="section" id="sec-security">
+  <div class="sec-hd">SECURITY OPERATIONS<div class="sec-line"></div></div>
+  <div class="grid">
+
+    <div class="card" role="button" tabindex="0" onclick="openModal('sentinel')" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('sentinel')" style="--cc:var(--r)">
+      <div class="badge" style="--cc:var(--r)">AUTH ONLY</div>
+      <div class="card-hd">
+        <div class="card-icon">ðŸ›¡ï¸</div>
+        <div class="card-meta">
+          <div class="card-title">SENTINEL</div>
+          <div class="card-desc">Autonomous penetration testing platform. Network Â· Web (OWASP Top 10) Â· Active Directory Â· Wireless Â· Physical security. Real-time findings dashboard. Auto-generated PDF pentest reports. Bash Bunny Â· WiFi Pineapple Â· HackRF One Â· Flipper Zero.</div>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag">WRITTEN AUTH REQUIRED</span><span class="tag">BASH BUNNY</span><span class="tag">HACKRF ONE</span><span class="tag">FLIPPER ZERO</span>
+      </div>
+    </div>
+
+    <div class="card" role="button" tabindex="0" onclick="openModal('pinecon')" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('pinecon')" style="--cc:var(--o)">
+      <div class="badge" style="--cc:var(--o)">DEVICE</div>
+      <div class="card-hd">
+        <div class="card-icon">ðŸ“¶</div>
+        <div class="card-meta">
+          <div class="card-title">PINECON</div>
+          <div class="card-desc">WiFi Pineapple honeypot &amp; OSINT capture tool. Passive recon, evil twin AP deployment, client tracking, credential capture for authorized social engineering engagements. Runs on-device.</div>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag">WIFI PINEAPPLE</span><span class="tag">EVIL TWIN</span><span class="tag">CLIENT TRACK</span><span class="tag">OSINT</span>
+      </div>
+    </a>
+
+    <div class="card" style="--cc:var(--y);cursor:default">
+      <div class="badge" style="--cc:var(--y)">PASSIVE</div>
+      <div class="card-hd">
+        <div class="card-icon">ðŸ“»</div>
+        <div class="card-meta">
+          <div class="card-title">HACKRF ONE</div>
+          <div class="card-desc">Software-defined radio platform. 1MHzâ€“6GHz frequency coverage. Replay attacks, signal analysis, spectrum monitoring. Integrate with GNU Radio for advanced signal processing and demodulation workflows.</div>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag">SDR</span><span class="tag">1MHzâ€“6GHz</span><span class="tag">GNU RADIO</span><span class="tag">SPECTRUM</span>
+      </div>
+    </div>
+
+    <div class="card" style="--cc:var(--p);cursor:default">
+      <div class="badge" style="--cc:var(--p)">MULTI-PROTOCOL</div>
+      <div class="card-hd">
+        <div class="card-icon">ðŸ¬</div>
+        <div class="card-meta">
+          <div class="card-title">FLIPPER ZERO</div>
+          <div class="card-desc">Multi-protocol security research tool. Sub-GHz radio, RFID/NFC, infrared, iButton, BadUSB. Portable field assessment for authorized physical security engagements.</div>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag">SUB-GHz</span><span class="tag">RFID/NFC</span><span class="tag">INFRARED</span><span class="tag">BADUSB</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- â•â•â•â•â•â•â•â•â•â• AI / AUTOMATION â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<section class="section" id="sec-ai">
+  <div class="sec-hd">AI &amp; AUTOMATION<div class="sec-line"></div></div>
+  <div class="grid">
+
+    <!-- JARVIS CORE -->
+    <div class="card" role="button" tabindex="0" onclick="localLink(event,'http://localhost:3000','J.A.R.V.I.S. CORE','Docker backend Â· run: docker compose up in C:\\Users\\jackg\\jarvis')" onkeydown="if(event.key==='Enter')localLink(event,'http://localhost:3000','J.A.R.V.I.S. CORE','Docker backend Â· run: docker compose up in C:\\Users\\jackg\\jarvis')" style="--cc:var(--p)">
+      <div class="badge" style="--cc:var(--p)">LOCAL :3000</div>
+      <div class="card-hd">
+        <div class="card-icon">ðŸ¤–</div>
+        <div class="card-meta">
+          <div class="card-title">J.A.R.V.I.S. CORE</div>
+          <div class="card-desc">Iron Man AI assistant. Docker/FastAPI backend Â· Home Assistant Â· Chatterbox TTS voice cloning Â· iOS SwiftUI HUD with Action Button Â· MCP servers Â· Philips Hue Â· Google Nest Â· Tailscale remote access.</div>
+        </div>
+      </div>
+      <div class="live">
+        <div class="wx">
+          <div class="wx-t loading" id="wx-t">â€”Â°F</div>
+          <div class="wx-d">
+            <span id="wx-desc">Charlotte, NC</span>
+            <span id="wx-feels">Feels like â€”Â°F</span>
+            <span id="wx-hum">Humidity â€”%</span>
+          </div>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag">DOCKER</span><span class="tag">CLAUDE API</span><span class="tag">HOME ASSISTANT</span><span class="tag">iOS APP</span>
+      </div>
+    </div>
+
+    <!-- SOAL INDUSTRIES -->
+    <div class="card" style="--cc:var(--g);cursor:default">
+      <div class="badge" style="--cc:var(--g)">MISSION</div>
+      <div class="card-hd">
+        <div class="card-icon">âš¡</div>
+        <div class="card-meta">
+          <div class="card-title">SOAL INDUSTRIES</div>
+          <div class="card-desc">Trusted advisor practice â€” positioned in important rooms, not a software company. Spencer Products as first client opportunity. Building external credibility while delivering real intelligence capability today.</div>
+        </div>
+      </div>
+      <div class="live">
+        <div class="lr"><span class="ll">OPERATOR</span><span class="lv up">JACK SPENCER</span></div>
+        <div class="lr"><span class="ll">LOCATION</span><span class="lv">CHARLOTTE, NC</span></div>
+        <div class="lr"><span class="ll">CERTS</span><span class="lv" style="font-size:8px;color:var(--b)">SEC+ Â· NET+ Â· SC-900 Â· AZ-900</span></div>
+      </div>
+      <div class="tags">
+        <span class="tag">TRUSTED ADVISOR</span><span class="tag">INTELLIGENCE</span><span class="tag">SECURITY</span><span class="tag">AUTOMATION</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<!-- â•â• FOOTER â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<footer>
+  <span>J.A.R.V.I.S. OPS HUB // SOAL INDUSTRIES // CHARLOTTE NC</span>
+  <div class="footer-r">
+    <span><span class="live-dot"></span>ALL FEEDS LIVE Â· 90s REFRESH</span>
+    <span id="last-sync">LAST SYNC: â€”</span>
+    <span>SECURITY TOOLS: AUTHORIZED ENGAGEMENTS ONLY</span>
+  </div>
+</footer>
+
+<!-- â•â• MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div id="modal" role="dialog" aria-modal="true" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-x" onclick="closeModal()">âœ• CLOSE</div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+Object.freeze(Object.prototype);
+
+/* â”€â”€ MODALS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const MODALS = {
+  sentinel: {
+    title: 'âš  AUTHORIZATION GATE â€” SENTINEL',
+    body: `<strong class="warn">WRITTEN AUTHORIZATION IS REQUIRED</strong> before running any module.<br><br>
+Unauthorized access to computer systems is a federal crime under the CFAA.<br><br>
+<strong class="hi">Launch:</strong> Open <span class="hi">SENTINEL/ui/dashboard.html</span> in browser<br>
+<strong class="hi">Run:</strong> <span class="hi">python sentinel.py --config engagement.yaml</span><br><br>
+All targets require explicit written sign-off on file before execution.`
+  },
+  pinecon: {
+    title: 'PINECON // WIFI PINEAPPLE',
+    body: `Deploy from your WiFi Pineapple device web interface.<br><br>
+<strong class="hi">Capabilities:</strong> Passive recon Â· evil twin AP Â· client probe capture Â· credential harvest<br><br>
+<strong class="warn">Authorized social engineering engagements only.</strong>`
+  }
+};
+
+function escH(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function openModal(id){
+  const d=MODALS[id]; if(!d) return;
+  document.getElementById('modal-content').innerHTML=`<div class="modal-title">${escH(d.title)}</div><div class="modal-body">${d.body}</div>`;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+/* â”€â”€ LOCAL LINK HANDLER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function localLink(e, url, title, hint){
+  const isLocal = ['localhost','127.0.0.1','0.0.0.0'].includes(window.location.hostname);
+  if(isLocal) return true;
+  e.preventDefault();
+  document.getElementById('modal-content').innerHTML=`
+    <div class="modal-title">ðŸ–¥ LOCAL SERVICE â€” ${escH(title)}</div>
+    <div class="modal-body">
+      This tool runs on your <strong class="hi">local machine</strong> and is not accessible remotely.<br><br>
+      <strong class="hi">URL:</strong> <span style="color:var(--b)">${escH(url)}</span><br>
+      <strong class="hi">Access:</strong> Open this URL on your home machine, or connect via <strong class="hi">Tailscale</strong> first.<br><br>
+      <span style="color:var(--dim)">${escH(hint)}</span>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+  return false;
+}
+
+/* â”€â”€ CLOCK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function tick(){ document.getElementById('clock').textContent = new Date().toISOString().replace('T',' ').split('.')[0]+' UTC'; }
+tick(); setInterval(tick,1000);
+
+
+/* â”€â”€ NAV SCROLL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function navTo(id, el) {
+  const target = document.getElementById(id);
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+/* nav active handled by navTo() */
+
+/* â”€â”€ SAFE FETCH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+async function sf(url){
+  const ac=new AbortController(); const t=setTimeout(()=>ac.abort(),10000);
+  try{
+    const r=await fetch(url,{signal:ac.signal,credentials:'omit',mode:'cors',referrerPolicy:'no-referrer'});
+    clearTimeout(t); if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r;
+  }catch(e){ clearTimeout(t); throw e; }
+}
+
+/* â”€â”€ HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function upd(ids,val,cls=''){
+  (Array.isArray(ids)?ids:[ids]).forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.textContent=val;
+    el.classList.remove('loading','up','dn','warn','crit');
+    if(cls) el.classList.add(cls);
+  });
+}
+function fc(c){ return (c>=0?'+':'')+c.toFixed(2)+'%'; }
+function cc(c){ return c>=0?'up':'dn'; }
+
+/* â”€â”€ FEEDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+async function loadQuakes(){
+  const r=await sf('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson');
+  const d=await r.json();
+  const f=d.features||[];
+  const s=[...f].sort((a,b)=>(b.properties.mag||0)-(a.properties.mag||0));
+  const max=(s[0]?.properties?.mag||0).toFixed(1);
+  upd(['h-eq','sb-eq','sb-eq2'],String(f.length),parseFloat(max)>=5?'warn':'');
+  upd('sb-mag','M'+max);
+  document.getElementById('h-eq-s').textContent='MAX M'+max;
+  upd('c-eq',f.length+' / M'+max,parseFloat(max)>=5?'warn':'up');
+
+  const list=document.getElementById('quake-list');
+  if(list&&s.length){
+    const now=Date.now();
+    list.innerHTML=s.slice(0,5).map(q=>{
+      const m=(q.properties.mag||0).toFixed(1);
+      const loc=escH((q.properties.place||'Unknown').substring(0,55));
+      const h=Math.round((now-(q.properties.time||now))/3600000);
+      const cls=m>=6?'m6':m>=5?'m5':m>=4?'m4':'m3';
+      return `<div class="qrow"><span class="qmag ${cls}">M${m}</span><span class="qloc">${loc}</span><span class="qage">${h}h</span></div>`;
+    }).join('');
+  }
+}
+
+async function loadFlights(){
+  const r=await sf('https://opensky-network.org/api/states/all?lamin=24&lomin=-125&lamax=50&lomax=-66');
+  const d=await r.json(); const n=(d.states||[]).length;
+  const disp=n>999?(n/1000).toFixed(1)+'K':String(n);
+  upd(['h-fl','c-fl'],disp,'up');
+  upd(['sb-fl','sb-fl2'],n.toLocaleString()+' FLIGHTS');
+  document.getElementById('h-fl-s').textContent=n.toLocaleString()+' OVER N. AMERICA';
+  const bar=document.getElementById('c-fl-bar');
+  if(bar) bar.style.width=Math.min(n/7500,1)*100+'%';
+}
+
+async function loadFear(){
+  const r=await sf('https://api.alternative.me/fng/?limit=1&format=json');
+  const d=await r.json();
+  const v=parseInt(d.data?.[0]?.value||50);
+  const lbl=(d.data?.[0]?.value_classification||'').toUpperCase();
+  const cls=v<=25?'crit':v<=40?'warn':v>=60?'up':'';
+  upd(['h-fg','sb-fg','sb-fg2'],String(v),cls);
+  upd('fg-label',lbl);
+  document.getElementById('h-fg-s').textContent=lbl;
+  const bar=document.getElementById('fg-bar'); if(bar) bar.style.width=v+'%';
+  if(v<=25){ const t=document.getElementById('threat'); t.textContent='THREAT: CRITICAL'; t.className='threat crit'; }
+}
+
+async function loadCrypto(){
+  const r=await sf('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true');
+  const d=await r.json();
+  const btc=d.bitcoin?.usd||0, btcC=d.bitcoin?.usd_24h_change||0;
+  const eth=d.ethereum?.usd||0, ethC=d.ethereum?.usd_24h_change||0;
+  const sol=d.solana?.usd||0,   solC=d.solana?.usd_24h_change||0;
+  const fb='$'+(btc>999?(btc/1000).toFixed(1)+'K':btc.toFixed(0));
+  upd(['h-btc','sb-btc','sb-btc2'],fb+' '+fc(btcC),cc(btcC));
+  document.getElementById('h-btc-s').textContent=fc(btcC)+' 24H';
+  upd('c-btc',fb+' '+fc(btcC),cc(btcC));
+  upd(['c-eth','sb-eth'],'$'+(eth/1000).toFixed(2)+'K '+fc(ethC),cc(ethC));
+  upd('c-sol','$'+sol.toFixed(2)+' '+fc(solC),cc(solC));
+  upd('c-trend',fc((btcC+ethC+solC)/3)+' AVG',cc((btcC+ethC+solC)/3));
+}
+
+async function loadYahoo(sym,ids){
+  const enc=encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`);
+  const r=await sf(`https://api.allorigins.win/get?url=${enc}`);
+  const o=await r.json(); const m=JSON.parse(o.contents).chart.result[0].meta;
+  const p=m.regularMarketPrice, prev=m.previousClose||p, chg=((p-prev)/prev)*100;
+  const fmt='$'+p.toFixed(2)+' '+fc(chg);
+  ids.forEach(id=>upd(id,fmt,cc(chg)));
+  return {p,chg};
+}
+
+async function loadMarkets(){
+  const [spy,qqq,iwm,vix]=await Promise.allSettled([
+    loadYahoo('SPY',['c-spy','sb-spy','sb-spy2']),
+    loadYahoo('QQQ',['c-qqq','sb-qqq']),
+    loadYahoo('IWM','c-iwm'),
+    loadYahoo('%5EVIX',['c-vix','sb-vix','sb-vix2'])
+  ]);
+  if(spy.status==='fulfilled'){
+    upd('h-spy','$'+spy.value.p.toFixed(2),cc(spy.value.chg));
+    document.getElementById('h-spy-s').textContent=fc(spy.value.chg)+' TODAY';
+  }
+}
+
+async function loadISS(){
+  const r=await sf('https://api.wheretheiss.at/v1/satellites/25544');
+  const d=await r.json();
+  const lat=parseFloat(d.latitude).toFixed(2), lon=parseFloat(d.longitude).toFixed(2);
+  const alt=Math.round(d.altitude), vel=Math.round(d.velocity);
+  const pos=`${Math.abs(lat)}Â°${lat>=0?'N':'S'} ${Math.abs(lon)}Â°${lon>=0?'E':'W'}`;
+  upd(['h-iss'],alt+'km','up');
+  upd(['sb-iss','sb-iss2'],pos);
+  upd(['c-iss','iss-lat'],lat+'Â°','up');
+  upd(['c-iss-vel','iss-vel'],vel.toLocaleString()+' km/h','up');
+  upd('iss-lon',lon+'Â°','up');
+  upd('iss-alt',alt+' km','up');
+  document.getElementById('h-iss-s').textContent=vel.toLocaleString()+' KM/H';
+}
+
+async function loadWeather(){
+  const r=await sf('https://wttr.in/Charlotte,NC?format=j1');
+  const d=await r.json(); const c=d.current_condition[0];
+  const el=document.getElementById('wx-t');
+  el.textContent=c.temp_F+'Â°F'; el.classList.remove('loading');
+  document.getElementById('wx-desc').textContent=c.weatherDesc[0].value;
+  document.getElementById('wx-feels').textContent='Feels like '+c.FeelsLikeF+'Â°F';
+  document.getElementById('wx-hum').textContent='Humidity '+c.humidity+'%';
+  upd('sb-wx',c.temp_F+'Â°F Â· '+c.weatherDesc[0].value.substring(0,10));
+}
+
+async function loadTicker(){
+  const enc=encodeURIComponent('https://feeds.bbci.co.uk/news/world/rss.xml');
+  const r=await sf(`https://api.allorigins.win/get?url=${enc}`);
+  const o=await r.json();
+  const xml=new DOMParser().parseFromString(o.contents,'text/xml');
+  const items=Array.from(xml.querySelectorAll('item')).slice(0,10);
+  if(!items.length) return;
+  const mk=its=>its.map(i=>{
+    const t=escH((i.querySelector('title')?.textContent||'').replace(/^<!\[CDATA\[|\]\]>$/g,'').trim().substring(0,100));
+    return `<span class="t-item"><span class="t-src">BBC</span>${t}</span>`;
+  }).join('');
+  document.getElementById('ticker').innerHTML=mk(items)+mk(items);
+}
+
+/* â”€â”€ BOOT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+async function boot(){
+  const jobs=[
+    ['quakes',  loadQuakes],
+    ['flights', loadFlights],
+    ['fear',    loadFear],
+    ['crypto',  loadCrypto],
+    ['markets', loadMarkets],
+    ['iss',     loadISS],
+    ['weather', loadWeather],
+    ['ticker',  loadTicker],
+  ];
+  const res=await Promise.allSettled(jobs.map(([,fn])=>fn()));
+  res.forEach((r,i)=>{ if(r.status==='rejected') console.warn(`[OpsHub] ${jobs[i][0]}:`,r.reason?.message); });
+  document.getElementById('last-sync').textContent='LAST SYNC: '+new Date().toISOString().replace('T',' ').split('.')[0]+'Z';
+}
+
+async function issLoop(){ while(true){ await new Promise(r=>setTimeout(r,10000)); try{await loadISS();}catch(e){} } }
+
+boot();
+issLoop();
+setInterval(()=>Promise.allSettled([loadQuakes(),loadFlights(),loadFear(),loadCrypto(),loadMarkets(),loadWeather()]),90000);
+</script>
+</body>
+</html>
+
