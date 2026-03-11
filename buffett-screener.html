@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monopoly Moat Screener — Buffett-Style Analysis</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src http://localhost:3000 https://query1.finance.yahoo.com https://query2.finance.yahoo.com https://api.allorigins.win https://corsproxy.io; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'; object-src 'none';">
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), camera=(), microphone=(), payment=(), usb=()">
     <style>
         :root {
             --bg-primary: #0a0e14; --bg-secondary: #111820; --bg-tertiary: #1a2130;
@@ -186,6 +190,7 @@ async function fetchBatch(syms) {
     const chunk=syms.join(',');
     const yurl=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(chunk)}`;
     const proxies=[
+        {url:`http://localhost:3000/proxy/yahoo?symbols=${encodeURIComponent(chunk)}`,wrapper:false,direct:true},
         {url:`https://api.allorigins.win/get?url=${encodeURIComponent(yurl)}`,wrapper:true},
         {url:`https://api.allorigins.win/get?url=${encodeURIComponent(yurl.replace('query1','query2'))}`,wrapper:true},
         {url:`https://corsproxy.io/?${encodeURIComponent(yurl)}`,wrapper:false},

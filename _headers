@@ -1,0 +1,9 @@
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+  Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=(), usb=()
+  X-XSS-Protection: 1; mode=block
+
+/*.html
+  Content-Security-Policy: default-src 'none'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://query1.finance.yahoo.com https://query2.finance.yahoo.com https://api.allorigins.win https://corsproxy.io https://api.coingecko.com https://wheretheiss.at https://api.weather.gov https://services.swpc.noaa.gov https://earthquake.usgs.gov https://eonet.gsfc.nasa.gov https://opensky-network.org https://api.alternative.me https://wttr.in https://feeds.bbci.co.uk https://hacker-news.firebaseio.com https://en.wikipedia.org https://www.reddit.com; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'; object-src 'none';

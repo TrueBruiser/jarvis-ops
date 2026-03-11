@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Long-Term Market Screener</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src http://localhost:3000 https://query1.finance.yahoo.com https://query2.finance.yahoo.com https://api.allorigins.win https://corsproxy.io; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'; object-src 'none';">
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), camera=(), microphone=(), payment=(), usb=()">
     <style>
         :root {
             --bg-primary: #0d1117;
@@ -236,7 +240,9 @@
     async function fetchBatchQuotes(symbols) {
         const chunk = symbols.join(',');
         const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(chunk)}&fields=regularMarketPrice,regularMarketChangePercent,regularMarketChange,regularMarketVolume,averageDailyVolume3Month,trailingPE,forwardPE,dividendYield,beta,marketCap,fiftyTwoWeekHigh,fiftyTwoWeekLow,trailingAnnualDividendYield,returnOnEquity,revenueGrowth,debtToEquity,profitMargins,currentRatio,pegRatio,epsTrailingTwelveMonths`;
+        // JARVIS local proxy is priority 1 — direct Yahoo fetch, no CORS games, sub-100ms on LAN
         const proxies = [
+            { url: `http://localhost:3000/proxy/yahoo?symbols=${encodeURIComponent(chunk)}`, wrapper: false, direct: true },
             { url: `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`, wrapper: true },
             { url: `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl.replace('query1','query2'))}`, wrapper: true },
             { url: `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`, wrapper: false },
