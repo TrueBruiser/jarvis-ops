@@ -1228,19 +1228,29 @@ function sectorBadge(s) {
 async function fetchYahooQuotes(symbols) {
   const chunk = symbols.join(',');
   const fields = 'regularMarketPrice,regularMarketChangePercent,regularMarketChange,regularMarketVolume,averageDailyVolume3Month,regularMarketDayHigh,regularMarketDayLow,regularMarketOpen,regularMarketPreviousClose,trailingPE,forwardPE,dividendYield,beta,marketCap,fiftyTwoWeekHigh,fiftyTwoWeekLow,trailingAnnualDividendYield,regularMarketTime,marketState';
-  const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(chunk)}&fields=${fields}`;
+  const yahooUrl  = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(chunk)}&fields=${fields}`;
+  const yahooUrl2 = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(chunk)}&fields=${fields}`;
 
-  // JARVIS local proxy is first (no CORS, no rate limits, no third-party dependency)
-  // External proxies are cold fallbacks only
+  // Proxy priority:
+  // 1. JARVIS local (localhost:3000) — only works at home with Docker running
+  // 2. allorigins /get wrapper — returns {contents:"..."} JSON, reliable from GitHub Pages
+  // 3. corsproxy.io — fallback
+  // 4. query2 direct — last resort, CORS blocked on GitHub Pages but works on local file://
   const proxies = [
     { url: `http://localhost:3000/proxy/yahoo?symbols=${encodeURIComponent(chunk)}`, local: true },
-    { url: `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}` },
+    { url: `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,  wrapper: true },
+    { url: `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl2)}`, wrapper: true },
     { url: `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}` },
-    { url: `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(chunk)}&fields=${fields}` },
+    { url: yahooUrl2 },
   ];
 
-  function applyResults(data) {
-    const results = data?.quoteResponse?.result || [];
+  function applyResults(data, wrapper) {
+    let parsed = data;
+    // allorigins /get wraps response: {contents: "{...}", status:{...}}
+    if (wrapper && data?.contents) {
+      try { parsed = JSON.parse(data.contents); } catch(e) { throw new Error('allorigins parse fail'); }
+    }
+    const results = parsed?.quoteResponse?.result || [];
     if (!results.length) throw new Error('empty');
     results.forEach(q => {
       liveData[q.symbol] = {
@@ -1270,20 +1280,20 @@ async function fetchYahooQuotes(symbols) {
     const resp = await fetch(proxies[0].url, { signal: AbortSignal.timeout(4000), credentials: 'omit' });
     if (resp.ok) {
       const data = await resp.json();
-      return applyResults(data);
+      return applyResults(data, false);
     }
   } catch(e) {}
 
   // JARVIS offline — race external fallbacks in parallel
   const settled = await Promise.allSettled(proxies.slice(1).map(async p => {
     const resp = await fetch(p.url, {
-      signal: AbortSignal.timeout(6000),
+      signal: AbortSignal.timeout(8000),
       referrerPolicy: 'no-referrer',
       credentials: 'omit'
     });
     if (!resp.ok) throw new Error(`${resp.status}`);
     const data = await resp.json();
-    return applyResults(data);
+    return applyResults(data, p.wrapper || false);
   }));
 
   return settled.some(r => r.status === 'fulfilled');
@@ -1347,17 +1357,18 @@ async function init() {
   setLoadMsg('MERGING DATA STREAMS...', 88);
   allStocks = STOCK_DB.map(s => {
     const live = liveData[s.sym] || {};
+    const hasLive = live.price != null;
     return {
       ...s,
-      price: live.price || (s.high52 * 0.88),
-      chg: live.chg || 0,
-      chgPct: live.chgPct || 0,
-      volume: live.volume || 0,
-      avgVol: live.avgVol || 1,
-      mktCap: live.marketCap ? live.marketCap/1e9 : s.mktCapB,
-      pe: live.pe || s.pe,
+      price:    hasLive ? live.price    : null,   // null = no live data, renders as N/A
+      chg:      live.chg    || 0,
+      chgPct:   live.chgPct || 0,
+      volume:   live.volume || 0,
+      avgVol:   live.avgVol || 1,
+      mktCap:   live.marketCap ? live.marketCap/1e9 : s.mktCapB,
+      pe:       live.pe       || s.pe,
       divYield: live.divYield !== undefined ? live.divYield : s.divYield,
-      beta: live.beta || s.beta,
+      beta:     live.beta     || s.beta,
       h52: live.h52 || s.high52,
       l52: live.l52 || s.low52,
       open: live.open,
