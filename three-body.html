@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Three-Body Problem Simulation</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000;
+    overflow: hidden;
+    font-family: 'Courier New', monospace;
+    color: #aaa;
+  }
+  canvas { display: block; }
+  #hud {
+    position: fixed;
+    top: 12px;
+    left: 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    pointer-events: none;
+    text-shadow: 0 0 4px #000;
+    z-index: 10;
+  }
+  #hud .fps { color: #0f0; }
+  #hud .label { color: #888; }
+  #controls {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+  }
+  #controls button {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #ccc;
+    padding: 8px 18px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.15s;
+  }
+  #controls button:hover { background: rgba(255,255,255,0.15); }
+  #controls button.active { border-color: #4af; color: #4af; }
+</style>
+</head>
+<body>
+<div id="hud">
+  <div><span class="label">FPS:</span> <span class="fps" id="fpsDisplay">0</span></div>
+  <div><span class="label">Time:</span> <span id="timeDisplay">0.00</span>s</div>
+  <div><span class="label">Energy:</span> <span id="energyDisplay">0</span></div>
+  <div style="margin-top:8px;color:#555;font-size:11px;">Drag bodies to reposition · Scroll to zoom</div>
+</div>
+<div id="controls">
+  <button id="btnReset">Reset</button>
+  <button id="btnPause">Pause</button>
+  <button id="btnTrails" class="active">Trails</button>
+  <button id="btnPreset">Next Preset</button>
+  <button id="btnSpeed">1x</button>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+// ── Configuration ──────────────────────────────────────────
+const G = 1;
+const DT_BASE = 0.002;
+const SUBSTEPS = 8;
+const TRAIL_LENGTH = 1200;
+const SOFTENING = 0.5;
+
+const COLORS = ['#ff6b6b', '#4ecdc4', '#ffe66d'];
+const GLOW_COLORS = ['rgba(255,107,107,', 'rgba(78,205,196,', 'rgba(255,230,109,'];
+
+// ── Canvas Setup ───────────────────────────────────────────
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ── Camera ─────────────────────────────────────────────────
+let camX = 0, camY = 0, camZoom = 1;
+
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const factor = e.deltaY > 0 ? 0.9 : 1.1;
+  camZoom = Math.max(0.05, Math.min(20, camZoom * factor));
+}, { passive: false });
+
+function worldToScreen(x, y) {
+  return [
+    W / 2 + (x - camX) * camZoom,
+    H / 2 + (y - camY) * camZoom
+  ];
+}
+
+function screenToWorld(sx, sy) {
+  return [
+    (sx - W / 2) / camZoom + camX,
+    (sy - H / 2) / camZoom + camY
+  ];
+}
+
+// ── Presets ─────────────────────────────────────────────────
+const presets = [
+  { // Figure-8
+    name: 'Figure-8',
+    bodies: [
+      { x: -0.97000436, y: 0.24308753, vx: 0.4662036850, vy: 0.4323657300, m: 1 },
+      { x: 0.97000436, y: -0.24308753, vx: 0.4662036850, vy: 0.4323657300, m: 1 },
+      { x: 0, y: 0, vx: -0.9324073700, vy: -0.8647314600, m: 1 }
+    ],
+    scale: 200,
+    zoom: 1.5
+  },
+  { // Lagrange equilateral
+    name: 'Lagrange Triangle',
+    bodies: [
+      { x: 0, y: -1.5, vx: 0.5, vy: 0, m: 1 },
+      { x: 1.299, y: 0.75, vx: -0.25, vy: 0.433, m: 1 },
+      { x: -1.299, y: 0.75, vx: -0.25, vy: -0.433, m: 1 }
+    ],
+    scale: 180,
+    zoom: 1.2
+  },
+  { // Chaotic unequal masses
+    name: 'Chaotic',
+    bodies: [
+      { x: -2, y: 0, vx: 0, vy: 0.4, m: 3 },
+      { x: 2, y: 0, vx: 0, vy: -0.2, m: 1 },
+      { x: 0, y: 1.5, vx: -0.3, vy: -0.1, m: 2 }
+    ],
+    scale: 120,
+    zoom: 0.8
+  },
+  { // Sun-planet-moon hierarchy
+    name: 'Hierarchy',
+    bodies: [
+      { x: 0, y: 0, vx: 0, vy: 0, m: 10 },
+      { x: 3, y: 0, vx: 0, vy: 1.8, m: 0.5 },
+      { x: 3.4, y: 0, vx: 0, vy: 2.8, m: 0.01 }
+    ],
+    scale: 100,
+    zoom: 0.6
+  }
+];
+
+let currentPreset = 0;
+
+// ── Body State ─────────────────────────────────────────────
+let bodies = [];
+let trails = [];
+let simTime = 0;
+
+function loadPreset(idx) {
+  const p = presets[idx];
+  const s = p.scale;
+  bodies = p.bodies.map(b => ({
+    x: b.x * s, y: b.y * s,
+    vx: b.vx * s, vy: b.vy * s,
+    m: b.m,
+    r: 6 + b.m * 3
+  }));
+  trails = bodies.map(() => []);
+  simTime = 0;
+  camX = 0; camY = 0;
+  camZoom = p.zoom || 1;
+}
+
+loadPreset(0);
+
+// ── Physics (Velocity Verlet / Leapfrog) ───────────────────
+function computeAccelerations(bods) {
+  const n = bods.length;
+  const ax = new Float64Array(n);
+  const ay = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const dx = bods[j].x - bods[i].x;
+      const dy = bods[j].y - bods[i].y;
+      const r2 = dx * dx + dy * dy + SOFTENING * SOFTENING;
+      const r = Math.sqrt(r2);
+      const f = G / (r2 * r);
+      const fx = f * dx;
+      const fy = f * dy;
+      ax[i] += fx * bods[j].m;
+      ay[i] += fy * bods[j].m;
+      ax[j] -= fx * bods[i].m;
+      ay[j] -= fy * bods[i].m;
+    }
+  }
+  return { ax, ay };
+}
+
+function step(dt) {
+  const n = bodies.length;
+  // Velocity Verlet
+  let { ax, ay } = computeAccelerations(bodies);
+
+  // Half-step velocity + full-step position
+  for (let i = 0; i < n; i++) {
+    bodies[i].vx += 0.5 * dt * ax[i];
+    bodies[i].vy += 0.5 * dt * ay[i];
+    bodies[i].x += dt * bodies[i].vx;
+    bodies[i].y += dt * bodies[i].vy;
+  }
+
+  // Recompute accelerations at new positions
+  const a2 = computeAccelerations(bodies);
+
+  // Complete velocity step
+  for (let i = 0; i < n; i++) {
+    bodies[i].vx += 0.5 * dt * a2.ax[i];
+    bodies[i].vy += 0.5 * dt * a2.ay[i];
+  }
+}
+
+function totalEnergy() {
+  let ke = 0, pe = 0;
+  for (let i = 0; i < bodies.length; i++) {
+    const b = bodies[i];
+    ke += 0.5 * b.m * (b.vx * b.vx + b.vy * b.vy);
+    for (let j = i + 1; j < bodies.length; j++) {
+      const dx = bodies[j].x - b.x;
+      const dy = bodies[j].y - b.y;
+      const r = Math.sqrt(dx * dx + dy * dy + SOFTENING * SOFTENING);
+      pe -= G * b.m * bodies[j].m / r;
+    }
+  }
+  return ke + pe;
+}
+
+// ── Drag Interaction ───────────────────────────────────────
+let dragIdx = -1;
+let paused = false;
+let showTrails = true;
+let speedMul = 1;
+const speeds = [1, 2, 4, 0.25, 0.5];
+let speedIdx = 0;
+
+canvas.addEventListener('mousedown', e => {
+  const [wx, wy] = screenToWorld(e.clientX, e.clientY);
+  for (let i = 0; i < bodies.length; i++) {
+    const dx = wx - bodies[i].x;
+    const dy = wy - bodies[i].y;
+    if (dx * dx + dy * dy < (bodies[i].r / camZoom + 20) ** 2) {
+      dragIdx = i;
+      return;
+    }
+  }
+});
+
+canvas.addEventListener('mousemove', e => {
+  if (dragIdx >= 0) {
+    const [wx, wy] = screenToWorld(e.clientX, e.clientY);
+    bodies[dragIdx].x = wx;
+    bodies[dragIdx].y = wy;
+    bodies[dragIdx].vx = 0;
+    bodies[dragIdx].vy = 0;
+  }
+});
+
+canvas.addEventListener('mouseup', () => { dragIdx = -1; });
+canvas.addEventListener('mouseleave', () => { dragIdx = -1; });
+
+// ── Controls ───────────────────────────────────────────────
+document.getElementById('btnReset').onclick = () => loadPreset(currentPreset);
+document.getElementById('btnPause').onclick = function() {
+  paused = !paused;
+  this.textContent = paused ? 'Play' : 'Pause';
+};
+document.getElementById('btnTrails').onclick = function() {
+  showTrails = !showTrails;
+  this.classList.toggle('active', showTrails);
+  if (!showTrails) trails = bodies.map(() => []);
+};
+document.getElementById('btnPreset').onclick = () => {
+  currentPreset = (currentPreset + 1) % presets.length;
+  loadPreset(currentPreset);
+};
+document.getElementById('btnSpeed').onclick = function() {
+  speedIdx = (speedIdx + 1) % speeds.length;
+  speedMul = speeds[speedIdx];
+  this.textContent = speedMul + 'x';
+};
+
+// ── FPS Counter ────────────────────────────────────────────
+let frameCount = 0;
+let fpsTime = 0;
+let fps = 0;
+
+// ── Render ─────────────────────────────────────────────────
+function drawStars() {
+  // Simple static star field - seeded once
+  if (!drawStars.cache) {
+    drawStars.cache = [];
+    for (let i = 0; i < 200; i++) {
+      drawStars.cache.push({
+        x: Math.random(),
+        y: Math.random(),
+        r: Math.random() * 1.2 + 0.3,
+        a: Math.random() * 0.4 + 0.1
+      });
+    }
+  }
+  for (const s of drawStars.cache) {
+    ctx.fillStyle = `rgba(255,255,255,${s.a})`;
+    ctx.fillRect(s.x * W, s.y * H, s.r, s.r);
+  }
+}
+
+function render(now) {
+  requestAnimationFrame(render);
+
+  // FPS tracking
+  frameCount++;
+  if (now - fpsTime >= 500) {
+    fps = Math.round(frameCount * 1000 / (now - fpsTime));
+    frameCount = 0;
+    fpsTime = now;
+    document.getElementById('fpsDisplay').textContent = fps;
+    document.getElementById('timeDisplay').textContent = simTime.toFixed(1);
+    document.getElementById('energyDisplay').textContent = totalEnergy().toFixed(4);
+  }
+
+  // Physics substeps
+  if (!paused && dragIdx < 0) {
+    const dt = DT_BASE * speedMul;
+    for (let s = 0; s < SUBSTEPS; s++) {
+      step(dt);
+    }
+    simTime += DT_BASE * SUBSTEPS * speedMul;
+
+    // Record trails
+    for (let i = 0; i < bodies.length; i++) {
+      trails[i].push(bodies[i].x, bodies[i].y);
+      if (trails[i].length > TRAIL_LENGTH * 2) {
+        trails[i] = trails[i].slice(-TRAIL_LENGTH * 2);
+      }
+    }
+  }
+
+  // Auto-center camera on center of mass
+  if (dragIdx < 0) {
+    let cx = 0, cy = 0, tm = 0;
+    for (const b of bodies) { cx += b.x * b.m; cy += b.y * b.m; tm += b.m; }
+    camX += (cx / tm - camX) * 0.05;
+    camY += (cy / tm - camY) * 0.05;
+  }
+
+  // Clear
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
+  drawStars();
+
+  // Draw trails
+  if (showTrails) {
+    for (let i = 0; i < bodies.length; i++) {
+      const t = trails[i];
+      const len = t.length / 2;
+      if (len < 2) continue;
+      ctx.beginPath();
+      const [sx, sy] = worldToScreen(t[0], t[1]);
+      ctx.moveTo(sx, sy);
+      for (let j = 1; j < len; j++) {
+        const [px, py] = worldToScreen(t[j * 2], t[j * 2 + 1]);
+        ctx.lineTo(px, py);
+      }
+      ctx.strokeStyle = COLORS[i];
+      ctx.lineWidth = 1.5;
+      ctx.globalAlpha = 0.5;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // Draw bodies
+  for (let i = 0; i < bodies.length; i++) {
+    const b = bodies[i];
+    const [sx, sy] = worldToScreen(b.x, b.y);
+    const r = b.r * Math.max(0.6, camZoom * 0.5);
+
+    // Glow
+    const grad = ctx.createRadialGradient(sx, sy, 0, sx, sy, r * 4);
+    grad.addColorStop(0, GLOW_COLORS[i] + '0.4)');
+    grad.addColorStop(0.5, GLOW_COLORS[i] + '0.1)');
+    grad.addColorStop(1, GLOW_COLORS[i] + '0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(sx - r * 4, sy - r * 4, r * 8, r * 8);
+
+    // Body
+    ctx.beginPath();
+    ctx.arc(sx, sy, r, 0, Math.PI * 2);
+    ctx.fillStyle = COLORS[i];
+    ctx.fill();
+
+    // Inner highlight
+    ctx.beginPath();
+    ctx.arc(sx - r * 0.25, sy - r * 0.25, r * 0.4, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fill();
+  }
+}
+
+requestAnimationFrame(render);
+</script>
+</body>
+</html>
