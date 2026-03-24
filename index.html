@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.tile.openstreetmap.org; connect-src https://earthquake.usgs.gov https://opensky-network.org https://api.alternative.me https://api.coingecko.com https://api.wheretheiss.at https://api.weather.gov https://services.swpc.noaa.gov https://eonet.gsfc.nasa.gov https://hacker-news.firebaseio.com https://cdn.jsdelivr.net; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.tile.openstreetmap.org; connect-src https://earthquake.usgs.gov https://opensky-network.org https://api.alternative.me https://api.coingecko.com https://api.wheretheiss.at https://api.weather.gov https://services.swpc.noaa.gov https://eonet.gsfc.nasa.gov https://hacker-news.firebaseio.com https://cdn.jsdelivr.net http://localhost:3000 http://localhost:5055 http://localhost:8123; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="no-referrer">
 <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=()">
@@ -158,6 +158,19 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .modal-body{font-size:10px;color:var(--text);line-height:1.8;font-family:var(--raj)}
 .modal-body .hi{color:var(--g)}
 
+
+/* IFRAME PANELS */
+.iframe-panel{width:100%;height:100%;border:none;flex:1}
+.panel-offline{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;flex:1}
+.offline-icon{font-size:32px;margin-bottom:12px;opacity:.4}
+.offline-title{font-family:var(--orb);font-size:10px;letter-spacing:.2em;color:var(--text3);margin-bottom:8px}
+.offline-desc{font-size:11px;color:var(--text2);font-family:var(--raj);max-width:400px;line-height:1.8;margin-bottom:16px}
+.offline-btn{padding:6px 16px;font-size:9px;font-family:var(--orb);letter-spacing:.12em;border:1px solid var(--border2);color:var(--text2);background:var(--bg3);cursor:pointer;border-radius:3px;transition:all .15s}
+.offline-btn:hover{border-color:var(--b);color:var(--b)}
+.svc-status{display:inline-flex;align-items:center;gap:5px;font-size:8px;font-family:var(--orb);letter-spacing:.1em;padding:2px 8px;border-radius:2px}
+.svc-online{background:var(--gd);color:var(--g)}
+.svc-offline{background:var(--rd);color:var(--r)}
+
 /* RESPONSIVE */
 @media(max-width:900px){:root{--sidebar-w:56px}.sb-label,.sb-item span:not(.icon),.sb-metrics,.sb-divider{display:none}.sb-item{justify-content:center;padding:10px}.sb-item .icon{margin:0}.hud-tl,.hud-tr{display:none}.quick-nav{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}}
 @media(max-width:600px){#sidebar{display:none}.quick-nav{grid-template-columns:repeat(2,1fr);padding:8px}#market-strip{font-size:9px}}
@@ -266,17 +279,17 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
       <!-- Quick-nav cards below globe -->
       <div class="quick-nav">
-        <div class="qn-card" style="--cc:var(--g)" onclick="nav('worldview')"><div class="qn-title">WORLDVIEW</div><div class="qn-sub">Flat map + feeds</div></div>
+        <div class="qn-card" style="--cc:var(--g)" onclick="nav('worldview')"><div class="qn-title">WORLDVIEW</div><div class="qn-sub">Live flat map</div></div>
         <div class="qn-card" style="--cc:var(--b)" onclick="nav('brief')"><div class="qn-title">DAILY BRIEF</div><div class="qn-sub">SITREP today</div></div>
         <div class="qn-card" style="--cc:var(--y)" onclick="nav('meridian')"><div class="qn-title">MERIDIAN</div><div class="qn-sub">Markets terminal</div></div>
-        <div class="qn-card" style="--cc:var(--y)" onclick="window.open('buffett-screener.html','_blank')"><div class="qn-title">BUFFETT SCORE</div><div class="qn-sub">Moat screener</div></div>
-        <div class="qn-card" style="--cc:var(--r)" onclick="nav('sentinel')"><div class="qn-title">SENTINEL</div><div class="qn-sub">Pentest tools</div></div>
+        <div class="qn-card" style="--cc:var(--y)" onclick="loadMeridian('buffett-screener.html');nav('meridian')"><div class="qn-title">BUFFETT SCORE</div><div class="qn-sub">Moat screener</div></div>
+        <div class="qn-card" style="--cc:var(--g)" onclick="loadMeridian('long-term-screener.html');nav('meridian')"><div class="qn-title">LONG TERM</div><div class="qn-sub">Dividend growth</div></div>
+        <div class="qn-card" style="--cc:var(--y)" onclick="loadMeridian('screener.html');nav('meridian')"><div class="qn-title">SCREENER</div><div class="qn-sub">Russell 3000</div></div>
+        <div class="qn-card" style="--cc:var(--r)" onclick="nav('sentinel')"><div class="qn-title">SENTINEL</div><div class="qn-sub">Pentest platform</div></div>
         <div class="qn-card" style="--cc:var(--b)" onclick="nav('eclipse')"><div class="qn-title">ECLIPSE</div><div class="qn-sub">OSINT platform</div></div>
         <div class="qn-card" style="--cc:var(--o)" onclick="nav('pinecon')"><div class="qn-title">PINECON</div><div class="qn-sub">WiFi intel</div></div>
         <div class="qn-card" style="--cc:var(--c)" onclick="nav('mesh')"><div class="qn-title">HERMES-MESH</div><div class="qn-sub">LoRa bridge</div></div>
-        <div class="qn-card" style="--cc:var(--g)" onclick="window.open('worldview-live.html','_blank')"><div class="qn-title">GLOBE FULL</div><div class="qn-sub">CesiumJS view ↗</div></div>
-        <div class="qn-card" style="--cc:var(--y)" onclick="window.open('screener.html','_blank')"><div class="qn-title">SCREENER</div><div class="qn-sub">Russell 3000 ↗</div></div>
-        <div class="qn-card" style="--cc:var(--g)" onclick="window.open('long-term-screener.html','_blank')"><div class="qn-title">LONG TERM</div><div class="qn-sub">Dividend growth ↗</div></div>
+        <div class="qn-card" style="--cc:var(--g)" onclick="window.open('worldview-live.html','_blank')"><div class="qn-title">CESIUM GLOBE</div><div class="qn-sub">Full 3D view ↗</div></div>
         <div class="qn-card" style="--cc:var(--p)" onclick="nav('soal')"><div class="qn-title">SOAL</div><div class="qn-sub">Advisory practice</div></div>
       </div>
     </div>
@@ -307,45 +320,90 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       </div>
     </div>
 
-    <!-- ▸ WORLDVIEW (flat map) -->
+    <!-- ▸ WORLDVIEW (iframe) -->
     <div class="panel" id="p-worldview">
-      <div class="mod-header"><div class="mod-title">WORLDVIEW</div><div class="mod-badge" style="background:var(--gd);color:var(--g)">GEOINT</div><div style="margin-left:auto;display:flex;gap:8px"><div class="tb-pill" style="border-color:var(--g);color:var(--g);cursor:pointer;font-size:7px" onclick="window.open('worldview.html','_blank')">FLAT MAP ↗</div><div class="tb-pill" style="border-color:var(--b);color:var(--b);cursor:pointer;font-size:7px" onclick="window.open('worldview-live.html','_blank')">GLOBE ↗</div></div></div>
-      <div class="mod-body" style="padding:0"><div id="wv-map" style="width:100%;height:500px;background:var(--bg)"></div><div style="padding:16px"><div class="sec-grid"><div class="sec-card"><div class="sec-card-header"><span style="color:var(--g)">◎</span><span class="sec-card-title">LIVE FEEDS</span></div><div class="sec-card-body"><div class="sec-item"><span>OpenSky ADS-B</span><span style="color:var(--g)" id="wv-adsb">—</span></div><div class="sec-item"><span>USGS Seismic</span><span style="color:var(--o)" id="wv-usgs">—</span></div><div class="sec-item"><span>ISS Position</span><span style="color:var(--c)" id="wv-iss">—</span></div><div class="sec-item"><span>NASA EONET</span><span style="color:var(--y)" id="wv-eonet">—</span></div></div></div><div class="sec-card"><div class="sec-card-header"><span style="color:var(--o)">◉</span><span class="sec-card-title">RECENT SEISMIC (M4.0+)</span></div><div class="sec-card-body" id="wv-quake-list"><div style="color:var(--text3)">Loading...</div></div></div></div></div></div>
+      <div class="mod-header"><div class="mod-title">WORLDVIEW</div><div class="mod-badge" style="background:var(--gd);color:var(--g)">GEOINT</div><div style="margin-left:auto;display:flex;gap:8px"><div class="tb-pill" style="border-color:var(--g);color:var(--g);cursor:pointer;font-size:7px" onclick="window.open('worldview.html','_blank')">POP OUT ↗</div><div class="tb-pill" style="border-color:var(--b);color:var(--b);cursor:pointer;font-size:7px" onclick="window.open('worldview-live.html','_blank')">CESIUM GLOBE ↗</div></div></div>
+      <iframe class="iframe-panel" id="wv-frame" data-src="worldview.html" style="display:none"></iframe>
+      <div id="wv-loading" style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--text3);font-family:var(--orb);font-size:9px;letter-spacing:.2em">LOADING WORLDVIEW...</div>
     </div>
 
     <!-- ▸ ECLIPSE -->
     <div class="panel" id="p-eclipse">
-      <div class="mod-header"><div class="mod-title">ECLIPSE</div><div class="mod-badge" style="background:var(--bd);color:var(--b)">OSINT / SIGINT / HUMINT</div></div>
-      <div class="mod-body"><div style="text-align:center;padding:60px 20px"><div style="font-family:var(--orb);font-size:12px;letter-spacing:.3em;color:var(--text3);margin-bottom:12px">ECLIPSE RESEARCH PLATFORM</div><div style="font-size:12px;color:var(--text2);font-family:var(--raj);max-width:400px;margin:0 auto;line-height:1.8">Requires local JARVIS backend on <span style="color:var(--c)">localhost:3000</span>.</div><div style="margin-top:20px"><div class="tb-pill" style="border-color:var(--b);color:var(--b);display:inline-flex;cursor:pointer" role="button" onclick="tryLocal('http://localhost:3000')">CONNECT TO JARVIS CORE ↗</div></div></div></div>
+      <div class="mod-header"><div class="mod-title">ECLIPSE</div><div class="mod-badge" style="background:var(--bd);color:var(--b)">OSINT / SIGINT / HUMINT</div><div class="svc-status svc-offline" id="svc-eclipse">OFFLINE</div></div>
+      <div class="panel-offline" id="eclipse-offline">
+        <div class="offline-icon">◈</div>
+        <div class="offline-title">ECLIPSE RESEARCH PLATFORM</div>
+        <div class="offline-desc">OSINT / SIGINT / HUMINT workbench with Claude API integration, multi-tab research, and export. Requires JARVIS Core backend.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+          <button class="offline-btn" onclick="checkService('http://localhost:3000','eclipse')">CHECK CONNECTION</button>
+          <button class="offline-btn" onclick="window.open('http://localhost:3000','_blank')">OPEN JARVIS CORE ↗</button>
+        </div>
+        <div style="margin-top:12px;font-size:9px;color:var(--text3)">localhost:3000 · Access via Tailscale when remote</div>
+      </div>
+      <iframe class="iframe-panel" id="eclipse-frame" style="display:none"></iframe>
     </div>
 
     <!-- ▸ MERIDIAN -->
     <div class="panel" id="p-meridian">
-      <div class="mod-header"><div class="mod-title">MERIDIAN TERMINAL</div><div class="mod-badge" style="background:var(--yd);color:var(--y)">FINANCIAL</div><div style="margin-left:auto;display:flex;gap:8px"><div class="tb-pill" style="border-color:var(--y);color:var(--y);cursor:pointer;font-size:7px" onclick="window.open('screener.html','_blank')">SCREENER ↗</div><div class="tb-pill" style="border-color:var(--g);color:var(--g);cursor:pointer;font-size:7px" onclick="window.open('buffett-screener.html','_blank')">BUFFETT ↗</div><div class="tb-pill" style="border-color:var(--b);color:var(--b);cursor:pointer;font-size:7px" onclick="window.open('long-term-screener.html','_blank')">LONG TERM ↗</div></div></div>
-      <div class="mod-body"><div class="fin-grid" id="fin-grid"></div><div class="sec-grid"><div class="sec-card" style="grid-column:1/-1"><div class="sec-card-header"><span style="color:var(--y)">◆</span><span class="sec-card-title">MARKET INDICES</span></div><div class="sec-card-body" id="fin-indices"><div style="color:var(--text3)">Loading...</div></div></div></div></div>
+      <div class="mod-header"><div class="mod-title">MERIDIAN TERMINAL</div><div class="mod-badge" style="background:var(--yd);color:var(--y)">FINANCIAL</div><div style="margin-left:auto;display:flex;gap:8px"><div class="tb-pill" style="border-color:var(--y);color:var(--y);cursor:pointer;font-size:7px" onclick="loadMeridian('screener.html')">SCREENER</div><div class="tb-pill" style="border-color:var(--g);color:var(--g);cursor:pointer;font-size:7px" onclick="loadMeridian('buffett-screener.html')">BUFFETT</div><div class="tb-pill" style="border-color:var(--b);color:var(--b);cursor:pointer;font-size:7px" onclick="loadMeridian('long-term-screener.html')">LONG TERM</div><div class="tb-pill" style="border-color:var(--text3);color:var(--text3);cursor:pointer;font-size:7px" onclick="window.open(document.getElementById('meridian-frame').src,'_blank')">POP OUT ↗</div></div></div>
+      <iframe class="iframe-panel" id="meridian-frame" src="screener.html"></iframe>
     </div>
 
-    <!-- ▸ SENTINEL -->
+    <!-- ▸ SENTINEL (interactive) -->
     <div class="panel" id="p-sentinel">
-      <div class="mod-header"><div class="mod-title">SENTINEL</div><div class="mod-badge" style="background:var(--rd);color:var(--r)">PENETRATION TESTING</div></div>
-      <div class="mod-body"><div class="sec-grid">
-        <div class="sec-card" style="border-top:2px solid var(--r)"><div class="sec-card-header"><span style="color:var(--r)">◉</span><span class="sec-card-title">BASH BUNNY</span></div><div class="sec-card-body"><div class="sec-item"><span>QuickCreds</span><span style="color:var(--g)">LOADED</span></div><div class="sec-item"><span>BrowserCreds</span><span style="color:var(--g)">LOADED</span></div><div class="sec-item"><span>Reverse Shell</span><span style="color:var(--g)">LOADED</span></div><div class="sec-item"><span>AD Enumeration</span><span style="color:var(--g)">LOADED</span></div><div class="sec-item"><span>Cloud Cred Theft</span><span style="color:var(--o)">STAGED</span></div></div></div>
-        <div class="sec-card" style="border-top:2px solid var(--o)"><div class="sec-card-header"><span style="color:var(--o)">◎</span><span class="sec-card-title">WIFI PINEAPPLE MK VII</span></div><div class="sec-card-body"><div class="sec-item"><span>Passive Survey</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>WPA2/PMKID Capture</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>Evil Twin</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>WPA-Enterprise PEAP</span><span style="color:var(--o)">STAGED</span></div><div class="sec-item"><span>Karma / PineAP</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>API: 172.16.42.1:1471</span><span style="color:var(--text3)">OFFLINE</span></div></div></div>
-        <div class="sec-card" style="border-top:2px solid var(--y)"><div class="sec-card-header"><span style="color:var(--y)">◆</span><span class="sec-card-title">HACKRF ONE</span></div><div class="sec-card-body"><div class="sec-item"><span>Wideband Sweep</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>ADS-B Receive</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>Replay Attack</span><span style="color:var(--o)">STAGED</span></div><div class="sec-item"><span>GSM Scanning</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>GPS Spoofing (lab)</span><span style="color:var(--r)">AUTH REQ</span></div></div></div>
-        <div class="sec-card" style="border-top:2px solid var(--p)"><div class="sec-card-header"><span style="color:var(--p)">◇</span><span class="sec-card-title">FLIPPER ZERO</span></div><div class="sec-card-body"><div class="sec-item"><span>Sub-GHz (.sub)</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>NFC (.nfc)</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>RFID (.rfid)</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>Infrared (.ir)</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>BadUSB (.BadUSB)</span><span style="color:var(--g)">READY</span></div></div></div>
-      </div></div>
+      <div class="mod-header"><div class="mod-title">SENTINEL</div><div class="mod-badge" style="background:var(--rd);color:var(--r)">PENETRATION TESTING</div><div style="margin-left:auto;display:flex;gap:6px"><div class="tb-pill" style="border-color:var(--r);color:var(--r);cursor:pointer;font-size:7px" onclick="sentinelView('all')">ALL</div><div class="tb-pill" style="border-color:var(--text3);color:var(--text3);cursor:pointer;font-size:7px" onclick="sentinelView('bunny')">BUNNY</div><div class="tb-pill" style="border-color:var(--text3);color:var(--text3);cursor:pointer;font-size:7px" onclick="sentinelView('pineapple')">PINEAPPLE</div><div class="tb-pill" style="border-color:var(--text3);color:var(--text3);cursor:pointer;font-size:7px" onclick="sentinelView('hackrf')">HACKRF</div><div class="tb-pill" style="border-color:var(--text3);color:var(--text3);cursor:pointer;font-size:7px" onclick="sentinelView('flipper')">FLIPPER</div></div></div>
+      <div class="mod-body">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px" id="sentinel-stats">
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:12px;text-align:center"><div style="font-family:var(--orb);font-size:18px;font-weight:600;color:var(--g)">14</div><div style="font-size:8px;font-family:var(--orb);letter-spacing:.12em;color:var(--text3);margin-top:4px">PAYLOADS READY</div></div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:12px;text-align:center"><div style="font-family:var(--orb);font-size:18px;font-weight:600;color:var(--o)">3</div><div style="font-size:8px;font-family:var(--orb);letter-spacing:.12em;color:var(--text3);margin-top:4px">STAGED</div></div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:12px;text-align:center"><div style="font-family:var(--orb);font-size:18px;font-weight:600;color:var(--r)">1</div><div style="font-size:8px;font-family:var(--orb);letter-spacing:.12em;color:var(--text3);margin-top:4px">AUTH REQ</div></div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:12px;text-align:center"><div style="font-family:var(--orb);font-size:18px;font-weight:600;color:var(--white)">4</div><div style="font-size:8px;font-family:var(--orb);letter-spacing:.12em;color:var(--text3);margin-top:4px">DEVICES</div></div>
+        </div>
+        <div class="sec-grid" id="sentinel-grid">
+          <div class="sec-card" data-module="bunny" style="border-top:2px solid var(--r)"><div class="sec-card-header"><span style="color:var(--r)">◉</span><span class="sec-card-title">BASH BUNNY</span><span class="svc-status svc-offline" style="margin-left:auto;font-size:7px">USB</span></div><div class="sec-card-body"><div class="sec-item"><span>QuickCreds</span><span style="color:var(--g);cursor:pointer" onclick="sentinelAction('bunny','quickcreds')">LOADED ▸</span></div><div class="sec-item"><span>BrowserCreds</span><span style="color:var(--g);cursor:pointer" onclick="sentinelAction('bunny','browsercreds')">LOADED ▸</span></div><div class="sec-item"><span>Reverse Shell</span><span style="color:var(--g);cursor:pointer" onclick="sentinelAction('bunny','revshell')">LOADED ▸</span></div><div class="sec-item"><span>AD Enumeration</span><span style="color:var(--g);cursor:pointer" onclick="sentinelAction('bunny','adenum')">LOADED ▸</span></div><div class="sec-item"><span>Cloud Cred Theft</span><span style="color:var(--o)">STAGED</span></div></div></div>
+          <div class="sec-card" data-module="pineapple" style="border-top:2px solid var(--o)"><div class="sec-card-header"><span style="color:var(--o)">◎</span><span class="sec-card-title">WIFI PINEAPPLE MK VII</span><span class="svc-status svc-offline" id="svc-pineapple" style="margin-left:auto;font-size:7px">172.16.42.1</span></div><div class="sec-card-body"><div class="sec-item"><span>Passive Survey</span><span style="color:var(--g);cursor:pointer" onclick="sentinelAction('pineapple','survey')">READY ▸</span></div><div class="sec-item"><span>WPA2/PMKID Capture</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>Evil Twin</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>WPA-Enterprise PEAP</span><span style="color:var(--o)">STAGED</span></div><div class="sec-item"><span>Karma / PineAP</span><span style="color:var(--g)">READY</span></div></div></div>
+          <div class="sec-card" data-module="hackrf" style="border-top:2px solid var(--y)"><div class="sec-card-header"><span style="color:var(--y)">◆</span><span class="sec-card-title">HACKRF ONE</span><span class="svc-status svc-offline" style="margin-left:auto;font-size:7px">SDR</span></div><div class="sec-card-body"><div class="sec-item"><span>Wideband Sweep</span><span style="color:var(--g);cursor:pointer" onclick="sentinelAction('hackrf','sweep')">READY ▸</span></div><div class="sec-item"><span>ADS-B Receive</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>Replay Attack</span><span style="color:var(--o)">STAGED</span></div><div class="sec-item"><span>GSM Scanning</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>GPS Spoofing (lab)</span><span style="color:var(--r)">AUTH REQ</span></div></div></div>
+          <div class="sec-card" data-module="flipper" style="border-top:2px solid var(--p)"><div class="sec-card-header"><span style="color:var(--p)">◇</span><span class="sec-card-title">FLIPPER ZERO</span><span class="svc-status svc-offline" style="margin-left:auto;font-size:7px">BLE</span></div><div class="sec-card-body"><div class="sec-item"><span>Sub-GHz (.sub)</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>NFC (.nfc)</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>RFID (.rfid)</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>Infrared (.ir)</span><span style="color:var(--g)">READY</span></div><div class="sec-item"><span>BadUSB (.BadUSB)</span><span style="color:var(--g)">READY</span></div></div></div>
+        </div>
+        <div id="sentinel-log" style="margin-top:16px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:12px;max-height:200px;overflow-y:auto;display:none"><div style="font-family:var(--orb);font-size:8px;letter-spacing:.15em;color:var(--text3);margin-bottom:8px">ENGAGEMENT LOG</div><div id="sentinel-log-entries" style="font-size:10px;color:var(--text2);line-height:1.8;font-family:var(--mono)"></div></div>
+      </div>
     </div>
 
     <!-- ▸ PINECON -->
     <div class="panel" id="p-pinecon">
-      <div class="mod-header"><div class="mod-title">PINECON</div><div class="mod-badge" style="background:var(--od);color:var(--o)">WIFI INTELLIGENCE</div></div>
-      <div class="mod-body"><div class="sec-grid"><div class="sec-card" style="grid-column:1/-1"><div class="sec-card-header"><span style="color:var(--o)">◎</span><span class="sec-card-title">PINECON ENGINE</span></div><div class="sec-card-body" style="line-height:2">WiFi Pineapple Intelligence &amp; Reporting Engine. Passive analysis — not attack orchestration.<br><span class="hi">SSID classification</span> · Risk scoring · Session management · HTML report generation.<br><br><strong style="color:var(--white)">Capabilities:</strong><br>• Passive probe request analysis and client fingerprinting<br>• SSID taxonomy: enterprise, personal, honeypot, open, WPS-enabled<br>• Temporal pattern analysis — device presence over time<br>• Automated threat scoring based on signal anomalies<br>• HTML report output with executive summary format<br><br><span style="color:var(--text3)">Requires WiFi Pineapple at 172.16.42.1:1471</span></div></div></div></div>
+      <div class="mod-header"><div class="mod-title">PINECON</div><div class="mod-badge" style="background:var(--od);color:var(--o)">WIFI INTELLIGENCE</div><div class="svc-status svc-offline" id="svc-pinecon">172.16.42.1 OFFLINE</div></div>
+      <div class="panel-offline" id="pinecon-offline">
+        <div class="offline-icon">◎</div>
+        <div class="offline-title">PINECON INTELLIGENCE ENGINE</div>
+        <div class="offline-desc">WiFi Pineapple passive intelligence — SSID classification, risk scoring, session management, HTML report generation. Requires WiFi Pineapple Mark VII on the local network.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+          <button class="offline-btn" onclick="checkService('http://172.16.42.1:1471','pinecon')">CHECK PINEAPPLE</button>
+          <button class="offline-btn" onclick="nav('sentinel')">VIEW IN SENTINEL</button>
+        </div>
+        <div style="margin-top:12px;font-size:9px;color:var(--text3)">172.16.42.1:1471 · Connect Pineapple to VLAN-50</div>
+      </div>
     </div>
 
     <!-- ▸ HERMES-MESH -->
     <div class="panel" id="p-mesh">
-      <div class="mod-header"><div class="mod-title">HERMES-MESH</div><div class="mod-badge" style="background:var(--cd);color:var(--c)">LORA BRIDGE</div></div>
-      <div class="mod-body"><div class="sec-grid"><div class="sec-card" style="grid-column:1/-1"><div class="sec-card-header"><span style="color:var(--c)">⬡</span><span class="sec-card-title">MESH NETWORK TOPOLOGY</span></div><div class="sec-card-body" style="line-height:2"><strong style="color:var(--white)">Architecture:</strong> Physical Radio → Serial → Python Bridge → MQTT → FastAPI REST/WebSocket → JARVIS + Browser<br><br><strong style="color:var(--white)">MQTT Topics:</strong><br>• <span style="color:var(--c)">mesh/nodes/{id}/telemetry</span> — battery, SNR, signal<br>• <span style="color:var(--c)">mesh/nodes/{id}/position</span> — GPS coordinates<br>• <span style="color:var(--c)">mesh/messages/text</span> — text message relay<br>• <span style="color:var(--c)">mesh/network/topology</span> — node graph<br>• <span style="color:var(--c)">mesh/alerts/nodeup|nodedown</span> — presence monitoring<br><br><strong style="color:var(--white)">Purpose:</strong> Out-of-band comms when primary network is severed. LoRa 915MHz.<br><br><span style="color:var(--text3)">Requires MQTT broker at localhost:1883</span></div></div></div></div>
+      <div class="mod-header"><div class="mod-title">HERMES-MESH</div><div class="mod-badge" style="background:var(--cd);color:var(--c)">LORA BRIDGE</div><div class="svc-status svc-offline" id="svc-mesh">MQTT OFFLINE</div></div>
+      <div class="panel-offline">
+        <div class="offline-icon">⬡</div>
+        <div class="offline-title">HERMES-MESH LoRa BRIDGE</div>
+        <div class="offline-desc">Meshtastic LoRa radio bridge. Physical Radio → Serial → Python Bridge → MQTT → FastAPI REST/WebSocket → JARVIS. Out-of-band comms when primary network is severed. LoRa 915MHz.</div>
+        <div style="margin-top:16px;text-align:left;max-width:400px">
+          <div style="font-family:var(--orb);font-size:8px;letter-spacing:.15em;color:var(--text3);margin-bottom:8px">MQTT TOPICS</div>
+          <div style="font-size:10px;color:var(--text2);line-height:2;font-family:var(--mono)">
+            <span style="color:var(--c)">mesh/nodes/{id}/telemetry</span> — battery, SNR, signal<br>
+            <span style="color:var(--c)">mesh/nodes/{id}/position</span> — GPS coordinates<br>
+            <span style="color:var(--c)">mesh/messages/text</span> — text relay<br>
+            <span style="color:var(--c)">mesh/network/topology</span> — node graph<br>
+            <span style="color:var(--c)">mesh/alerts/nodeup|nodedown</span> — presence
+          </div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:8px"><button class="offline-btn" onclick="checkService('http://localhost:1883','mesh')">CHECK MQTT</button></div>
+        <div style="margin-top:12px;font-size:9px;color:var(--text3)">localhost:1883 · Requires MQTT broker + Meshtastic serial device</div>
+      </div>
     </div>
 
     <!-- ▸ SOAL -->
@@ -366,7 +424,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   <div class="status-item"><span class="status-dot" id="sd-crypto" style="background:var(--text3)"></span>CRYPTO</div>
   <div class="status-item"><span class="status-dot" id="sd-nws" style="background:var(--text3)"></span>NWS</div>
   <div class="status-item"><span class="status-dot" id="sd-swpc" style="background:var(--text3)"></span>SWPC</div>
-  <div class="status-right"><span style="color:var(--text3)" id="sb-session">SESSION —</span><span style="color:var(--c)">v3.0.0</span></div>
+  <div class="status-right"><span style="color:var(--text3)" id="sb-session">SESSION —</span><span style="color:var(--c)">v4.0.0</span></div>
 </div>
 
 <!-- MODAL -->
@@ -387,8 +445,64 @@ let quakeData=[];let issData=null;let eonetData=[];
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 function tryLocal(url){window.open(url,'_blank')}
 
+/* Iframe lazy-loading */
+function lazyLoadIframe(id){const f=document.getElementById(id);if(f&&f.dataset.src&&!f.src){f.src=f.dataset.src;f.style.display='flex';const loading=f.previousElementSibling||f.nextElementSibling;if(loading&&loading.id&&loading.id.includes('loading'))loading.style.display='none'}}
+
+/* Meridian tab switching */
+function loadMeridian(page){const f=document.getElementById('meridian-frame');if(f)f.src=page}
+
+/* Service detection */
+async function checkService(url,svc){
+  const badge=document.getElementById('svc-'+svc);
+  try{
+    const controller=new AbortController();
+    setTimeout(()=>controller.abort(),3000);
+    await fetch(url,{mode:'no-cors',signal:controller.signal});
+    if(badge){badge.className='svc-status svc-online';badge.textContent='ONLINE'}
+    const offline=document.getElementById(svc+'-offline');
+    if(offline)offline.style.display='none';
+    const frame=document.getElementById(svc+'-frame');
+    if(frame){frame.src=url;frame.style.display='flex'}
+    return true;
+  }catch(e){
+    if(badge){badge.className='svc-status svc-offline';badge.textContent='OFFLINE'}
+    return false;
+  }
+}
+
+/* SENTINEL view filter */
+function sentinelView(mod){
+  document.querySelectorAll('#sentinel-grid .sec-card').forEach(c=>{
+    c.style.display=(mod==='all'||c.dataset.module===mod)?'':'none'
+  });
+  document.querySelectorAll('#p-sentinel .mod-header .tb-pill').forEach(p=>{
+    const active=p.textContent.trim().toLowerCase()===mod||(mod==='all'&&p.textContent.trim()==='ALL');
+    p.style.borderColor=active?'var(--r)':'var(--text3)';
+    p.style.color=active?'var(--r)':'var(--text3)'
+  });
+}
+
+/* SENTINEL engagement action */
+function sentinelAction(device,payload){
+  const log=document.getElementById('sentinel-log');
+  const entries=document.getElementById('sentinel-log-entries');
+  log.style.display='block';
+  const ts=new Date().toISOString().slice(11,19)+'Z';
+  const line=document.createElement('div');
+  line.innerHTML='<span style="color:var(--text3)">'+ts+'</span> <span style="color:var(--r)">'+esc(device.toUpperCase())+'</span> → <span style="color:var(--g)">'+esc(payload)+'</span> triggered';
+  entries.insertBefore(line,entries.firstChild);
+}
+
+/* Auto-detect local services on boot */
+async function detectServices(){
+  checkService('http://localhost:3000','eclipse');
+  checkService('http://localhost:5055','worldview-engine');
+}
+
 /* ─── NAV ─── */
-function nav(panel){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));const el=document.getElementById('p-'+panel);if(el)el.classList.add('active');const sb=document.querySelector(`.sb-item[data-panel="${panel}"]`);if(sb)sb.classList.add('active');if(panel==='worldview'&&!wvMap)initWorldview()}
+function nav(panel){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));const el=document.getElementById('p-'+panel);if(el)el.classList.add('active');const sb=document.querySelector(`.sb-item[data-panel="${panel}"]`);if(sb)sb.classList.add('active');
+  if(panel==='worldview'){lazyLoadIframe('wv-frame');const ld=document.getElementById('wv-loading');if(ld)setTimeout(()=>{ld.style.display='none'},1500)}
+}
 document.querySelectorAll('.sb-item').forEach(item=>{item.addEventListener('click',()=>nav(item.dataset.panel));item.addEventListener('keydown',e=>{if(e.key==='Enter')nav(item.dataset.panel)})});
 
 /* ─── MODAL ─── */
@@ -508,8 +622,7 @@ async function fetchFlights(){try{const d=await cached('https://opensky-network.
 async function fetchBriefGeo(){try{const ids=await cached('https://hacker-news.firebaseio.com/v0/topstories.json',300000);if(!ids)return;const top5=await Promise.all(ids.slice(0,5).map(id=>cached(`https://hacker-news.firebaseio.com/v0/item/${id}.json`,300000)));document.getElementById('brief-geo').textContent='Top signals: '+top5.filter(Boolean).map(s=>esc(s.title)).join(' · ');document.getElementById('brief-threat').innerHTML='Posture: <span style="color:var(--g)">NOMINAL</span> — No active advisories.'}catch(e){}}
 async function buildTicker(){const items=[];const q=await cached('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson',300000);if(q)q.features.slice(0,3).forEach(f=>{items.push(`<span style="color:var(--o)">⚡ M${f.properties.mag.toFixed(1)}</span> ${esc(f.properties.place)}`)});const hn=await cached('https://hacker-news.firebaseio.com/v0/topstories.json',300000);if(hn){const stories=await Promise.all(hn.slice(0,4).map(id=>cached(`https://hacker-news.firebaseio.com/v0/item/${id}.json`,300000)));stories.filter(Boolean).forEach(s=>{items.push(`<span style="color:var(--b)">▸</span> ${esc(s.title)}`)})}if(items.length){const html=items.map(i=>`<span class="ticker-item">${i}</span>`).join('');document.getElementById('ticker-track').innerHTML=html+html}}
 
-/* ─── WORLDVIEW MAP ─── */
-function initWorldview(){wvMap=L.map('wv-map',{center:[20,0],zoom:2,zoomControl:true,attributionControl:false,maxBounds:[[-90,-180],[90,180]],maxBoundsViscosity:1.0});L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,opacity:0.5,className:'dark-tiles'}).addTo(wvMap);wvQuakeLayer=L.layerGroup().addTo(wvMap);const style=document.createElement('style');style.textContent='.dark-tiles{filter:brightness(0.35) saturate(0.5) hue-rotate(180deg) invert(1)}';document.head.appendChild(style);fetchQuakes();fetchISS()}
+/* WORLDVIEW now iframed — Leaflet init removed */
 
 /* ─── BRIEF DATE ─── */
 document.getElementById('brief-date').textContent=new Date().toISOString().slice(0,10)+' · '+new Date().toISOString().slice(11,16)+'Z';
@@ -519,6 +632,7 @@ async function boot(){
   await openCache();
   initGlobe();
   fetchQuakes();fetchISS();fetchCrypto();fetchEONET();fetchWeather();fetchSWPC();fetchFlights();fetchBriefGeo();buildTicker();
+  detectServices();
   setInterval(fetchQuakes,300000);setInterval(fetchISS,30000);setInterval(fetchCrypto,120000);setInterval(fetchEONET,600000);setInterval(fetchFlights,120000);setInterval(fetchWeather,900000);setInterval(fetchSWPC,600000);setInterval(buildTicker,300000);
 }
 boot();
